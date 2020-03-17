@@ -1,0 +1,44 @@
+let
+  fun g:int(x:(int,int)->int)
+    x(5,7);
+  fun f:int(c:int)
+    let
+      fun linsum:int(a:int,b:int)
+        (a+b)*c;
+    in 
+      g(linsum);   
+in
+  print(f(2));
+
+/*
+let 
+  fun f:int (i:int, j:int) i+j;
+in
+  print (f(3,5));
+  
+SERBATOIO ESEMPI
+let 
+  var x:int = 1;
+  var b:bool = true;
+in
+  print (if (b) then { x+1 } else { x+2 });
+---------------
+let 
+  fun f:int (i:int, j:int) i+j;
+in
+  print (f(3,5));
+----------------
+
+let
+  var y:int = 5+2;
+  fun f:bool (n:int, m:int)
+    let 
+      var x:int = m;
+  in n==x;   
+in  
+  print ( 
+    if f(y,8) 
+      then { false }
+      else { 10 }
+  ); 
+  */

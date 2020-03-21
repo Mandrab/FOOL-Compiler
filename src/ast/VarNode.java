@@ -12,6 +12,10 @@ public class VarNode implements Node, DecNode {
 		type=t;
 		exp=v;
 	}
+	
+	public String getID( ) {
+		return id;
+	}
 
 	public String toPrint(String s) {
 		return s+"Var:" + id +"\n"

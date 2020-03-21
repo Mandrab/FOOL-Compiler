@@ -12,6 +12,7 @@ public class SymbolTable {
 	
 	public SymbolTable( ) {
 		symTable = new ArrayList<Map<String,STentry>>( );
+		nestingLevel = -1;
 	}
 	
 	public Map<String, STentry> nestTable( ) {

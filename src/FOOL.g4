@@ -10,49 +10,54 @@ int lexicalErrors=0;
 
 prog :
 	(
-		LET (
-			cllist ( declist )? | declist
-    	) 	IN exp
-
-    | 	exp
-    ) SEMIC EOF ;
-
-cllist : ( cls )+ ;
+		LET ( ( cls )+ ( dec )* | ( dec )+ ) IN exp
+   	|	exp
+   	) SEMIC EOF ;
 
 cls :
-	CLASS ID ( EXTENDS ID )? LPAR ( ID COLON type ( COMMA ID COLON type )* )? RPAR    
-    CLPAR
-    	( FUN ID COLON type LPAR ( ID COLON hotype ( COMMA ID COLON hotype )* )? RPAR
-      		( LET ( VAR ID COLON type ASS exp SEMIC )+ IN )? exp 
-	   		SEMIC
-	    )*
- 	CRPAR ;
+	CLASS clsID = ID ( EXTENDS suID = ID )? LPAR ( field ( COMMA field )* )? RPAR    
+ 	CLPAR ( method )* CRPAR ;
 
-declist :
-	(
-    	( 
-    		VAR ID COLON hotype ASS exp
-        | 	FUN ID COLON type LPAR (ID COLON hotype (COMMA ID COLON hotype)* )? RPAR 
-            	(LET declist IN)? exp 
-        ) SEMIC 
-	)+ ;
+dec :
+	(	
+		VAR vID = ID COLON vT = hotype ASS vE = exp
+  	|	FUN fID = ID COLON fT = type LPAR ( parameter ( COMMA parameter )* )? RPAR 
+        ( LET ( dec )+ IN )? fE = exp 
+  	) SEMIC ;
+
+field :
+	fID = ID COLON fT = type ;
+
+method :
+	FUN mID = ID COLON mT = type LPAR ( parameter ( COMMA parameter )* )? RPAR
+	( LET ( var SEMIC )+ IN )? mE = exp 
+	SEMIC ;
+
+parameter :
+	pID = ID COLON pT = hotype ;
+	
+var :
+	VAR vID = ID COLON vT = type ASS vE = exp ;
 
 exp	:
-	term (
+	term
+		(
 			PLUS term  
     	| 	MINUS term 
         | 	OR term    
         )* ;
 
 term :
-	factor (
+	factor
+		(
 			TIMES factor 
   		| 	DIV  factor 
   	   	| 	AND  factor 
   	   	)* ;
   	
 factor :
-	value (
+	value
+		(
 			EQ value 
 	   	| 	GE value 
 	   	| 	LE value

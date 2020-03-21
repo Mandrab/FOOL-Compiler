@@ -9,6 +9,10 @@ public class ParNode implements Node, DecNode {
 		id = i;
 		type = t;
 	}
+	
+	public String getID( ) {
+		return id;
+	}
 
 	public String toPrint(String s) {
 		return s + "Par:" + id + "\n" + type.toPrint(s + "  ");

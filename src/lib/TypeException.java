@@ -8,6 +8,4 @@ public class TypeException extends Exception {
 		 FOOLlib.typeErrors++;
 		 text=t;
     }
-		  
-	
 }

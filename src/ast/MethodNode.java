@@ -21,8 +21,16 @@ public class MethodNode implements DecNode, Node {
 		this.setOffset(-1);
 	}
 	
-	public String getID() {
-		return this.id;
+	public String getID( ) {
+		return id;
+	}
+	
+	public Node getType( ) {
+		return returnType;
+	}
+	
+	public void addDec(Node d) {
+		declist.add( d );
 	}
 
 	public void addDec(List<Node> d) {

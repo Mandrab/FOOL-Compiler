@@ -17,6 +17,14 @@ public class FunNode implements Node, DecNode {
 		id = i;
 		type = t;
 	}
+	
+	public String getID( ) {
+		return id;
+	}
+	
+	public void addDec(Node d) {
+		declist.add( d );
+	}
 
 	public void addDec(List<Node> d) {
 		declist = d;

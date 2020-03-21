@@ -15,6 +15,14 @@ public class FieldNode implements DecNode, Node {
 	public String toPrint(String s) {
 		return s + "Par:" + id + "\n" + type.toPrint(s + "  ");
 	}
+	
+	public String getID( ) {
+		return id;
+	}
+	
+	public Node getType( ) {
+		return type;
+	}
 
 	// non utilizzato
 	public Node typeCheck() {

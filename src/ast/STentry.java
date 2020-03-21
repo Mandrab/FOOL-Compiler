@@ -6,6 +6,13 @@ public class STentry {
   private Node type;
   private int offset;
   private boolean isMethod;
+  
+  public STentry (int n, Node t, int o ) {
+	  nl=n;
+	  type=t;
+	  offset=o;
+	  this.isMethod = false;
+  }
 
   public STentry (int n, Node t, int o, boolean isMethod) {
 	  nl=n;

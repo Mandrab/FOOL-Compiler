@@ -1,20 +1,22 @@
 package ast;
 
-/*Nodo per il campo null. */
+import visitors.Visitor;
+
 public class EmptyNode implements Node {
 
-	public EmptyNode () {
-
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
 	}
 
-	public String toPrint(String s) {
-		return s+"Null\n";  
-	}
+
+	
+	
 
 	public Node typeCheck() {
 		return new EmptyTypeNode(); 
 	}
-	/*Mette -1 sullo stack, come scritto nelle slide. Questo perchè -1 è diverso da qualsiasi indirizzo
+	/*Mette -1 sullo stack, come scritto nelle slide. Questo perchï¿½ -1 ï¿½ diverso da qualsiasi indirizzo
 	 * dello stack. */
 	public String codeGeneration() {
 		return "push -1\n";

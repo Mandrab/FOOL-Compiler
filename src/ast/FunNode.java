@@ -4,63 +4,78 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lib.*;
+import visitors.Visitor;
 
 public class FunNode implements Node, DecNode {
 
-	private String id;
+	private String ID;
 	private Node type;
-	private List<Node> parlist = new ArrayList<Node>(); // campo "parlist" che � lista di Node
-	private List<Node> declist = new ArrayList<Node>();
+	private List<Node> parameters; // campo "parameters" che � lista di Node
+	private List<Node> declarations;
 	private Node exp;
 
-	public FunNode(String i, Node t) {
-		id = i;
-		type = t;
+	public FunNode( String id, Node type ) {
+		this.ID = id;
+		this.type = type;
+		this.parameters = new ArrayList<Node>( );
+		this.declarations = new ArrayList<Node>();
 	}
 	
 	public String getID( ) {
-		return id;
+		return ID;
 	}
 	
-	public void addDec(Node d) {
-		declist.add( d );
-	}
-
-	public void addDec(List<Node> d) {
-		declist = d;
-	}
-
-	public void addBody(Node b) {
-		exp = b;
-	}
-
-	public void addPar(Node p) { // metodo "addPar" che aggiunge un nodo a campo "parlist"
-		parlist.add(p);
+	@Override
+	public Node getSymType( ) {
+		return type;
 	}
 	
-	public List<Node> getPars() { // metodo "addPar" che aggiunge un nodo a campo "parlist"
-		return parlist;
+	public void addParameter( Node parameter ) { // metodo "addPar" che aggiunge un nodo a campo "parameters"
+		parameters.add( parameter );
+	}
+	
+	public List<Node> getParameters( ) { // metodo "addPar" che aggiunge un nodo a campo "parameters"
+		return parameters;
 	}
 
-	public String toPrint(String s) {
-		String parlstr = "";
-		for (Node par : parlist)
-			parlstr += par.toPrint(s + "  ");
-		String declstr = "";
-		for (Node dec : declist)
-			declstr += dec.toPrint(s + "  ");
-		return s + "Fun:" + id + "\n" + type.toPrint(s + "  ") + parlstr + declstr + exp.toPrint(s + "  ");
+	public void addDeclaration( Node declaration ) {
+		declarations.add( declaration );
 	}
+	
+	public List<Node> getDeclarations( ) { // metodo "addPar" che aggiunge un nodo a campo "parameters"
+		return declarations;
+	}
+
+	public void setExpession( Node expression ) {
+		exp = expression;
+	}
+	
+	public Node getExpession( ) {
+		return exp;
+	}
+	
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
+	
+	
+
+
 
 	public Node typeCheck() throws TypeException {
-		for (Node dec : declist)
+		for (Node dec : declarations)
 			try {
 				dec.typeCheck();
 			} catch (TypeException e) {
 				System.out.println("Type checking error in a declaration: " + e.text);
 			}
 		if (!FOOLlib.isSubtype(exp.typeCheck(), type))
-			throw new TypeException("Wrong return type for function " + id);
+			throw new TypeException("Wrong return type for function " + ID);
 		return null;
 	}
 
@@ -74,16 +89,16 @@ public class FunNode implements Node, DecNode {
 
 		// Nel caso di elementi funzionali aggiungiamo un "pop" aggiuntivo.
 
-		for (int i = 0; i < declist.size(); i++) {
-			if (declist.get(i) instanceof FunNode) {
+		for (int i = 0; i < declarations.size(); i++) {
+			if (declarations.get(i) instanceof FunNode) {
 				remdeclCode += "pop\n";					//pop del codice dichiarazione se funzionale
 			}
-			declCode += declist.get(i).codeGeneration(); //codice delle dichiarazioni
+			declCode += declarations.get(i).codeGeneration(); //codice delle dichiarazioni
 			remdeclCode += "pop\n";						//pop del codice dichiarazione
 		}		
 
-		for (int i = 0; i < parlist.size(); i++) {
-			if (((DecNode) parlist.get(i)).getSymType() instanceof ArrowTypeNode) {
+		for (int i = 0; i < parameters.size(); i++) {
+			if (((DecNode) parameters.get(i)).getSymType() instanceof ArrowTypeNode) {
 				parCode += "pop\n";					//pop dei parametri se funzionale
 			}
 			parCode += "pop\n";						//pop dei parametri
@@ -96,7 +111,7 @@ public class FunNode implements Node, DecNode {
 				remdeclCode + // devo svuotare lo stack, e faccio pop tanti quanti sono le var/fun dichiarate
 				"sra\n" + // salvo il return address
 				"pop\n" + // pop dell'AL (access link)
-				parCode + // pop dei parametri che ho in parlist
+				parCode + // pop dei parametri che ho in parameters
 				"sfp\n" + // ripristino il registro $fp al CL, in maniera che sia l'fp dell'AR del
 							// chiamante.
 				"ltm\n" + "lra\n" + "js\n" // js salta all'indirizzo che � in cima allo stack e salva la prossima
@@ -104,11 +119,6 @@ public class FunNode implements Node, DecNode {
 		);
 
 		return "lfp\n" + "push " + funl + "\n";
-	}
-
-	@Override
-	public Node getSymType() {
-		return type;
 	}
 
 }

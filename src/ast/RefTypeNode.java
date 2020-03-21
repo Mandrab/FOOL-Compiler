@@ -1,13 +1,14 @@
 package ast;
 
 import lib.TypeException;
+import visitors.Visitor;
 
 public class RefTypeNode implements Node {
 
 	private String ID;
 	
-	public RefTypeNode( String id ) {
-		ID = id;
+	public RefTypeNode( String ID ) {
+		this.ID = ID;
 	}
 	
 	public String getID( ) {
@@ -15,14 +16,22 @@ public class RefTypeNode implements Node {
 	}
 	
 	@Override
-	public String toPrint(String indent) {
-		// TODO Auto-generated method stub
-		return null;
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
 
 	@Override
 	public Node typeCheck() throws TypeException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

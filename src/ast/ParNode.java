@@ -1,22 +1,38 @@
 package ast;
 
+import visitors.Visitor;
+
 public class ParNode implements Node, DecNode {
 
-	private String id;
+	private String ID;
 	private Node type;
 
-	public ParNode(String i, Node t) {
-		id = i;
-		type = t;
+	public ParNode( String id, Node type ) {
+		this.ID = id;
+		this.type = type;
 	}
 	
 	public String getID( ) {
-		return id;
+		return ID;
 	}
 
-	public String toPrint(String s) {
-		return s + "Par:" + id + "\n" + type.toPrint(s + "  ");
+	public Node getSymType( ) {
+		return type;
 	}
+	
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
+	
+
+
+	
+	
 
 	// non utilizzato
 	public Node typeCheck() {
@@ -28,9 +44,8 @@ public class ParNode implements Node, DecNode {
 		return "";
 	}
 
-	@Override
-	public Node getSymType() {
-		return type;
-	}
+	
+
+	
 
 }

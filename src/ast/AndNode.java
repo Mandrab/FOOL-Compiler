@@ -1,21 +1,35 @@
 package ast;
 
+import lib.FOOLlib;
 import lib.TypeException;
+import visitors.Visitor;
 
 public class AndNode implements Node {
 
 	private Node left;
 	private Node right;
 
-	public AndNode (Node l, Node r) {
-		left=l;
-		right=r;
+	public AndNode ( Node left, Node right ) {
+		this.left = left;
+		this.right = right;
 	}
 
-	public String toPrint(String s) {
-		return s+"And\n" + left.toPrint(s+"  ")  
-		+ right.toPrint(s+"  ") ; 
+	public Node getLeft() {
+		return left;
 	}
+
+	public Node getRight() {
+		return right;
+	}
+
+	@Override
+	public <T> T accept(Visitor<T> visitor) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
 	
 	/*Da riguardare, � possibile l'and solo tra booleani.*/
 	public Node typeCheck() throws TypeException {

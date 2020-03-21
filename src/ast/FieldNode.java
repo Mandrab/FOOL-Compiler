@@ -1,28 +1,47 @@
 package ast;
 
+import visitors.Visitor;
+
 public class FieldNode implements DecNode, Node {
 
-	private String id;
+	private String ID;
 	private Node type;
 	private int offset;
 
-	public FieldNode(String i, Node t) {
-		id = i;
-		type = t;
+	public FieldNode( String id, Node type ) {
+		this.ID = id;
+		this.type = type;
 		this.offset = 0;
-	}
-
-	public String toPrint(String s) {
-		return s + "Par:" + id + "\n" + type.toPrint(s + "  ");
 	}
 	
 	public String getID( ) {
-		return id;
+		return ID;
 	}
 	
-	public Node getType( ) {
+	public Node getSymType( ) {
 		return type;
 	}
+	
+	public void setOffset( int offset ) {
+		this.offset = offset;
+	}
+	
+	public int getOffset() {
+		return this.offset;
+	}
+
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
+	
+	
+	
+
 
 	// non utilizzato
 	public Node typeCheck() {
@@ -33,18 +52,7 @@ public class FieldNode implements DecNode, Node {
 	public String codeGeneration() {
 		return "";
 	}
-
-	@Override
-	public Node getSymType() {
-		return type;
-	}
 	
-	public int getOffset() {
-		return this.offset;
-	}
 	
-	public void setOffset(int o) {
-		this.offset = o;
-	}
 
 }

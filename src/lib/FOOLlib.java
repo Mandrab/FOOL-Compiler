@@ -1,17 +1,21 @@
 package lib;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ast.*;
 
 public class FOOLlib {
 
+    public static final int MEMSIZE = 10000;
 	public static int typeErrors = 0;
 	public static Map<String, String> superType = new HashMap<>();
+	public static List<List<String>> dispatchTable = new ArrayList<>();
 
 	/***
-	 * Valuta se il tipo "a" è <= al tipo "b"
+	 * Valuta se il tipo "a" ï¿½ <= al tipo "b"
 	 * Valuta co-varianza tra tipi di ritorno e controvarianza sui tipi del parametri.
 	 * @param a
 	 * @param b
@@ -20,22 +24,21 @@ public class FOOLlib {
 	public static boolean isSubtype(Node a, Node b) {
 
 		if ((a instanceof ArrowTypeNode) && (b instanceof ArrowTypeNode)) {
-			if (((ArrowTypeNode) a).getParList().size() != ((ArrowTypeNode) b).getParList().size()) {
+			if (((ArrowTypeNode) a).getParameters().size() != ((ArrowTypeNode) b).getParameters().size()) {
 				return false;
 			} else {
-				if (!(((ArrowTypeNode) a).getRet().getClass().equals(((ArrowTypeNode) b).getRet().getClass())
-						|| ((((ArrowTypeNode) a).getRet() instanceof BoolTypeNode)
-								&& (((ArrowTypeNode) b).getRet() instanceof IntTypeNode)))) {
+				if (!(((ArrowTypeNode) a).getRetType().getClass().equals(((ArrowTypeNode) b).getRetType().getClass())
+						|| ((((ArrowTypeNode) a).getRetType() instanceof BoolTypeNode)
+								&& (((ArrowTypeNode) b).getRetType() instanceof IntTypeNode)))) {
 					return false;
 				} else {
-					for (int i = 0; i < ((ArrowTypeNode) a).getParList().size(); i++) {
-						if (!((((ArrowTypeNode) a).getParList().get(i).getClass()
-								.equals(((ArrowTypeNode) b).getParList().get(i).getClass())
-								|| ((((ArrowTypeNode) a).getParList().get(i) instanceof IntTypeNode)
-										&& (((ArrowTypeNode) b).getParList().get(i) instanceof BoolTypeNode))))) {
+					for (int i = 0; i < ((ArrowTypeNode) a).getParameters().size(); i++) {
+						if (!((((ArrowTypeNode) a).getParameters().get(i).getClass()
+								.equals(((ArrowTypeNode) b).getParameters().get(i).getClass())
+								|| ((((ArrowTypeNode) a).getParameters().get(i) instanceof IntTypeNode)
+										&& (((ArrowTypeNode) b).getParameters().get(i) instanceof BoolTypeNode))))) {
 							return false;
 						}
-
 					}
 					return true;
 				}
@@ -56,9 +59,9 @@ public class FOOLlib {
 			String idFirst = ((RefTypeNode) a).getID();
 			String idSecond = ((RefTypeNode) b).getID();
 			
-			//Risalgo a, se trovo un predecessore = b allora è sottotipo,
+			//Risalgo a, se trovo un predecessore = b allora ï¿½ sottotipo,
 			//se arrivo alla classe padre di tutti senza trovare un uguaglianza verificata
-			//concludo che a non è sottotipo di b
+			//concludo che a non ï¿½ sottotipo di b
 			while(!(idSecond.equals(idFirst)) && idFirst != null) {
 				idFirst = superType.get(idFirst);
 			}
@@ -74,25 +77,67 @@ public class FOOLlib {
 	 * @param b
 	 * @return
 	 */
-	public Node lowestCommonAncestor(Node a, Node b) {
+	public static Node lowestCommonAncestor(Node a, Node b) {
 		//se sono uguali ritorno 
-		
-		
-		//Se uno dei due è empty ritorno l'altro
+		//Se uno dei due e empty ritorno l'altro
 		if((a instanceof EmptyTypeNode))
 			return  b; 
 		
 		if((b instanceof EmptyTypeNode))
 			return a;
 		
-		//Int/Bool return il più grande
-		
+		if(a instanceof ArrowTypeNode && b instanceof ArrowTypeNode) {
+			ArrowTypeNode arrowA = (ArrowTypeNode)a;
+			ArrowTypeNode arrowB = (ArrowTypeNode)b;
+			
+			if(arrowA.getParameters().size() != arrowB.getParameters().size()) {
+				return null;
+			}
+			Node lCommonAncestor = lowestCommonAncestor(arrowA.getRetType(), arrowB.getRetType());
+			if(lCommonAncestor == null) {
+				return lCommonAncestor;
+			}
+			List<Node> parList = new ArrayList<Node>();
+			for(int i = 0; i < arrowA.getParameters().size(); i++) {
+				if(!(isSubtype(arrowA.getParameters().get(i), arrowB.getParameters().get(i))) && 
+						!(isSubtype(arrowB.getParameters().get(i), arrowA.getParameters().get(i)))){
+					return null;
+				}
+				else if(isSubtype(arrowA.getParameters().get(i), arrowB.getParameters().get(i))) {
+					parList.add(arrowA.getParameters().get(i));
+				}
+				else {
+					parList.add(arrowB.getParameters().get(i));
+				}
+				
+			}
+			return new ArrowTypeNode(parList, lCommonAncestor);
+		}
 		
 		//Altrimenti devo cercare il lowest common ancestor, risalendo la catena:
-		//se b è sottotipo di a -> return a
-		//altrimenti risalgo il padre di a e controllo
+		//se b e sottotipo di a -> return a
+		//altrimenti risalgo il padre di a e controllo		
+		if(a instanceof RefTypeNode && b instanceof RefTypeNode) {
+            String idA = ((RefTypeNode)a).getID();        
+            RefTypeNode parentA = new RefTypeNode(superType.get(idA));
+            while(parentA != null) {
+                if(isSubtype(b, parentA))
+                    return parentA;
+                    
+                idA = superType.get(idA);
+                parentA = new RefTypeNode(superType.get(idA));
+            }		
+		}
 		
-		
+		//Int/Bool return il piu grande
+        if( (a instanceof BoolTypeNode) && (b instanceof BoolTypeNode))
+            return new BoolTypeNode();
+        
+        if( (a instanceof BoolTypeNode) && (b instanceof IntTypeNode)|| 
+                (a instanceof IntTypeNode) && (b instanceof BoolTypeNode)||
+                (a instanceof IntTypeNode) && (b instanceof IntTypeNode))
+            return new IntTypeNode();
+
 		//se non ho ancora restituito niente: null
 		return null;
 	}
@@ -109,6 +154,12 @@ public class FOOLlib {
 		return "function" + (funlabCount++);
 	}
 
+	private static int methodlabCount = 0;
+	
+	public static String freshMethodLabel() {
+		return "method" + (methodlabCount++);
+	}
+	
 	private static String funCode = "";
 
 	public static void putCode(String c) {

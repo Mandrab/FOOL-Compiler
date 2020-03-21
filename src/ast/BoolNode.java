@@ -1,24 +1,34 @@
 package ast;
 
+import visitors.Visitor;
+
 public class BoolNode implements Node {
 
-  private boolean val;
-  
-  public BoolNode (boolean n) {
-   val=n;
-  }
-  
-  public String toPrint(String s) {
-   if (val) return s+"Bool:true\n";
-       else return s+"Bool:false\n";  
-  }
-  
-  public Node typeCheck() {
-		return new BoolTypeNode(); 
-  }
-	  
-  public String codeGeneration() {
-	return "push "+(val?1:0)+"\n";
-  }
-      
-}  
+	private boolean value;
+
+	public BoolNode( boolean value ) {
+		this.value = value;
+	}
+	
+	public boolean getValue( ) {
+		return value;
+	}
+
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
+
+	public Node typeCheck() {
+		return new BoolTypeNode();
+	}
+
+	public String codeGeneration() {
+		return "push " + (value ? 1 : 0) + "\n";
+	}
+
+}

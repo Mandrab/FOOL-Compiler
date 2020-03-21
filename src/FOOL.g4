@@ -1,7 +1,11 @@
 grammar FOOL;
 
+@header {
+package generated;
+}
+
 @lexer::members {
-int lexicalErrors=0;
+public int lexicalErrors=0;
 }
   
 /*------------------------------------------------------------------
@@ -40,41 +44,41 @@ var :
 	VAR vID = ID COLON vT = type ASS vE = exp ;
 
 exp	:
-	term
+	l = term
 		(
-			PLUS term  
-    	| 	MINUS term 
-        | 	OR term    
+			PLUS r = term  
+    	| 	MINUS r = term 
+        | 	OR r = term    
         )* ;
 
 term :
-	factor
+	l = factor
 		(
-			TIMES factor 
-  		| 	DIV  factor 
-  	   	| 	AND  factor 
+			TIMES r = factor 
+  		| 	DIV r = factor 
+  	   	| 	AND r = factor 
   	   	)* ;
   	
 factor :
-	value
+	l = value
 		(
-			EQ value 
-	   	| 	GE value 
-	   	| 	LE value
+			EQ r = value 
+	   	| 	GE r = value 
+	   	| 	LE r = value
 	   	)* ;
   	
 value :
 		INTEGER																	#integerValue
 	| 	( TRUE | FALSE )														#booleanValue
 	| 	NULL																	#nullValue
-	| 	NEW ID LPAR (exp (COMMA exp)* )? RPAR									#newValue
+	| 	NEW ID LPAR ( exp ( COMMA exp )* )? RPAR								#newValue
 	| 	IF exp THEN CLPAR exp CRPAR ELSE CLPAR exp CRPAR						#ifThenElseValue
 	| 	NOT LPAR exp RPAR														#notValue
 	| 	PRINT LPAR exp RPAR														#printValue
     | 	LPAR exp RPAR															#parenthesisBlockValue
     |	ID																		#idValue
 	| 	ID LPAR ( exp ( COMMA exp )* )? RPAR									#functionCallValue
-	|	ID DOT ID LPAR ( exp ( COMMA exp )* )? RPAR								#methodCallValue
+	|	oID = ID DOT mID = ID LPAR ( exp ( COMMA exp )* )? RPAR					#methodCallValue
 	;
                
 hotype : type | arrow ;

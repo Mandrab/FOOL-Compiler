@@ -1,47 +1,46 @@
 package ast;
 
-public class STentry {
-   
-  private int nl;
-  private Node type;
-  private int offset;
-  private boolean isMethod;
-  
-  public STentry (int n, Node t, int o ) {
-	  nl=n;
-	  type=t;
-	  offset=o;
-	  this.isMethod = false;
-  }
+import visitors.Visitor;
 
-  public STentry (int n, Node t, int o, boolean isMethod) {
-	  nl=n;
-	  type=t;
-	  offset=o;
-	  this.isMethod = isMethod;
-  }
-  
-  public Node getType() {
-	  return type;
-  }
-  
-  public int getOffset() {
-	  return offset;
-  }
-  
-  public int getNestingLevel() {
-	  return nl;
-  }
-  
-  public String toPrint(String s) {
-	   return s+"STentry: nestlev " + nl +"\n"+
-			  s+"STentry: type\n " +
-			      type.toPrint(s+"  ") +
-			  s+"STentry: offset " + offset +"\n";
-  }
-  
-  public boolean isMethod() {
-	  return this.isMethod;
-  }
-  
-}  
+public class STentry implements Visitable {
+
+	private int nestingLevel;
+	private int offset;
+	private Node type;
+	private boolean isMethod;
+
+	public STentry( int nestingLevel, Node type, int offset ) {
+		this.nestingLevel = nestingLevel;
+		this.offset = offset;
+		this.type = type;
+		this.isMethod = false;
+	}
+
+	public STentry( int nestingLevel, Node type, int offset, boolean isMethod ) {
+		this.nestingLevel = nestingLevel;
+		this.offset = offset;
+		this.type = type;
+		this.isMethod = isMethod;
+	}
+	
+	public int getNestingLevel( ) {
+		return nestingLevel;
+	}
+	
+	public int getOffset( ) {
+		return offset;
+	}
+	
+	public Node getRetType(	) {
+		return type;
+	}
+	
+	public boolean isMethod( )  {
+		return isMethod;
+	}
+	
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+}

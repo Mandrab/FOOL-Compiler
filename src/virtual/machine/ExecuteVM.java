@@ -1,3 +1,7 @@
+package virtual.machine;
+
+import generated.SVMParser;
+
 public class ExecuteVM {
     
     public static final int CODESIZE = 10000;

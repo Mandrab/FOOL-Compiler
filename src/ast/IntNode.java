@@ -1,23 +1,36 @@
 package ast;
 
+import visitors.Visitor;
+
 public class IntNode implements Node {
 
-  private Integer val;
-  
-  public IntNode (Integer n) {
-   val=n;
-  }
-  
-  public String toPrint(String s) {
-   return s+"Int:" + Integer.toString(val) +"\n";  
-  }
+	private Integer value;
 
-  public Node typeCheck() {
-	return new IntTypeNode(); 
-  }
-  
-  public String codeGeneration() {
-	  return "push "+val+"\n";
-  }
+	public IntNode( Integer value ) {
+		this.value = value;
+	}
+	
+	public int getValue( ) {
+		return value;
+	}
+	
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
 
-}  
+
+
+	public Node typeCheck() {
+		return new IntTypeNode();
+	}
+
+	public String codeGeneration() {
+		return "push " + value + "\n";
+	}
+
+}

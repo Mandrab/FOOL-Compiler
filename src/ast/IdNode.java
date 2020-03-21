@@ -1,39 +1,65 @@
 package ast;
 
 import lib.*;
+import visitors.Visitor;
 
 public class IdNode implements Node {
 
-	private String id;
-	private int nestingLevel;
+	private String ID;
 	private STentry entry;
+	private int nestingLevel;
 
-	public IdNode(String i, STentry st, int nl) {
-		id = i;
-		nestingLevel = nl;
-		entry = st;
+	public IdNode( String id, STentry stEntry, int nestingLevel ) {
+		this.ID = id;
+		this.nestingLevel = nestingLevel;
+		this.entry = stEntry;
 	}
+	
+	public String getID( ) {
+		return ID;
+	}
+	
+	public STentry getEntry( ) {
+		return entry;
+	}
+	
+	public int getNestingLevel() {
+		return nestingLevel;
+	}
+	
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
+	
+	
 
-	public String toPrint(String s) {
-		return s + "Id:" + id + "\n" + ((entry != null) ? entry.toPrint(s + "  ") : "");
-	}
+
+
 
 	public Node typeCheck() throws TypeException {
-		return entry.getType();
+		if(entry.getRetType() instanceof ClassTypeNode)
+			throw new TypeException(" Type check found a problem: \n ID can not be a class's name: " + this.ID);
+		if(entry.isMethod())
+			throw new TypeException(" Type check found a problem: \n ID can not be a method: " + this.ID);
+		return entry.getRetType();
 	}
 
 	/*
 	 * ricontrollare possibile errore in getPush
 	 */
 	public String codeGeneration() {
-String getAR="";
+		String getAR="";
 		
 		for (int i=0;i<nestingLevel-entry.getNestingLevel(); i++ )
 			getAR+="lw\n";
 		
-		if(!(entry.getType() instanceof ArrowTypeNode)){
-			return 
-					"lfp\n"+	// AL
+		if(!(entry.getRetType() instanceof ArrowTypeNode)){
+			return "lfp\n"+	// AL
 					getAR+		// Andiamo nel suo AR. getAr ci da l'AL.
 					"push "+entry.getOffset()+"\n"+	// e aggiungiamo 
 					"add\n"+
@@ -46,7 +72,7 @@ String getAR="";
 			 * [a offset messo in symbol table  ] FP ad AR dichiarazione funzione
 			 * [a offset messo in symbol table-1] indir funzione (per invocazione suo codice)
 			 */
-			return  // Salviamo sullo Stack l'FP ad AR dichiarazione funzione. FP del frame dove è dichiarata la funzione.
+			return  // Salviamo sullo Stack l'FP ad AR dichiarazione funzione. FP del frame dove ï¿½ dichiarata la funzione.
 					"lfp\n"+
 					getAR+		// Andiamo nel suo AR. getAR ci da l'AL.
 					"push "+entry.getOffset()+"\n"+

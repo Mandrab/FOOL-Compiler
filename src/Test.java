@@ -6,6 +6,11 @@ import java.io.FileWriter;
 import org.antlr.v4.runtime.*;
 
 import ast.Node;
+import ast.ProgLetInNode;
+import generated.FOOLLexer;
+import generated.FOOLParser;
+import visitors.ParserVisitor;
+import visitors.PrinterVisitor;
 
 public class Test {
     public static void main(String[] args) throws Exception {
@@ -29,9 +34,10 @@ public class Test {
 	        	
 	
 	        System.out.println("Visualizing AST...");
-	        System.out.println(ast.toPrint(""));
-	
-	        Node type = ast.typeCheck(); //type-checking bottom-up 
+	        //System.out.println(ast.toPrint(""));
+	        System.out.println(new PrinterVisitor().visit((ProgLetInNode)ast));
+	        
+	        /*Node type = ast.typeCheck(); //type-checking bottom-up 
 	        System.out.println(type.toPrint("Type checking ok! Type of the program is: "));
 	        
 	      
@@ -55,7 +61,7 @@ public class Test {
 	
 	        System.out.println("Starting Virtual Machine...");
 	        ExecuteVM vm = new ExecuteVM(parserASM.code);
-	        vm.cpu();
+	        vm.cpu();*/
         }
        
         

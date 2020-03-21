@@ -1,37 +1,48 @@
 package ast;
+
 import java.util.List;
+
+import visitors.Visitor;
 
 public class ArrowTypeNode implements Node {
 
-  private List<Node> parlist;
-  private Node ret;
-  
-  public ArrowTypeNode (List<Node> p, Node r) {
-   parlist=p;
-   ret=r;
-  }
+	private List<Node> parameters;
+	private Node returnType;
 
-  public Node getRet () { 
-	    return ret;
-  }
-	  
-  public List<Node> getParList () { 
-	    return parlist;
-  }
-  
-  public String toPrint(String s) {
-	 String parlstr="";
-	 for (Node par:parlist)
-		 parlstr+=par.toPrint(s+"  ");
-     return s+"ArrowTypeNode\n" + parlstr + ret.toPrint(s+"  ->") ; 
-  }
+	public ArrowTypeNode( List<Node> parameters, Node returnType ) {
+		this.parameters = parameters;
+		this.returnType = returnType;
+	}
 
-  //non utilizzato
-  public Node typeCheck() {
-	  return null;
-  }
+	public Node getRetType() {
+		return returnType;
+	}
 
-  //non utilizzato
-  public String codeGeneration() {return "";}
+	public List<Node> getParameters() {
+		return parameters;
+	}
+	
+	@Override
+	public <T> T accept(Visitor<T> visitor) {
+		return visitor.visit( this );
+	}
+	
+	
+	
+	
+	
+	
 
-}  
+
+
+	// non utilizzato
+	public Node typeCheck() {
+		return null;
+	}
+
+	// non utilizzato
+	public String codeGeneration() {
+		return "";
+	}
+
+}

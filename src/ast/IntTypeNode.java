@@ -1,18 +1,28 @@
 package ast;
 
+import visitors.Visitor;
+
 public class IntTypeNode implements Node {
-  
-  public IntTypeNode () {
-  }
-  
-  public String toPrint(String s) {
-	   return s+"IntType\n";  
-  }
 
-  //non utilizzato
-  public Node typeCheck() {return null;}
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+	
 
-  //non utilizzato
-  public String codeGeneration() {return "";}
 
-}  
+	
+	
+	
+
+	// non utilizzato
+	public Node typeCheck() {
+		return null;
+	}
+
+	// non utilizzato
+	public String codeGeneration() {
+		return "";
+	}
+
+}

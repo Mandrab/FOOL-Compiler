@@ -2,9 +2,7 @@ package ast;
 
 import lib.*;
 
-public interface Node {
-
-	String toPrint(String indent);
+public interface Node extends Visitable {
 	
 	//fa il type checking e ritorna: 
 	//per una espressione, il suo tipo (oggetto BoolTypeNode o IntTypeNode)

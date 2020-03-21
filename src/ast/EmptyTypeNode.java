@@ -1,14 +1,19 @@
 package ast;
 
+import visitors.Visitor;
+
 /*Tipo null. Utilizzato da EmptyNode come tipo di ritorno.*/
 public class EmptyTypeNode implements Node {
-	  
-	  public EmptyTypeNode () {
-	  }
-	  
-	  public String toPrint(String s) {
-	   return s+"EmptyType\n";  
-	  }
+
+	@Override
+	public <T> T accept( Visitor<T> visitor ) {
+		return visitor.visit( this );
+	}
+
+	
+	
+	
+	
 	  
 	  //non utilizzato
 	  public Node typeCheck() {return null;}

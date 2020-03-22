@@ -10,25 +10,26 @@ import virtual.machine.VisualVM;
 }
 
 @lexer::members {
-int lexicalErrors=0;
+
+public int lexicalErrors=0;
 }
 
 @parser::members {
       
-    int[] code = new int[VisualVM.CODESIZE];
-    int[] sourceMap = new int[VisualVM.CODESIZE];
-    private int i = 0;
+public int[] code = new int[VisualVM.CODESIZE];
+public int[] sourceMap = new int[VisualVM.CODESIZE];
+private int i = 0;
 
-    private HashMap<String,Integer> labelDef = new HashMap<String,Integer>();
-    private HashMap<Integer,String> labelRef = new HashMap<Integer,String>();
-    
-    private void codem(int line, int ... c) {
-    	for (int x : c) {
-    		this.code[i] = x;
-    		this.sourceMap[i] = line-1;
-    		i++;
-    	}
-    }
+private HashMap<String,Integer> labelDef = new HashMap<String,Integer>();
+private HashMap<Integer,String> labelRef = new HashMap<Integer,String>();
+
+private void codem(int line, int ... c) {
+	for (int x : c) {
+		this.code[i] = x;
+		this.sourceMap[i] = line-1;
+		i++;
+	}
+}
     
 }
 

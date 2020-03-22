@@ -6,12 +6,15 @@ import javax.swing.*;
 
 import generated.SVMParser;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.*;
 
 public class VisualVM {
 
+	private List<VMState> vmStates;
+	
 	private static final Font FONT = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
     public static final int MEMSIZE = 10000;
@@ -34,6 +37,7 @@ public class VisualVM {
 	private final JList<String> asmList;
 	private final JList<String> stackList, heapList;
 	private final JButton nextStep;
+	private final JButton backStep;
 	private final JButton play;
 	private final JPanel registerPanel;
 	private final JSplitPane memPanel;
@@ -49,6 +53,8 @@ public class VisualVM {
 
 	public VisualVM(int[] code, int[] sourceMap, List<String> source) {
 		
+		this.vmStates = new LinkedList<>( );
+		
 		this.code = code;
 		this.sourceMap = sourceMap;
 		this.source = source;
@@ -61,10 +67,13 @@ public class VisualVM {
 		this.buttonPanel.setLayout(new BoxLayout(this.buttonPanel, BoxLayout.Y_AXIS));
 		this.play = new JButton("PLAY");
 		this.play.addActionListener(e -> this.playButtonHandler());
-		this.nextStep = new JButton("STEP");
-		this.nextStep.addActionListener(e -> this.stepButtonHandler());
+		this.nextStep = new JButton("STEP FORWARD");
+		this.nextStep.addActionListener(e -> this.stepForwardButtonHandler());
+		this.backStep = new JButton("STEP BACKWARD");
+		this.backStep.addActionListener(e -> this.stepBackwardButtonHandler());
 		this.buttonPanel.add(this.play);
 		this.buttonPanel.add(this.nextStep);
+		this.buttonPanel.add(this.backStep);
 
 		this.registerPanel = new JPanel();
 		this.tmLabel = new JLabel();
@@ -89,18 +98,7 @@ public class VisualVM {
 
 		this.mainPanel.setLayout(new BorderLayout());
 		this.asmList = new JList<String>();
-//		final List<String> disassembly = new ArrayList<>();
-//		int i;
-//		for (i = 0; i < this.code.length && this.code[i] != 0; i++) {
-//			disassembly.add(String.format("%5d: %s", i, SVMParser.tokenNames[this.code[i]].replace("'", "")));
-//			if (Arrays.asList(SVMParser.PUSH, SVMParser.BRANCH, SVMParser.BRANCHEQ, SVMParser.BRANCHLESSEQ)
-//					.contains(this.code[i])) {
-//				i++;
-//				disassembly.add(String.format("%5d: %d", i, this.code[i]));
-//			}
-//		}
-//		this.codeLineCount = i;
-//		this.asmList.setListData(new Vector<>(disassembly));
+
 		for (int i = 0; i < this.source.size(); i++) {
 			this.source.set(i, String.format("%5d: %s", i, this.source.get(i)));
 		}
@@ -178,7 +176,7 @@ public class VisualVM {
 
 	private void checkKeyboardCommand() {
 		if (this.keyboardCommand.endsWith(" ")) {
-			this.stepButtonHandler();
+			this.stepForwardButtonHandler();
 		} else if (this.keyboardCommand.endsWith("\n")) {
 			this.playButtonHandler();
 		} else if (this.keyboardCommand.endsWith("fra")) {
@@ -223,119 +221,137 @@ public class VisualVM {
 	
 	private void playButtonHandler() {
 		while (this.step());
-		this.nextStep.setEnabled(false);
-		this.play.setEnabled(false);
+		/*this.nextStep.setEnabled(false);
+		this.backStep.setEnabled(false);
+		this.play.setEnabled(false);*/
 		this.update();
 	}
 
-	private void stepButtonHandler() {
+	private void stepForwardButtonHandler() {
 		boolean play = this.step();
 		if (!play) {
-			this.nextStep.setEnabled(false);
-			this.play.setEnabled(false);
+			/*this.nextStep.setEnabled(false);
+			this.backStep.setEnabled(false);
+			this.play.setEnabled(false);*/
 		} else {
 			this.update();
 		}
 	}
+	
+	private void stepBackwardButtonHandler() {
+		stepBack( );
+		this.update();
+	}
 
 	private boolean step() {
-		int bytecode = fetch();
-		int v1, v2;
-		int address;
-		switch (bytecode) {
-		case SVMParser.PUSH:
-			v1 = fetch();
-			push(v1);
-			break;
-		case SVMParser.POP:
-			pop();
-			break;
-		case SVMParser.ADD:
-			v1 = pop();
-			v2 = pop();
-			push(v2 + v1);
-			break;
-		case SVMParser.SUB:
-			v1 = pop();
-			v2 = pop();
-			push(v2 - v1);
-			break;
-		case SVMParser.MULT:
-			v1 = pop();
-			v2 = pop();
-			push(v2 * v1);
-			break;
-		case SVMParser.DIV:
-			v1 = pop();
-			v2 = pop();
-			push(v2 / v1);
-			break;
-		case SVMParser.STOREW:
-			address = pop();
-			memory[address] = pop();
-			break;
-		case SVMParser.LOADW:
-			push(memory[pop()]);
-			break;
-		case SVMParser.BRANCH:
-			ip = fetch();
-			break;
-		case SVMParser.BRANCHEQ:
-			address = fetch();
-			v1 = pop();
-			v2 = pop();
-			ip = v2 == v1 ? address : ip;
-			break;
-		case SVMParser.BRANCHLESSEQ:
-			address = fetch();
-			v1 = pop();
-			v2 = pop();
-			ip = v2 <= v1 ? address : ip;
-			break;
-		case SVMParser.JS:
-			address = pop();
-			ra = ip;
-			ip = address;
-			break;
-		case SVMParser.LOADRA:
-			push(ra);
-			break;
-		case SVMParser.STORERA:
-			ra = pop();
-			break;
-		case SVMParser.LOADTM:
-			push(tm);
-			break;
-		case SVMParser.STORETM:
-			tm = pop();
-			break;
-		case SVMParser.LOADFP:
-			push(fp);
-			break;
-		case SVMParser.STOREFP:
-			fp = pop();
-			break;
-		case SVMParser.COPYFP:
-			fp = sp;
-			break;
-		case SVMParser.LOADHP:
-			push(hp);
-			break;
-		case SVMParser.STOREHP:
-			hp = pop();
-			break;
-		case SVMParser.PRINT:
-			final String output = sp == MEMSIZE ? "EMPTY STACK" : Integer.toString(memory[sp]);
-			System.out.println(output);
-			this.outputText.append(output + "\n");
-			break;
-		case SVMParser.HALT:
-			return false;
-		}
-		if (this.sp <= this.hp) {
-			System.out.println("Segmentation fault");
-			this.outputText.append("Segmentation fault\n");
-			return false;
+		try {
+			if ( this.sp > this.hp ) {
+				saveState( );
+				
+				int bytecode = fetch();
+				int v1, v2;
+				int address;
+				switch (bytecode) {
+				case SVMParser.PUSH:
+					v1 = fetch();
+					push(v1);
+					break;
+				case SVMParser.POP:
+					pop();
+					break;
+				case SVMParser.ADD:
+					v1 = pop();
+					v2 = pop();
+					push(v2 + v1);
+					break;
+				case SVMParser.SUB:
+					v1 = pop();
+					v2 = pop();
+					push(v2 - v1);
+					break;
+				case SVMParser.MULT:
+					v1 = pop();
+					v2 = pop();
+					push(v2 * v1);
+					break;
+				case SVMParser.DIV:
+					v1 = pop();
+					v2 = pop();
+					push(v2 / v1);
+					break;
+				case SVMParser.STOREW:
+					address = pop();
+					memory[address] = pop();
+					break;
+				case SVMParser.LOADW:
+					push(memory[pop()]);
+					break;
+				case SVMParser.BRANCH:
+					ip = fetch();
+					break;
+				case SVMParser.BRANCHEQ:
+					address = fetch();
+					v1 = pop();
+					v2 = pop();
+					ip = v2 == v1 ? address : ip;
+					break;
+				case SVMParser.BRANCHLESSEQ:
+					address = fetch();
+					v1 = pop();
+					v2 = pop();
+					ip = v2 <= v1 ? address : ip;
+					break;
+				case SVMParser.JS:
+					address = pop();
+					ra = ip;
+					ip = address;
+					break;
+				case SVMParser.LOADRA:
+					push(ra);
+					break;
+				case SVMParser.STORERA:
+					ra = pop();
+					break;
+				case SVMParser.LOADTM:
+					push(tm);
+					break;
+				case SVMParser.STORETM:
+					tm = pop();
+					break;
+				case SVMParser.LOADFP:
+					push(fp);
+					break;
+				case SVMParser.STOREFP:
+					fp = pop();
+					break;
+				case SVMParser.COPYFP:
+					fp = sp;
+					break;
+				case SVMParser.LOADHP:
+					push(hp);
+					break;
+				case SVMParser.STOREHP:
+					hp = pop();
+					break;
+				case SVMParser.PRINT:
+					final String output = sp == MEMSIZE ? "EMPTY STACK" : Integer.toString(memory[sp]);
+					System.out.println(output);
+					this.outputText.append(output + "\n");
+					break;
+				case SVMParser.HALT:
+					return false;
+				}
+				
+			} else {
+				System.out.println("Segmentation fault");
+				this.outputText.append("Segmentation fault\n");
+				return false;
+			}
+		} catch ( Exception e ) {
+			play.setEnabled( true );
+			nextStep.setEnabled( true );
+			backStep.setEnabled( true );
+			e.printStackTrace();
 		}
 		return true;
 	}
@@ -352,4 +368,44 @@ public class VisualVM {
 		return code[ip++];
 	}
 	
+	private class VMState {
+
+		public int[] memory;
+		
+		public int ip = 0;
+		public int sp = MEMSIZE; // punta al top dello stack
+
+		public int tm;
+		public int hp = 0;
+		public int ra;
+		public int fp = MEMSIZE;
+		
+		public VMState( int[] mem, int ip, int sp, int tm, int hp, int ra, int fp ) {
+			memory = new int[ MEMSIZE ];
+			System.arraycopy( mem, 0, memory, 0, MEMSIZE );
+			this.ip = ip;
+			this.sp = sp;
+			this.tm = tm;
+			this.hp = hp;
+			this.ra = ra;
+			this.fp = fp;
+		}
+	}
+	
+	private void saveState( ) {
+		vmStates.add( 0, new VMState( memory, ip, sp, tm, hp, ra, fp ) );
+	}
+	
+	private void stepBack( ) {
+		if ( vmStates.size() > 0 ) {
+			VMState state = vmStates.remove( 0 );
+			System.arraycopy( state.memory, 0, memory, 0, MEMSIZE );
+			this.ip = state.ip;
+			this.sp = state.sp;
+			this.tm = state.tm;
+			this.hp = state.hp;
+			this.ra = state.ra;
+			this.fp = state.fp;
+		}
+	}
 }

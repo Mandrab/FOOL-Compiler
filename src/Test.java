@@ -2,21 +2,26 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.antlr.v4.runtime.*;
 
 import ast.Node;
-import ast.ProgLetInNode;
 import generated.FOOLLexer;
 import generated.FOOLParser;
 import generated.SVMLexer;
 import generated.SVMParser;
+import generated.SVMVISLexer;
+import generated.SVMVISParser;
 import virtual.machine.ExecuteVM;
+import virtual.machine.VisualVM;
 import visitors.ParserVisitor;
 import visitors.PrinterVisitor;
 import visitors.TypeCheckerVisitor;
 
 public class Test {
+
     public static void main(String[] args) throws Exception {
       
         String fileName = "fool_files" + File.separator + "quicksort.fool";
@@ -53,22 +58,16 @@ public class Test {
 	        out.close(); 
 	        System.out.println("Code generated! Assembling and running generated code.");
 	        
-	        FileInputStream isASM = new FileInputStream(fileName+".asm");
-	        ANTLRInputStream inputASM = new ANTLRInputStream(isASM);
-	        SVMLexer lexerASM = new SVMLexer(inputASM);
+	        CharStream charsASM = CharStreams.fromFileName(fileName+".asm");
+	        SVMVISLexer lexerASM = new SVMVISLexer(charsASM);
 	        CommonTokenStream tokensASM = new CommonTokenStream(lexerASM);
-	        SVMParser parserASM = new SVMParser(tokensASM);
-	        
+	        SVMVISParser parserASM = new SVMVISParser(tokensASM); 
 	        parserASM.assembly();
-	        
 	        System.out.println("You had: "+lexerASM.lexicalErrors+" lexical errors and "+parserASM.getNumberOfSyntaxErrors()+" syntax errors.");
 	        if (lexerASM.lexicalErrors>0 || parserASM.getNumberOfSyntaxErrors()>0) System.exit(1);
-	
 	        System.out.println("Starting Virtual Machine...");
-	        ExecuteVM vm = new ExecuteVM(parserASM.code);
+	        VisualVM vm = new VisualVM(parserASM.code,parserASM.sourceMap,Files.readAllLines(Paths.get(fileName+".asm")));
 	        vm.cpu();
         }
-       
-        
     }
 }

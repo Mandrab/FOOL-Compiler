@@ -1,7 +1,4 @@
 bin/
 fool_files/*.asm
 src/*.tokens
-src/*BaseVisitor.java
-src/*Lexer.java
-src/*Parser.java
-src/*Visitor.java
+src/generated/

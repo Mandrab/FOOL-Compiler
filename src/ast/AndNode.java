@@ -1,8 +1,6 @@
 package ast;
 
-import lib.FOOLlib;
-import lib.TypeException;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class AndNode implements Node {
 
@@ -23,7 +21,7 @@ public class AndNode implements Node {
 	}
 
 	@Override
-	public <T> T accept(Visitor<T> visitor) {
+	public <T> T accept(NodeVisitor<T> visitor) {
 		return visitor.visit( this );
 	}
 	
@@ -31,14 +29,7 @@ public class AndNode implements Node {
 	
 	
 	
-	/*Da riguardare, � possibile l'and solo tra booleani.*/
-	public Node typeCheck() throws TypeException {
-		Node l= left.typeCheck();  
-		Node r= right.typeCheck();  
-		if (!(l instanceof BoolTypeNode && r instanceof BoolTypeNode))
-			throw new TypeException("Incompatible types in and");
-		return new BoolTypeNode();
-	}
+
 	
 	/* Questo metodo restituisce il risultato della moltiplicazione tra i due elementi in input. Restituisce:
 	 * 1 per True

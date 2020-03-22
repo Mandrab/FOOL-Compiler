@@ -3,9 +3,7 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import lib.FOOLlib;
-import lib.TypeException;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class ClassCallNode implements Node {
 	
@@ -54,7 +52,7 @@ public class ClassCallNode implements Node {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -64,41 +62,7 @@ public class ClassCallNode implements Node {
 	
 
 
-	@Override
-	public Node typeCheck() throws TypeException {
-		if (!(methodEntry.getRetType() instanceof ArrowTypeNode)) {
-			System.out.println(methodEntry.getRetType().getClass());
-			throw new TypeException("Invocation of a non-method " + this.ID);
-		}
-
-		ArrowTypeNode arrowNode = (ArrowTypeNode) methodEntry.getRetType();
-		List<Node> p = arrowNode.getParameters();
-		int count = 0;
-		if (!(p.size() == parameters.size()))
-			throw new TypeException("[ClassCallNode] Wrong number of parameters in the invocation of method " + this.ID);
-		
-		for(Node par : parameters) {
-			
-			if ( par instanceof IdNode )
-				par = ( ( IdNode ) par).getEntry( ).getRetType( );
-			else if ( par instanceof DecNode )
-				par = ( ( DecNode )par ).getSymType( );
-			else if ( par instanceof CallNode )
-				par = ( ( CallNode ) par ).getRetType( );
-			else if ( par instanceof ClassCallNode )
-				par = ( ( ClassCallNode )par ).getRetType( );
-			else par = par.typeCheck( );
-
-			if ( par instanceof ArrowTypeNode )
-				par = ( ( ArrowTypeNode )par ).getRetType( );
-			
-			if (!(FOOLlib.isSubtype( par, ( (ParNode) p.get(count) ).getSymType())))
-				throw new TypeException("[ClassCallNode] Wrong type of parameter for method call" );
-			count++;
-		}
-		
-		return arrowNode.getRetType();
-	}
+	
 
 	@Override
 	public String codeGeneration() {

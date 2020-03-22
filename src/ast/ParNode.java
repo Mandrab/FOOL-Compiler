@@ -1,6 +1,6 @@
 package ast;
 
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class ParNode implements Node, DecNode {
 
@@ -21,7 +21,7 @@ public class ParNode implements Node, DecNode {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -34,10 +34,7 @@ public class ParNode implements Node, DecNode {
 	
 	
 
-	// non utilizzato
-	public Node typeCheck() {
-		return null;
-	}
+
 
 	// non utilizzato
 	public String codeGeneration() {

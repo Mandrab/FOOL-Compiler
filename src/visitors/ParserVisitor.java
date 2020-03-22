@@ -1,7 +1,9 @@
 package visitors;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import ast.AndNode;
 import ast.ArrowTypeNode;
@@ -128,7 +130,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			clsNode.setSuper( stFront.get( suID ) );
 			// get superclass' type
 			superClassType = ( ClassTypeNode ) stFront.get( suID ).getRetType( );
-			
+
 			// reset fields and methods starting offsets according to superclass definitions
 	        fieldOffset = -1 - superClassType.getFields( ).size( );
 	        methodOffset = superClassType.getMethods( ).size( );
@@ -188,12 +190,12 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
       		// a previous declared method exist
 			if( val != null ){
-				
+
 				// superclass exist and has this method -> ok, override
-				if ( superClassType != null && superClassType.getMethods( ).stream( ).map( e -> ( MethodNode ) e ).anyMatch( e -> e.getID( ).equals( methodNode.getID( ) ) ) ) {
+				if ( superClassType != null && classTable.getClassVT( ctx.suID.getText( ) ).get( methodNode.getID( ) ) != null ) {
 
 					// substitute method in (this) class table
-					stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), methodNode.getSymType( ), val.getOffset( ), true ) );
+					stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), val.getOffset( ), true ) );
 					methodNode.setOffset( val.getOffset( ) );
 					
 				// superclass does not contains this method -> the duplicate declaration is made in this class
@@ -206,7 +208,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			} else {
 
 				// add method in class table
-				stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), methodNode.getSymType( ), methodOffset++, true ) );
+				stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset++, true ) );
 				methodNode.setOffset( methodOffset++ );
 			}
       	}
@@ -214,18 +216,19 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
       	// get (this) class declarations' table and add it to classTable
       	Map<String, STentry> virtualTable = symTable.popTable( );
       	classTable.addClassVT( clsID, virtualTable );
-      	
+
       	// get (offset-sorted) methods and add them to ClassTypeNode
-      	virtualTable.entrySet( ).stream( ).filter( e -> e.getValue( ).isMethod( ) ).sorted( ( e1, e2 ) -> e1.getValue( ).getOffset( ) - e2.getValue( ).getOffset( ) ).forEach(e ->
-			clsTypeNode.addMethod( new MethodNode( e.getKey( ), e.getValue( ).getRetType( ) ) ) );
-		
+      	virtualTable.values( ).stream( ).filter( STentry::isMethod )
+      			.sorted( ( e1, e2 ) -> e1.getOffset( ) - e2.getOffset( ) ).forEach( e -> clsTypeNode.addMethod( e.getRetType( ) ) );
+
       	// get (offset-sorted) fields and add them to ClassTypeNode
-		virtualTable.entrySet().stream().filter( e -> !e.getValue().isMethod() ).sorted( (e1, e2) -> e2.getValue().getOffset() - e1.getValue().getOffset() ).forEach(e ->
-			clsTypeNode.addField( new FieldNode( e.getKey( ), e.getValue( ).getRetType( ) ) ) );
+		virtualTable.entrySet( ).stream( ).filter( e -> ! e.getValue( ).isMethod( ) )
+				.sorted( ( e1, e2 ) -> e2.getValue( ).getOffset( ) - e1.getValue( ).getOffset( ) )
+				.forEach( e -> clsTypeNode.addField( new FieldNode( e.getKey( ), e.getValue( ).getRetType( ) ) ) );
 
 		return clsNode;
 	}
-	
+
 	@Override
 	public Node visitDec(FOOLParser.DecContext ctx) {
 		Map<String,STentry> stFront = symTable.getTable( );
@@ -436,7 +439,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
     		stErrors++;
 		}
 		
-		NewNode newNode = new NewNode( symTable.getTable( 0 ).get( ctx.ID( ).getText( ) ), ctx.ID( ).getText( ) );
+		NewNode newNode = new NewNode( ctx.ID( ).getText( ), symTable.getTable( 0 ).get( ctx.ID( ).getText( ) ) );
 		
 		for ( int i = 0; i < ctx.exp( ).size( ); i++ ) {
 			newNode.addField( visit( ctx.exp( i ) ) );

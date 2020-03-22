@@ -1,7 +1,6 @@
 package ast;
 
-import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class VarNode implements Node, DecNode {
 
@@ -23,12 +22,12 @@ public class VarNode implements Node, DecNode {
 		return type;
 	}
 	
-	public Node getExp( ) {
+	public Node getExpression( ) {
 		return exp;
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 
@@ -43,11 +42,6 @@ public class VarNode implements Node, DecNode {
 	
 
 
-	public Node typeCheck() throws TypeException {
-		if (!FOOLlib.isSubtype(exp.typeCheck(), type))
-			throw new TypeException("Incompatible value for variable " + ID);
-		return null;
-	}
 
 	public String codeGeneration() {
 		return exp.codeGeneration();

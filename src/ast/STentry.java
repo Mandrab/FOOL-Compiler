@@ -1,6 +1,6 @@
 package ast;
 
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class STentry implements Visitable {
 
@@ -40,7 +40,7 @@ public class STentry implements Visitable {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class FunNode implements Node, DecNode {
 
@@ -55,7 +55,7 @@ public class FunNode implements Node, DecNode {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -67,17 +67,9 @@ public class FunNode implements Node, DecNode {
 
 
 
-	public Node typeCheck() throws TypeException {
-		for (Node dec : declarations)
-			try {
-				dec.typeCheck();
-			} catch (TypeException e) {
-				System.out.println("Type checking error in a declaration: " + e.text);
-			}
-		if (!FOOLlib.isSubtype(exp.typeCheck(), type))
-			throw new TypeException("Wrong return type for function " + ID);
-		return null;
-	}
+
+
+	
 
 	public String codeGeneration() {
 		String declCode = "";

@@ -3,8 +3,7 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import lib.TypeException;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 /***
  * Contiene tutti i campi/metodi (anche quelli ereditati)
@@ -47,7 +46,7 @@ public class ClassTypeNode implements Node {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -57,11 +56,10 @@ public class ClassTypeNode implements Node {
 	
 	
 
-	@Override
-	public Node typeCheck() throws TypeException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
+
+	
+	
 
 	@Override
 	public String codeGeneration() {

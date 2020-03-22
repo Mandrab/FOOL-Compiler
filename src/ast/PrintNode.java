@@ -1,7 +1,6 @@
 package ast;
 
-import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class PrintNode implements Node {
 
@@ -11,12 +10,12 @@ public class PrintNode implements Node {
 		exp = expression;
 	}
 	
-	public Node getExp( ) {
+	public Node getExpression( ) {
 		return exp;
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -31,9 +30,6 @@ public class PrintNode implements Node {
 
 
 
-	public Node typeCheck() throws TypeException {
-		return exp.typeCheck();
-	}
 
 	public String codeGeneration() {
 		return exp.codeGeneration() + "print\n";

@@ -1,8 +1,8 @@
 package ast;
 
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public interface Visitable {
 
-	public <T> T accept( Visitor<T> visitor );
+	public <T> T accept( NodeVisitor<T> visitor );
 }

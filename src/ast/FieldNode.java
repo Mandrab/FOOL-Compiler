@@ -1,6 +1,6 @@
 package ast;
 
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class FieldNode implements DecNode, Node {
 
@@ -31,7 +31,7 @@ public class FieldNode implements DecNode, Node {
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -43,10 +43,8 @@ public class FieldNode implements DecNode, Node {
 	
 
 
-	// non utilizzato
-	public Node typeCheck() {
-		return null;
-	}
+
+
 
 	// non utilizzato
 	public String codeGeneration() {

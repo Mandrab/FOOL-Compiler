@@ -1,6 +1,6 @@
 package ast;
 
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class BoolNode implements Node {
 
@@ -15,7 +15,7 @@ public class BoolNode implements Node {
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -23,9 +23,7 @@ public class BoolNode implements Node {
 	
 	
 
-	public Node typeCheck() {
-		return new BoolTypeNode();
-	}
+
 
 	public String codeGeneration() {
 		return "push " + (value ? 1 : 0) + "\n";

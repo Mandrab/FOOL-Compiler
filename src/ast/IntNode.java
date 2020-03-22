@@ -1,6 +1,6 @@
 package ast;
 
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class IntNode implements Node {
 
@@ -15,7 +15,7 @@ public class IntNode implements Node {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -25,9 +25,9 @@ public class IntNode implements Node {
 
 
 
-	public Node typeCheck() {
-		return new IntTypeNode();
-	}
+
+
+	
 
 	public String codeGeneration() {
 		return "push " + value + "\n";

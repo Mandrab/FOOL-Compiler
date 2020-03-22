@@ -1,7 +1,6 @@
 package ast;
 
-import lib.TypeException;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class RefTypeNode implements Node {
 
@@ -16,7 +15,7 @@ public class RefTypeNode implements Node {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -30,10 +29,7 @@ public class RefTypeNode implements Node {
 	
 
 
-	@Override
-	public Node typeCheck() throws TypeException {
-		return null;
-	}
+
 
 	@Override
 	public String codeGeneration() {

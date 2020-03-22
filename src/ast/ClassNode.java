@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lib.FOOLlib;
-import lib.TypeException;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class ClassNode implements DecNode, Node {
 
@@ -65,7 +64,7 @@ public class ClassNode implements DecNode, Node {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -86,44 +85,7 @@ public class ClassNode implements DecNode, Node {
 	
 
 
-	@Override
-	public Node typeCheck() throws TypeException {
-		for (Node m : methods)
-			try {
-				m.typeCheck();
-			} catch (TypeException e) {
-				System.out.println("Type checking error in a method: " + e.text);
-			}
-		
-		if(superEntry != null) {
-			ClassTypeNode classTypeNSuper = (ClassTypeNode) superEntry.getRetType();
-			int minOffset = ((FieldNode)(classTypeNSuper.getFields().get(0))).getOffset();
-			int maxOffset = ((FieldNode)(classTypeNSuper.getFields().get(classTypeNSuper.getFields().size()-1))).getOffset();
-			int count = 0;
-			
-			for(Node f: fields) {
-				if( ((FieldNode) f).getOffset() >= minOffset && ((FieldNode) f).getOffset() <= maxOffset) {
-					if (!FOOLlib.isSubtype(((FieldNode)f).getSymType(), ((FieldNode)(classTypeNSuper.getFields().get(count))).getSymType()))
-						throw new TypeException(" [ClassNode] Type check found a problem: \n Wrong overriding in field: " + ((FieldNode)f).getID());
-				}
-				count++;
-			}
-			
-			minOffset = ((MethodNode)(classTypeNSuper.getMethods().get(0))).getOffset();
-			maxOffset = ((MethodNode)(classTypeNSuper.getMethods().get(classTypeNSuper.getMethods().size()-1))).getOffset();
-			count = 0;
-			
-			for(Node m: methods) {
-				if( ((MethodNode) m).getOffset() >= minOffset && ((MethodNode) m).getOffset() <= maxOffset) {
-					if (!FOOLlib.isSubtype(((MethodNode)m).getSymType(), ((MethodNode)(classTypeNSuper.getFields().get(count))).getSymType()))
-						throw new TypeException(" [ClassNode] Type check found a problem: \n Wrong overriding in method: " + ((MethodNode)m).getID());
-				}
-				count++;
-			}
-		}
-		
-		return null; //TODO giusto?!?!?
-	}
+
 
 	@Override
 	public String codeGeneration() {

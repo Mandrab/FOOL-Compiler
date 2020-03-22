@@ -1,7 +1,7 @@
 package ast;
 
 import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 import java.util.List;
 
@@ -19,12 +19,12 @@ public class ProgLetInNode implements Node {
 		return declarations;
 	}
 
-	public Node getExp( ) {
+	public Node getExpression( ) {
 		return exp;
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -40,15 +40,6 @@ public class ProgLetInNode implements Node {
 	
 	
 
-	public Node typeCheck() throws TypeException {
-		for (Node dec : declarations)
-			try {
-				dec.typeCheck();
-			} catch (TypeException e) {
-				System.out.println("Type checking error in a declaration: " + e.text);
-			}
-		return exp.typeCheck();
-	}
 
 	public String codeGeneration() {
 		String declCode = "";

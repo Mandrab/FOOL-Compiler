@@ -1,11 +1,11 @@
 package ast;
 
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class EmptyNode implements Node {
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 
@@ -13,9 +13,9 @@ public class EmptyNode implements Node {
 	
 	
 
-	public Node typeCheck() {
-		return new EmptyTypeNode(); 
-	}
+
+
+	
 	/*Mette -1 sullo stack, come scritto nelle slide. Questo perch� -1 � diverso da qualsiasi indirizzo
 	 * dello stack. */
 	public String codeGeneration() {

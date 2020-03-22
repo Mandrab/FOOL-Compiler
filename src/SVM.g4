@@ -2,24 +2,24 @@ grammar SVM;
 
 @header {
 
-	package generated;
+package generated;
 
-	import java.util.*;
+import java.util.*;
 
-	import virtual.machine.ExecuteVM;
+import virtual.machine.ExecuteVM;
 }
 
 @lexer::members {
 
-	int lexicalErrors=0;
+public int lexicalErrors = 0;
 }
 
 @parser::members {
 
-    int[] code = new int[ExecuteVM.CODESIZE];    
-    private int i = 0;
-    private HashMap<String,Integer> labelDef = new HashMap<String,Integer>();
-    private HashMap<Integer,String> labelRef = new HashMap<Integer,String>();
+public int[] code = new int[ ExecuteVM.CODESIZE ];    
+private int i = 0;
+private Map<String,Integer> labelDef = new HashMap<String,Integer>( );
+private Map<Integer,String> labelRef = new HashMap<Integer,String>( );
 }
 
 /*------------------------------------------------------------------

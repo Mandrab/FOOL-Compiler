@@ -1,7 +1,6 @@
 package ast;
 
-import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class IdNode implements Node {
 
@@ -28,7 +27,7 @@ public class IdNode implements Node {
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -41,13 +40,9 @@ public class IdNode implements Node {
 
 
 
-	public Node typeCheck() throws TypeException {
-		if(entry.getRetType() instanceof ClassTypeNode)
-			throw new TypeException(" Type check found a problem: \n ID can not be a class's name: " + this.ID);
-		if(entry.isMethod())
-			throw new TypeException(" Type check found a problem: \n ID can not be a method: " + this.ID);
-		return entry.getRetType();
-	}
+
+
+	
 
 	/*
 	 * ricontrollare possibile errore in getPush

@@ -23,6 +23,7 @@ import ast.LessEqualNode;
 import ast.MethodNode;
 import ast.MinusNode;
 import ast.NewNode;
+import ast.Node;
 import ast.NotNode;
 import ast.OrNode;
 import ast.ParNode;
@@ -35,7 +36,9 @@ import ast.STentry;
 import ast.TimesNode;
 import ast.VarNode;
 
-public interface Visitor<R> {
+public interface NodeVisitor<R> {
+	
+	R visit( Node visitable );
 
 	R visit( AndNode visitable );
 	

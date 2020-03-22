@@ -37,7 +37,7 @@ import ast.STentry;
 import ast.TimesNode;
 import ast.VarNode;
 
-public class PrinterVisitor implements Visitor<String> {
+public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVisitor<String> {
 	
 	private String baseIndent;
 	private int indentCount;
@@ -264,7 +264,7 @@ public class PrinterVisitor implements Visitor<String> {
 	public String visit( NotNode element ) {
 		String result = indent( ) + "Not\n";
 		incIndent( );
-		result += element.getExp( ).accept( this );
+		result += element.getExpression( ).accept( this );
 		decIndent( );
 		return result;
 	}
@@ -302,7 +302,7 @@ public class PrinterVisitor implements Visitor<String> {
 	public String visit( PrintNode element ) {
 		String result = indent( ) + "Print\n";
 		incIndent( );
-		result += element.getExp( ).accept( this );
+		result += element.getExpression( ).accept( this );
 		decIndent( );
 		return result;
 	}
@@ -320,7 +320,7 @@ public class PrinterVisitor implements Visitor<String> {
 	public String visit( ProgNode element ) {
 		String result = indent( ) + "Prog\n";
 		incIndent( );
-		result += element.getExp( ).accept( this );
+		result += element.getExpression( ).accept( this );
 		decIndent( );
 		return result;
 	}
@@ -356,7 +356,7 @@ public class PrinterVisitor implements Visitor<String> {
 		String result = indent( ) + "Var: " + element.getID( ) + "\n";
 		incIndent( );
 		result += element.getSymType( ).accept( this );
-		result += element.getExp( ).accept( this );
+		result += element.getExpression( ).accept( this );
 		decIndent( );
 		return result;
 	}

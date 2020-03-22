@@ -1,7 +1,12 @@
 grammar SVMVIS;
 
 @header {
+
+package generated;
+
 import java.util.HashMap;
+
+import virtual.machine.VisualVM;
 }
 
 @lexer::members {

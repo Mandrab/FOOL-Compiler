@@ -1,8 +1,7 @@
 package ast;
 
 import lib.FOOLlib;
-import lib.TypeException;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class OrNode implements Node {
 
@@ -23,7 +22,7 @@ public class OrNode implements Node {
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -40,14 +39,7 @@ public class OrNode implements Node {
 
 
 
-	/* Da riguardare. E' possibile l'and solo tra booleani */
-	public Node typeCheck() throws TypeException {
-		Node l = left.typeCheck();
-		Node r = right.typeCheck();
-		if (!(l instanceof BoolTypeNode && r instanceof BoolTypeNode))
-			throw new TypeException("Incompatible types in or");
-		return new BoolTypeNode();
-	}
+
 
 	/*
 	 * crea due etichette fresh. Per vedere se i due valori di codeGeneration sono

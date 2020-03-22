@@ -1,10 +1,8 @@
 package ast;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class CallNode implements Node {
 
@@ -36,12 +34,12 @@ public class CallNode implements Node {
 		return parameters;
 	}
 	
-	public Node getRetType( ) {
+	public Node getType( ) {
 		return definition.getRetType( );
 	}
 	
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -52,19 +50,9 @@ public class CallNode implements Node {
 	
 	
 
-	public Node typeCheck() throws TypeException {
-		if (!(definition.getRetType() instanceof ArrowTypeNode))
-			throw new TypeException("Invocation of a non-function " + ID); // gi� implementato?
-		ArrowTypeNode t = (ArrowTypeNode) definition.getRetType();
-		List<Node> p = t.getParameters();
-		if (!(p.size() == parameters.size()))
-			throw new TypeException("[CallNode] Wrong number of parameters in the invocation of " + ID);
-		for (int i = 0; i < parameters.size(); i++)
-			if (!(FOOLlib.isSubtype(parameters.get(i).typeCheck(), p.get(i)))) {
-				throw new TypeException("Wrong type for " + (i + 1) + "-th parameter in the invocation of " + ID);
-			}
-		return t.getRetType();
-	}
+
+	
+	
 
 
 	public String codeGeneration() {
@@ -102,36 +90,5 @@ public class CallNode implements Node {
 					"lw\n" + // push function address.
 					"js\n";
 		}
-		/*if(entry.isMethod()) {
-			return "lfp\n" +// push Control Link (pointer to frame of function id caller)
-					parCode +// generate code for parameter expressions in reversed order
-					"lfp\n" +
-					getAR + // Find the correct AR address.
-					"push " + entry.getOffset() + "\n" + // push indirizzo ad AR dichiarazione funzione, recuperato a offset ID
-					"add\n" + 
-					"stm\n" + // duplicate top of the stack.
-					"ltm\n" +
-					"lw\n" + 
-					"ltm\n" + // ripusho l'indirizzo ottenuto precedentemente, per poi calcolarmi offset ID - 1
-					"lw\n" + //Per raggiungere la DT
-					"push " + entry.getOffset() + "\n" +
-					"add\n" +
-					"js\n";
-		} else {
-			return "lfp\n" +// push Control Link (pointer to frame of function id caller)
-					parCode +// generate code for parameter expressions in reversed order
-					"lfp\n" +
-					getAR + // Find the correct AR address.
-					"push " + entry.getOffset() + "\n" + // push indirizzo ad AR dichiarazione funzione, recuperato a offset ID
-					"add\n" + 
-					"stm\n"+ // duplicate top of the stack.
-					"ltm\n"+
-					"lw\n" + 
-					"ltm\n" + // ripusho l'indirizzo ottenuto precedentemente, per poi calcolarmi offset ID - 1
-					"push 1\n" + // push 1, 
-					"sub\n" + // sottraggo a offset ID - 1, per recuperare l'indirizzo funzione.
-					"lw\n" + // push function address.
-					"js\n";
-		}*/
 	}
 }

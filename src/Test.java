@@ -9,8 +9,12 @@ import ast.Node;
 import ast.ProgLetInNode;
 import generated.FOOLLexer;
 import generated.FOOLParser;
+import generated.SVMLexer;
+import generated.SVMParser;
+import virtual.machine.ExecuteVM;
 import visitors.ParserVisitor;
 import visitors.PrinterVisitor;
+import visitors.TypeCheckerVisitor;
 
 public class Test {
     public static void main(String[] args) throws Exception {
@@ -22,23 +26,24 @@ public class Test {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         
         //SIMPLISTIC BUT WRONG CHECK OF THE LEXER ERRORS
-        if(lexer.lexicalErrors > 0){
+        if( lexer.lexicalErrors > 0 ){
         	System.out.println("The program was not in the right format. Exiting the compilation process now");
         }else{
         
 	        FOOLParser parser = new FOOLParser(tokens);
 
-	        ParserVisitor visitor = new ParserVisitor();
+	        ParserVisitor parserVisitor = new ParserVisitor( );
 	        
-	        Node ast = visitor.visit(parser.prog()); //generazione AST	        
-	        	
-	
+	        Node ast = parserVisitor.visit( parser.prog( ) ); 				// generate AST	        
+
+	        PrinterVisitor printerVisitor = new PrinterVisitor( );
+
 	        System.out.println("Visualizing AST...");
-	        //System.out.println(ast.toPrint(""));
-	        System.out.println(new PrinterVisitor().visit((ProgLetInNode)ast));
+	        //System.out.println( printerVisitor.visit( ast ) );				// visit the ast and print it
 	        
-	        /*Node type = ast.typeCheck(); //type-checking bottom-up 
-	        System.out.println(type.toPrint("Type checking ok! Type of the program is: "));
+	        TypeCheckerVisitor typeCheckerVisitor = new TypeCheckerVisitor( );
+	        Node type = typeCheckerVisitor.visit( ast );			// visit the ast and type-check it bottom-up
+	        System.out.println( "Type checking ok! Type of the program is: " + printerVisitor.visit( type ) );
 	        
 	      
 	        // CODE GENERATION  prova.fool.asm
@@ -61,7 +66,7 @@ public class Test {
 	
 	        System.out.println("Starting Virtual Machine...");
 	        ExecuteVM vm = new ExecuteVM(parserASM.code);
-	        vm.cpu();*/
+	        vm.cpu();
         }
        
         

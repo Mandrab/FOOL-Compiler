@@ -1,7 +1,7 @@
 package ast;
 
 import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class IfNode implements Node {
 
@@ -28,7 +28,7 @@ public class IfNode implements Node {
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -40,22 +40,9 @@ public class IfNode implements Node {
 
 
 
-	public Node typeCheck() throws TypeException {
-		if (!(FOOLlib.isSubtype(condition.typeCheck(), new BoolTypeNode())))
-			throw new TypeException("Non boolean condition in if");
-		Node t = thenBranch.typeCheck();
-		Node e = elseBranch.typeCheck();
-		if (FOOLlib.isSubtype(t, e))
-			return e;
-		if (FOOLlib.isSubtype(e, t))
-			return t;
 
-		Node n = FOOLlib.lowestCommonAncestor(t, e);
-		if (n == null)
-			throw new TypeException("Incompatible types in then-else branches");
 
-		return n;
-	}
+	
 
 	public String codeGeneration() {
 		String l1 = FOOLlib.freshLabel();

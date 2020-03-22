@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lib.FOOLlib;
-import lib.TypeException;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class MethodNode implements DecNode, Node {
 
@@ -70,7 +69,7 @@ public class MethodNode implements DecNode, Node {
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -84,18 +83,9 @@ public class MethodNode implements DecNode, Node {
 
 
 
-	public Node typeCheck() throws TypeException {
-		for (Node dec : declarations)
-			try {
-				dec.typeCheck();
-			} catch (TypeException e) {
-				System.out.println("Type checking error in a declaration: " + e.text);
-			}
-		
-		if (!FOOLlib.isSubtype(exp.typeCheck(), returnType))
-			throw new TypeException("[MethodNode] Wrong return type for method " + ID);
-		return null;
-	}
+
+
+	
 
 	public String codeGeneration() {
 		String declCode = "";

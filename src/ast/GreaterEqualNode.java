@@ -1,7 +1,7 @@
 package ast;
 
 import lib.*;
-import visitors.Visitor;
+import visitors.NodeVisitor;
 
 public class GreaterEqualNode implements Node {
 
@@ -22,7 +22,7 @@ public class GreaterEqualNode implements Node {
 	}
 
 	@Override
-	public <T> T accept( Visitor<T> visitor ) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 	
@@ -34,13 +34,7 @@ public class GreaterEqualNode implements Node {
 
 
 
-	public Node typeCheck() throws TypeException {
-		Node l = left.typeCheck();
-		Node r = right.typeCheck();
-		if (!(FOOLlib.isSubtype(l, r) || FOOLlib.isSubtype(r, l)))
-			throw new TypeException("Incompatible types in  greaterequal");
-		return new BoolTypeNode();
-	}
+
 
 	/*
 	 * Per la code generation uso comunque ble (branch less equal) che effettua il

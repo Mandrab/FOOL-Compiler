@@ -3,7 +3,6 @@ package visitors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import ast.AndNode;
 import ast.ArrowTypeNode;
@@ -304,7 +303,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	}
 	
 	@Override
-	public Node visitMethod(FOOLParser.MethodContext ctx) {	
+	public Node visitMethod(FOOLParser.MethodContext ctx) {
 		// create method node
 		MethodNode methodNode = new MethodNode( ctx.mID.getText( ), visit( ctx.mT ) );
 
@@ -354,6 +353,24 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
      	return new ParNode( ctx.pID.getText( ), visit( ctx.pT ) );	
 	}
 
+	@Override
+	public Node visitVar(FOOLParser.VarContext ctx) {
+		VarNode varNode = new VarNode( ctx.vID.getText( ), visit( ctx.vT ), visit( ctx.vE ) ); 
+		
+		Map<String,STentry> stFront = symTable.getTable( );
+		   
+		// functional-type variables take double space (function addr. & Frame Pointer, i.e. addr. of this Activation Record) -> decrement offset two time
+		if ( varNode.getSymType( ) instanceof ArrowTypeNode )
+			offset--;
+
+		if ( stFront.put( varNode.getID( ), new STentry( symTable.getLevel( ), varNode.getSymType( ), offset-- ) ) != null ) {
+			System.out.println( "Var ID '" + varNode.getID( ) + "' at line " + ctx.vID.getLine( ) + " already declared" );
+			stErrors++;
+		}
+		
+		return varNode;
+	}
+	
 	@Override
 	public Node visitHotype(FOOLParser.HotypeContext ctx) {
 		return visit( ctx.type( ) == null ? ctx.arrow( ) : ctx.type( ) );
@@ -473,7 +490,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		STentry entry = null;
 		
 		for ( int nl = symTable.getLevel( ); nl >= 0 && entry == null; nl-- ) {
-			entry=( symTable.getTable( nl ) ).get( ctx.ID( ).getText( ) );
+			entry = ( symTable.getTable( nl ) ).get( ctx.ID( ).getText( ) );
 		}
 
        	if ( entry == null ) {

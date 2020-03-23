@@ -1,6 +1,5 @@
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,12 +9,9 @@ import org.antlr.v4.runtime.*;
 import ast.Node;
 import generated.FOOLLexer;
 import generated.FOOLParser;
-import generated.SVMLexer;
-import generated.SVMParser;
 import generated.SVMVISLexer;
 import generated.SVMVISParser;
-import virtual.machine.ExecuteVM;
-import virtual.machine.VisualVM;
+import virtual.machine.visual.VirtualMachine;
 import visitors.ParserVisitor;
 import visitors.PrinterVisitor;
 import visitors.TypeCheckerVisitor;
@@ -66,8 +62,7 @@ public class Test {
 	        System.out.println("You had: "+lexerASM.lexicalErrors+" lexical errors and "+parserASM.getNumberOfSyntaxErrors()+" syntax errors.");
 	        if (lexerASM.lexicalErrors>0 || parserASM.getNumberOfSyntaxErrors()>0) System.exit(1);
 	        System.out.println("Starting Virtual Machine...");
-	        VisualVM vm = new VisualVM(parserASM.code,parserASM.sourceMap,Files.readAllLines(Paths.get(fileName+".asm")));
-	        vm.cpu();
+	        new VirtualMachine( parserASM.code, parserASM.sourceMap, Files.readAllLines( Paths.get( fileName+".asm" ) ) );
         }
     }
 }

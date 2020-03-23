@@ -2,10 +2,11 @@ package virtual.machine;
 
 import generated.SVMParser;
 
+import static lib.FOOLlib.MEMSIZE;
+
 public class ExecuteVM {
     
     public static final int CODESIZE = 10000;
-    public static final int MEMSIZE = 10000;
     
     private int[] code;
     private int[] memory = new int[MEMSIZE];
@@ -18,7 +19,7 @@ public class ExecuteVM {
     private int ra;           
     private int tm;
     
-    public ExecuteVM(int[] code) {
+    public ExecuteVM( int[] code ) {
       this.code = code;
     }
     

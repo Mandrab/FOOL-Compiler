@@ -1,6 +1,5 @@
 package ast;
 
-import lib.*;
 import visitors.NodeVisitor;
 
 public class IfNode implements Node {
@@ -31,23 +30,5 @@ public class IfNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-	
-	
 
-
-
-
-
-	
-
-	public String codeGeneration() {
-		String l1 = FOOLlib.freshLabel();
-		String l2 = FOOLlib.freshLabel();
-		return condition.codeGeneration() + "push 1\n" + "beq " + l1 + "\n" + elseBranch.codeGeneration() + "b " + l2 + "\n" + l1
-				+ ": \n" + thenBranch.codeGeneration() + l2 + ": \n";
-	}
 }

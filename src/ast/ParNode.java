@@ -24,25 +24,5 @@ public class ParNode implements Node, DecNode {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-	
-
-
-	
-	
-
-
-
-	// non utilizzato
-	public String codeGeneration() {
-		return "";
-	}
-
-	
-
-	
 
 }

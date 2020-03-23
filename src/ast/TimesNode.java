@@ -24,22 +24,5 @@ public class TimesNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-	
-	
-	
-
-
-
-	
-
-
-
-	public String codeGeneration() {
-		return left.codeGeneration() + right.codeGeneration() + "mult\n";
-	}
 
 }

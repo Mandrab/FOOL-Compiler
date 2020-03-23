@@ -18,20 +18,5 @@ public class ProgNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-	
-	
-	
 
-
-
-	
-
-
-	public String codeGeneration() {
-		return exp.codeGeneration() + "halt\n";
-	}
 }

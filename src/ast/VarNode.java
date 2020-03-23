@@ -31,24 +31,4 @@ public class VarNode implements Node, DecNode {
 		return visitor.visit( this );
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-
-
-	public String codeGeneration() {
-		return exp.codeGeneration();
-	}
-
-	
-
-	
-
 }

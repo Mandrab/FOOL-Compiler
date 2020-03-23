@@ -18,23 +18,5 @@ public class RefTypeNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-
-
-
-	@Override
-	public String codeGeneration() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }

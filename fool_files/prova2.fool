@@ -1,0 +1,62 @@
+/* expected return: 16 */ /*
+let
+	class List ( head: int, tail: List ) {
+		fun first: int( ) head;
+		fun rest: List( ) tail;
+	}
+
+	class StrangeList extends List ( r: int ) {
+		fun returnFive: int( ) 5;
+	}
+	
+	class OverrideList extends List ( head: bool ) {
+		fun hasHead: bool( ) head;
+	}
+
+	fun sum:int ( i:int, j:int ) i + j;
+  	fun mult:int ( i:int, j:int ) i * j;
+
+  	var sList: StrangeList = new StrangeList( 5,
+  						new List( 3, null ), 7 );
+  	var list: List = sList.rest( );
+  	var oList: OverrideList = new OverrideList( true, null );
+in
+	print ( sum( mult( sList.returnFive( ), list.first( ) ), oList.hasHead( ) ) );
+*/
+/* expected return: -1 */ /*
+let
+	class List (f:int, r:List) {
+		fun first:int() f;
+		fun rest:List() r;
+	}
+	class XList (f:int) {
+		fun first:int() f;
+	}
+
+	fun f:int (i:int, j:int) i+j;
+  	fun r:int (i:int, j:int) f(i,j) + 7;
+
+  	var list:List = new List(5,null);
+in
+	print ( list.rest( ) );
+*/
+/* expected return: 5 */
+let
+	class List (f:int, r:List) {
+		fun first:int() f;
+		fun rest:List() r;
+	}
+	class XList (f:int) {
+		fun generateAndGetFirst:int()
+			let
+				var list:List = new List(5, null);
+			in
+				list.first( );
+	}
+
+	fun f:int (i:int, j:int) i+j;
+  	fun r:int (i:int, j:int) f(i,j) + 7;
+
+  	var xlist:XList = new XList(7);
+in
+	print ( xlist.generateAndGetFirst( ) );

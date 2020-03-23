@@ -9,16 +9,4 @@ public class EmptyNode implements Node {
 		return visitor.visit( this );
 	}
 
-
-	
-	
-
-
-
-	
-	/*Mette -1 sullo stack, come scritto nelle slide. Questo perch� -1 � diverso da qualsiasi indirizzo
-	 * dello stack. */
-	public String codeGeneration() {
-		return "push -1\n";
-	}
 }

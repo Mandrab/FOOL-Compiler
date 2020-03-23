@@ -8,18 +8,5 @@ public class BoolTypeNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-
-
-
-
-	
-
-	// non utilizzato
-	public String codeGeneration() {
-		return "";
-	}
 
 }

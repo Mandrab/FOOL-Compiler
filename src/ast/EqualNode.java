@@ -1,6 +1,5 @@
 package ast;
 
-import lib.*;
 import visitors.NodeVisitor;
 
 public class EqualNode implements Node {
@@ -24,21 +23,6 @@ public class EqualNode implements Node {
 	@Override
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
-	}
-
-	
-	
-	
-	
-	
-
-
-
-	public String codeGeneration() {
-		String l1 = FOOLlib.freshLabel();
-		String l2 = FOOLlib.freshLabel();
-		return left.codeGeneration() + right.codeGeneration() + "beq " + l1 + "\n" + "push 0\n" + "b " + l2 + "\n" + l1
-				+ ": \n" + "push 1\n" + l2 + ": \n";
 	}
 
 }

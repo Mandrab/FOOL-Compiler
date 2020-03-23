@@ -1,6 +1,5 @@
 package ast;
 
-import lib.*;
 import visitors.NodeVisitor;
 
 public class GreaterEqualNode implements Node {
@@ -24,30 +23,6 @@ public class GreaterEqualNode implements Node {
 	@Override
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
-	}
-	
-	
-	
-	
-	
-	
-
-
-
-
-
-	/*
-	 * Per la code generation uso comunque ble (branch less equal) che effettua il
-	 * salto se il primo valore � minore uguale al secondo. Poi adatto le condizioni
-	 * del salto, ragionando in maniera inversa.
-	 */
-	public String codeGeneration() {
-		String l1 = FOOLlib.freshLabel();
-		String l2 = FOOLlib.freshLabel();
-		return left.codeGeneration() + right.codeGeneration() + "stm\n" + "lhp\n" + "sw\n" + "ltm\n" + "lhp\n" + "lw\n"
-				+ "bleq " + l1 + "\n" + "push 0\n" + // in caso negativo pusho 0 (false)
-				"b " + l2 + "\n" + l1 + ": \n" + "push 1\n" + // in caso positivo pusho 1 (true)
-				l2 + ": \n";
 	}
 
 }

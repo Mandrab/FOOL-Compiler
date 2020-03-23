@@ -10,14 +10,4 @@ public class EmptyTypeNode implements Node {
 		return visitor.visit( this );
 	}
 
-	
-	
-	
-	
-	  
-
-
-	 
-	  //non utilizzato
-	  public String codeGeneration() {return "";}
 }

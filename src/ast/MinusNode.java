@@ -24,20 +24,5 @@ public class MinusNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-
-
-
-	
-	
-
-
-	@Override
-	public String codeGeneration() {
-		return left.codeGeneration() + right.codeGeneration() + "sub\n";
-	}
 
 }

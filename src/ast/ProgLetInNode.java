@@ -1,6 +1,5 @@
 package ast;
 
-import lib.*;
 import visitors.NodeVisitor;
 
 import java.util.List;
@@ -27,24 +26,5 @@ public class ProgLetInNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-	
-	
-	
 
-
-	
-	
-	
-
-
-	public String codeGeneration() {
-		String declCode = "";
-		for (Node dec : declarations)
-			declCode += dec.codeGeneration();
-		return "push 0\n" + declCode + exp.codeGeneration() + "halt\n" + FOOLlib.getCode();
-	}
 }

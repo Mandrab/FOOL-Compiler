@@ -18,15 +18,5 @@ public class BoolNode implements Node {
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
-	
-	
-	
-	
-
-
-
-	public String codeGeneration() {
-		return "push " + (value ? 1 : 0) + "\n";
-	}
 
 }

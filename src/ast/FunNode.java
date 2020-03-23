@@ -3,7 +3,6 @@ package ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import lib.*;
 import visitors.NodeVisitor;
 
 public class FunNode implements Node, DecNode {
@@ -57,60 +56,6 @@ public class FunNode implements Node, DecNode {
 	@Override
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
-	}
-	
-	
-	
-	
-	
-	
-
-
-
-
-
-	
-
-	public String codeGeneration() {
-		String declCode = "";
-		String remdeclCode = "";
-		String parCode = "";
-		String funl = FOOLlib.freshFunLabel();
-
-		
-
-		// Nel caso di elementi funzionali aggiungiamo un "pop" aggiuntivo.
-
-		for (int i = 0; i < declarations.size(); i++) {
-			if (declarations.get(i) instanceof FunNode) {
-				remdeclCode += "pop\n";					//pop del codice dichiarazione se funzionale
-			}
-			declCode += declarations.get(i).codeGeneration(); //codice delle dichiarazioni
-			remdeclCode += "pop\n";						//pop del codice dichiarazione
-		}		
-
-		for (int i = 0; i < parameters.size(); i++) {
-			if (((DecNode) parameters.get(i)).getSymType() instanceof ArrowTypeNode) {
-				parCode += "pop\n";					//pop dei parametri se funzionale
-			}
-			parCode += "pop\n";						//pop dei parametri
-		}
-
-		FOOLlib.putCode(funl + ":\n" + "cfp\n" + // setta il registro $fp / copy stack pointer into frame pointer
-				"lra\n" + // load from ra sullo stack
-				declCode + // codice delle dichiarazioni
-				exp.codeGeneration() + "stm\n" + // salvo il risultato in un registro
-				remdeclCode + // devo svuotare lo stack, e faccio pop tanti quanti sono le var/fun dichiarate
-				"sra\n" + // salvo il return address
-				"pop\n" + // pop dell'AL (access link)
-				parCode + // pop dei parametri che ho in parameters
-				"sfp\n" + // ripristino il registro $fp al CL, in maniera che sia l'fp dell'AR del
-							// chiamante.
-				"ltm\n" + "lra\n" + "js\n" // js salta all'indirizzo che � in cima allo stack e salva la prossima
-											// istruzione in ra.
-		);
-
-		return "lfp\n" + "push " + funl + "\n";
 	}
 
 }

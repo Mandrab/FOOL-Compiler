@@ -4,6 +4,6 @@ package ast;
 public interface DecNode {
 	
 	/*Ritorna il tipo del valore messo in symble table.*/
-	Node getSymType();
+	Node getSymType( );
 
 }

@@ -12,6 +12,7 @@ import generated.FOOLParser;
 import generated.SVMVISLexer;
 import generated.SVMVISParser;
 import virtual.machine.visual.VirtualMachine;
+import visitors.CodeGeneratorVisitor;
 import visitors.ParserVisitor;
 import visitors.PrinterVisitor;
 import visitors.TypeCheckerVisitor;
@@ -48,7 +49,8 @@ public class Test {
 	        
 	      
 	        // CODE GENERATION  prova.fool.asm
-	        String code=ast.codeGeneration(); 
+	        CodeGeneratorVisitor codeGeneratorVisitor = new CodeGeneratorVisitor( );
+	        String code = codeGeneratorVisitor.visit( ast ); 
 	        BufferedWriter out = new BufferedWriter(new FileWriter(fileName+".asm")); 
 	        out.write(code);
 	        out.close(); 

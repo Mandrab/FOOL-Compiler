@@ -25,6 +25,7 @@ import ast.LessEqualNode;
 import ast.MethodNode;
 import ast.MinusNode;
 import ast.NewNode;
+import ast.Node;
 import ast.NotNode;
 import ast.OrNode;
 import ast.ParNode;
@@ -50,6 +51,15 @@ public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVis
 	public PrinterVisitor( String indent ) {
 		baseIndent = indent;
 		indentCount = 0;
+	}
+	
+	@Override
+	public String visit( Node element ) {
+		try {
+			return super.visit( element );
+		} catch ( Exception e ) { e.printStackTrace(); }
+
+		return null;
 	}
 
 	@Override

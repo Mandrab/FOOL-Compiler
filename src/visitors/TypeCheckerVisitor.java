@@ -1,5 +1,6 @@
 package visitors;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import ast.AndNode;
@@ -47,6 +48,22 @@ import lib.TypeException;
 	//per una dichiarazione, "null"
 public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeVisitor<Node> {
 
+	@Override
+	public Node visit( Node element ) {
+		try {
+			return super.visit( element );
+		} catch ( InvocationTargetException exception ) {
+			Throwable throwable = exception;
+			while( throwable.getCause( ) != null )
+				throwable = exception.getCause( );
+
+			if ( throwable instanceof TypeException ) throw ( RuntimeException ) throwable;
+			exception.printStackTrace( );
+		}
+
+		return null;
+	}
+	
 	@Override
 	public Node visit( AndNode element ) {
 		Node leftType = visit( element.getLeft( ) );  

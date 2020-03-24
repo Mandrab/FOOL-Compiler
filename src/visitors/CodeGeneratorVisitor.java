@@ -48,6 +48,15 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	private static final String INC_HP = "push 1\n" + "lhp\n" + "add\n" + "shp\n";
 	
 	@Override
+	public String visit( Node element ) {
+		try {
+			return super.visit( element );
+		} catch ( Exception e ) { e.printStackTrace(); }
+
+		return null;
+	}
+	
+	@Override
 	public String visit( AndNode element ) {
 		return visit( element.getLeft( ) ) +
 				visit( element.getRight( ) ) +
@@ -82,7 +91,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 		// push Access Link (pointer to frame of function id declaration, reached as for variable id)
 		for ( int i = 0; i < element.getNestingLevel( ) - element.getEntry( ).getNestingLevel( ); i++ )
 			result += "lw\n";
-		
+
 		if ( element.getEntry( ).isMethod( ) ) {
 			return result + 
 					"stm\n" + "ltm\n" + "ltm\n" + // duplicate top of the stack
@@ -251,7 +260,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	@Override
 	public String visit( IdNode element ) {
 		String getAR = IntStream.range( 0, element.getNestingLevel( ) - element.getEntry( ).getNestingLevel( ) ).mapToObj( e -> "lw\n" ).collect( Collectors.joining( ) );
-		
+
 		if ( ! ( element.getEntry( ).getRetType( ) instanceof ArrowTypeNode ) ) {
 			return "lfp\n" +	// AL
 					getAR +		// Andiamo nel suo AR. getAr ci da l'AL.

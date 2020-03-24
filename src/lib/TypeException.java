@@ -4,10 +4,15 @@ public class TypeException extends RuntimeException {
 	
 	private static final long serialVersionUID = -4973176543505016805L;
 	
-	public String text;
+	private String text;
 
-	public TypeException (String t) {
+	public TypeException( String t ) {
 		 FOOLlib.typeErrors++;
-		 text=t;
+		 text = t;
     }
+	
+	@Override
+	public String getMessage( ) {
+		return text;
+	}
 }

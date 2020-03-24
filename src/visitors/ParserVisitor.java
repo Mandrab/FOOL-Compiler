@@ -59,6 +59,10 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		offset = -2;
 	}
 	
+	public int getSymbolTableError( ) {
+		return stErrors;
+	}
+	
 	@Override
 	public Node visitProg(FOOLParser.ProgContext ctx) {
 		// creating first symbol's table
@@ -548,5 +552,4 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 		return clsCallNode;
 	}
-
 }

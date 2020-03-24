@@ -1,0 +1,19 @@
+let
+	class List (f:int, r:List) {
+		fun first:int() f;
+		fun rest:List() r;
+	}
+	class XList (f:int) {
+		fun generateAndGetFirst:int()
+			let
+				var list:List = new List(5, null);
+			in
+				list.first( );
+	}
+
+	fun f:int (i:int, j:int) i+j;
+  	fun r:int (i:int, j:int) f(i,j) + 7;
+
+  	var xlist:XList = new XList(7);
+in
+	print ( xlist.generateAndGetFirst( ) );

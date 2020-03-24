@@ -6,7 +6,7 @@ package generated;
 
 import java.util.HashMap;
 
-import virtual.machine.visual.VMModel;
+import virtual.machine.visual.VMCore;
 }
 
 @lexer::members {
@@ -16,8 +16,8 @@ public int lexicalErrors=0;
 
 @parser::members {
       
-public int[] code = new int[VMModel.getCodeSize( )];
-public int[] sourceMap = new int[VMModel.getCodeSize( )];
+public int[] code = new int[VMCore.getCodeSize( )];
+public int[] sourceMap = new int[VMCore.getCodeSize( )];
 private int i = 0;
 
 private HashMap<String,Integer> labelDef = new HashMap<String,Integer>();

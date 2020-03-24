@@ -66,35 +66,35 @@ assembly:
  * LEXER RULES
  *------------------------------------------------------------------*/
 
-PUSH	 : 'push' ; 	
-POP	 : 'pop' ; 	
-ADD	 : 'add' ;  	
-SUB	 : 'sub' ;	
-MULT	 : 'mult' ;  	
-DIV	 : 'div' ;	
-STOREW	 : 'sw' ; 	
-LOADW	 : 'lw' ;	
-BRANCH	 : 'b' ;	
-BRANCHEQ : 'beq' ;	
+PUSH	 	: 'push' ; 	
+POP	 		: 'pop' ; 	
+ADD	 		: 'add' ;  	
+SUB	 		: 'sub' ;	
+MULT	 	: 'mult' ;  	
+DIV	 		: 'div' ;	
+STOREW	 	: 'sw' ; 	
+LOADW		: 'lw' ;	
+BRANCH	 	: 'b' ;	
+BRANCHEQ 	: 'beq' ;	
 BRANCHLESSEQ:'bleq' ;	
-JS	 : 'js' ;	
-LOADRA	 : 'lra' ;	
-STORERA  : 'sra' ;	 
-LOADTM	 : 'ltm' ;	
-STORETM  : 'stm' ;	
-LOADFP	 : 'lfp' ;	
-STOREFP	 : 'sfp' ;	
-COPYFP   : 'cfp' ;      
-LOADHP	 : 'lhp' ;	
-STOREHP	 : 'shp' ;	
-PRINT	 : 'print' ;	
-HALT	 : 'halt' ;	
+JS	 		: 'js' ;	
+LOADRA	 	: 'lra' ;	
+STORERA  	: 'sra' ;	 
+LOADTM	 	: 'ltm' ;	
+STORETM  	: 'stm' ;	
+LOADFP	 	: 'lfp' ;	
+STOREFP	 	: 'sfp' ;	
+COPYFP   	: 'cfp' ;      
+LOADHP	 	: 'lhp' ;	
+STOREHP	 	: 'shp' ;	
+PRINT	 	: 'print' ;	
+HALT	 	: 'halt' ;	
  
-COL	 : ':' ;
-LABEL	 : ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;
-NUMBER	 : '0' | ('-')?(('1'..'9')('0'..'9')*) ;
+COL	 		: ':' ;
+LABEL	 	: ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;
+NUMBER	 	: '0' | ('-')?(('1'..'9')('0'..'9')*) ;
 
-WHITESP  : (' '|'\t'|'\n'|'\r')+ -> channel(HIDDEN) ;
+WHITESP  	: (' '|'\t'|'\n'|'\r')+ -> channel(HIDDEN) ;
 
-ERR	     : . { System.out.println("Invalid char: "+ getText()); lexicalErrors++; } -> channel(HIDDEN); 
+ERR	     	: . { System.out.println("Invalid char: "+ getText()); lexicalErrors++; } -> channel(HIDDEN); 
 

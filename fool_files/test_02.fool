@@ -1,0 +1,12 @@
+let
+  var y:int = 5+2;
+  fun f:bool (n:int, m:int)
+    let 
+      var x:int = m;
+  	in n==x;   
+in  
+  print ( 
+    if f(y,8) 
+      then { false }
+      else { 10 }
+  );

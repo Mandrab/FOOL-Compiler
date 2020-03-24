@@ -1,0 +1,16 @@
+/* Expected result: 16 */
+let
+	class List (f:int, r:List) {
+		fun first:int() f;
+		fun rest:List() r;
+	}
+	class XList (f:int) {
+		fun first:int() f;
+	}
+
+	fun f:int (i:int, j:int) i+j;
+  	fun r:int (i:int, j:int) f(i,j) + 7;
+
+  	var list:List = new List(5,null);
+in
+	print ( list.rest( ) );

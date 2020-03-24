@@ -1,0 +1,23 @@
+let
+	class List ( head: int, tail: List ) {
+		fun first: int( ) head;
+		fun rest: List( ) tail;
+	}
+
+	class StrangeList extends List ( r: int ) {
+		fun returnFive: int( ) 5;
+	}
+	
+	class OverrideList extends List ( head: bool ) {
+		fun hasHead: bool( ) head;
+	}
+
+	fun sum:int ( i:int, j:int ) i + j;
+  	fun mult:int ( i:int, j:int ) i * j;
+
+  	var sList: StrangeList = new StrangeList( 5,
+  						new List( 3, null ), 7 );
+  	var list: List = sList.rest( );
+  	var oList: OverrideList = new OverrideList( true, null );
+in
+	print ( sum( mult( sList.returnFive( ), list.first( ) ), oList.hasHead( ) ) );

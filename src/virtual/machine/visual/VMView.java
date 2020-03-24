@@ -129,7 +129,9 @@ public class VMView {
 		        	else breakPointLine = index;
 		    		SwingUtilities.updateComponentTreeUI( asmList );
 		        }
-		        asmList.setSelectedIndex( sourceMap[vm.getState( ).getIp( )] );
+		    }
+		    public void mouseReleased( MouseEvent e ) {
+		    	asmList.setSelectedIndex( sourceMap[vm.getState( ).getIp( )] );
 		    }
 		});
 		for ( MouseMotionListener m : asmList.getMouseMotionListeners( ) ) {
@@ -245,14 +247,15 @@ public class VMView {
 		int dest = sourceMap[vm.getState( ).getIp( )] * s.getMaximum( ) / codeLineCount - s.getHeight( ) / 2;
 		s.setValue( Math.max( dest, 0 ) );
 		setMem( );
-		
-		if ( vm.getResult( ) != null )
-			outputText.setText( vm.getResult( ) + "\n" );
+
+		if ( vm.getState( ).getResult( ).isPresent( ) )
+			outputText.setText( vm.getState( ).getResult( ).get( ) + "\n" );
 		else outputText.setText( "" );
 	}
 	
 	private void playButtonHandler( ) {
-		while ( sourceMap[vm.getState( ).getIp( )] != breakPointLine && vm.nextStep( ) && vm.getResult( ) == null );
+		while ( ! vm.hasEnded( ) && sourceMap[vm.getState( ).getIp( )] != breakPointLine )
+			vm.nextStep( );
 		update( );
 	}
 

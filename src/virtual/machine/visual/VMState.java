@@ -2,6 +2,8 @@ package virtual.machine.visual;
 
 import static lib.FOOLlib.MEMSIZE;
 
+import java.util.Optional;
+
 public class VMState {
 
 	private int[] memory;
@@ -14,6 +16,8 @@ public class VMState {
 	private int ra;
 	private int fp = MEMSIZE;
 	
+	private Optional<String> result;
+	
 	public VMState( VMState oldState ) {
 		memory = new int[ MEMSIZE ];
 		System.arraycopy( oldState.getMemory( ), 0, memory, 0, MEMSIZE );
@@ -23,9 +27,10 @@ public class VMState {
 		this.hp = oldState.getHp( );
 		this.ra = oldState.getRa( );
 		this.fp = oldState.getFp( );
+		this.result = oldState.getResult( );
 	}
 	
-	public VMState( int[] mem, int ip, int sp, int tm, int hp, int ra, int fp ) {
+	public VMState( int[] mem, int ip, int sp, int tm, int hp, int ra, int fp, Optional<String> result ) {
 		memory = new int[ MEMSIZE ];
 		System.arraycopy( mem, 0, memory, 0, MEMSIZE );
 		this.ip = ip;
@@ -34,6 +39,7 @@ public class VMState {
 		this.hp = hp;
 		this.ra = ra;
 		this.fp = fp;
+		this.result = result;
 	}
 
 	public int[] getMemory( ) {
@@ -116,6 +122,23 @@ public class VMState {
 		return this.fp = fp;
 	}
 	
+	public void setResult( String value ) {
+		result = value == null 
+				? Optional.empty( )
+				: Optional.of( new String( value ) );
+	}
+
+	public void addResult( String value ) {
+		if ( value != null )
+			result = Optional.of( result.isPresent( )
+					? result.get( ) + "\n" + value
+					: value );
+	}
+	
+	public Optional<String> getResult( ) {
+		return result;
+	}
+	
 	@Override
 	public String toString( ) {
 		return "State: \n" +
@@ -124,6 +147,7 @@ public class VMState {
 				"\tTM: " + tm +
 				"\tHP: " + hp +
 				"\tRA: " + ra +
-				"\tFP: " + fp;
+				"\tFP: " + fp +
+				"\tResult: " + result.orElse( "-" ).replaceAll( "\n", "; " );
 	}
 }

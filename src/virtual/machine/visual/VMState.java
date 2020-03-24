@@ -52,8 +52,12 @@ public class VMState {
 		return this.ip = ip;
 	}
 	
-	public int incIp( int i ) {
-		return ip += i;
+	public int incIp( ) {
+		return ++ip;
+	}
+	
+	public int decIp( ) {
+		return --ip;
 	}
 
 	public int getSp( ) {
@@ -64,8 +68,12 @@ public class VMState {
 		return this.sp = sp;
 	}
 	
-	public int incSp( int i ) {
-		return sp += i;
+	public int incSp( ) {
+		return ++sp;
+	}
+	
+	public int decSp( ) {
+		return --sp;
 	}
 
 	public int getTm( ) {
@@ -84,8 +92,12 @@ public class VMState {
 		return this.hp = hp;
 	}
 	
-	public int incHp( int i ) {
-		return hp += i;
+	public int incHp( ) {
+		return ++hp;
+	}
+	
+	public int decHp( ) {
+		return --hp;
 	}
 
 	public int getRa( ) {

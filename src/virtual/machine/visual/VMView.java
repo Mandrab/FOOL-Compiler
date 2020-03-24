@@ -1,18 +1,23 @@
 package virtual.machine.visual;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -22,6 +27,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import static lib.FOOLlib.MEMSIZE;
 
@@ -35,6 +41,7 @@ public class VMView {
 	
 	private final JFrame frame;
 	private final JPanel mainPanel;
+	private final JPanel eastPanel;
 	private final JPanel buttonPanel;
 	private final JList<String> asmList;
 	private final JList<String> stackList, heapList;
@@ -46,9 +53,11 @@ public class VMView {
 	private final JLabel tmLabel, raLabel, fpLabel, ipLabel, spLabel, hpLabel;
 	private final JScrollPane asmScroll, stackScroll, heapScroll, outputScroll;
 	private final JTextArea outputText;
+	private final JTextArea infoBox;
 	
 	private final int codeLineCount;
 	private String keyboardCommand = "";
+	private int breakPointLine = -1;
 	
 	public VMView ( VMCore vm, int[] sourceMap, List<String> source ) {
 
@@ -57,18 +66,27 @@ public class VMView {
 
 		frame = new JFrame( "FOOL Virtual Machine" );
 		mainPanel = new JPanel( );
-
+		eastPanel = new JPanel( );
+		
+		eastPanel.setLayout( new BorderLayout( ) );
+		
 		buttonPanel = new JPanel( );
-		buttonPanel.setLayout( new BoxLayout( buttonPanel, BoxLayout.Y_AXIS ) );
+		buttonPanel.setLayout( new BorderLayout( ) );
 		play = new JButton( "PLAY" );
 		play.addActionListener( e -> playButtonHandler( ) );
+
 		nextStep = new JButton( "NEXT STEP" );
 		nextStep.addActionListener( e -> nextStepButtonHandler( ) );
 		backStep = new JButton( "BACK STEP" );
 		backStep.addActionListener( e -> backStepButtonHandler( ) );
-		buttonPanel.add( play );
-		buttonPanel.add( nextStep );
-		buttonPanel.add( backStep );
+		infoBox = new JTextArea( "info:\n\nDouble click on\na cell will set a\nbreakpoint!\n" );
+		infoBox.setEditable( false );
+		buttonPanel.add( play, BorderLayout.NORTH );
+		buttonPanel.add( nextStep, BorderLayout.CENTER );
+		buttonPanel.add( backStep, BorderLayout.SOUTH );
+		eastPanel.add( buttonPanel, BorderLayout.NORTH );
+		eastPanel.add( Box.createVerticalGlue( ), BorderLayout.CENTER );
+		eastPanel.add( new JScrollPane( infoBox ), BorderLayout.SOUTH );
 
 		registerPanel = new JPanel( );
 		tmLabel = new JLabel( );
@@ -102,12 +120,34 @@ public class VMView {
 
 		
 		asmList.setFont( FONT );
-		for ( MouseListener m : asmList.getMouseListeners( ) ) {
-			asmList.removeMouseListener( m );
-		}
+		asmList.addMouseListener( new MouseAdapter( ) {
+		    public void mouseClicked( MouseEvent evt ) {
+		        JList<?> list = ( JList<?> ) evt.getSource( );
+		        if ( evt.getClickCount( ) == 2 ) { // Double-click detected
+		        	int index = list.locationToIndex( evt.getPoint( ) );
+		        	if ( breakPointLine == index ) breakPointLine = -1;
+		        	else breakPointLine = index;
+		    		SwingUtilities.updateComponentTreeUI( asmList );
+		        }
+		        asmList.setSelectedIndex( sourceMap[vm.getState( ).getIp( )] );
+		    }
+		});
 		for ( MouseMotionListener m : asmList.getMouseMotionListeners( ) ) {
 			asmList.removeMouseMotionListener( m );
 		}
+		asmList.setCellRenderer( new DefaultListCellRenderer() {
+			private static final long serialVersionUID = -4794316536883433342L;
+
+			@Override
+		    public Component getListCellRendererComponent( JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus ) {
+		        JLabel label = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+
+		        if ( index == breakPointLine )
+		        	label.setBackground( Color.RED );
+		        return label;
+		    }
+		});
+		
 		asmScroll = new JScrollPane( asmList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
 		mainPanel.add( asmScroll, BorderLayout.EAST );
@@ -134,7 +174,7 @@ public class VMView {
 
 		frame.getContentPane( ).setLayout( new BorderLayout( ) );
 		frame.add( mainPanel, BorderLayout.CENTER );
-		frame.add( buttonPanel, BorderLayout.EAST );
+		frame.add( eastPanel, BorderLayout.EAST );
 		frame.add( registerPanel, BorderLayout.WEST );
 		frame.add( outputScroll, BorderLayout.SOUTH );
 
@@ -199,6 +239,7 @@ public class VMView {
 		
 		asmList.clearSelection( );
 		asmList.setSelectedIndex( sourceMap[vm.getState( ).getIp( )] );
+		SwingUtilities.updateComponentTreeUI( asmList );
 
 		final JScrollBar s = asmScroll.getVerticalScrollBar( );
 		int dest = sourceMap[vm.getState( ).getIp( )] * s.getMaximum( ) / codeLineCount - s.getHeight( ) / 2;
@@ -211,7 +252,7 @@ public class VMView {
 	}
 	
 	private void playButtonHandler( ) {
-		while ( vm.nextStep( ) && vm.getResult( ) == null );
+		while ( sourceMap[vm.getState( ).getIp( )] != breakPointLine && vm.nextStep( ) && vm.getResult( ) == null );
 		update( );
 	}
 
@@ -223,5 +264,5 @@ public class VMView {
 	private void backStepButtonHandler( ) {
 		vm.backStep( );
 		update( );
-	}	
+	}
 }

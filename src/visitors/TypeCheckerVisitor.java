@@ -144,23 +144,31 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 			ClassTypeNode superCTN = ( ClassTypeNode ) element.getSuper( ).getRetType( );
 			ClassTypeNode thisCTN = ( ClassTypeNode ) element.getSymType( );
 
-			for( int i = 0; i < superCTN.getFields( ).size( ); i++ ) {
-				FieldNode superField = ( FieldNode ) superCTN.getFields( ).get( i );
-				FieldNode myField = ( FieldNode ) thisCTN.getFields( ).get( i );
-				
-				if ( ! FOOLlib.isSubtype( myField.getSymType( ), superField.getSymType( ) ) )
-					throw new TypeException( "Overriding of field '" + myField.getID( ) + "' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ) );
-			}
-			
-			for( int i = 0; i < superCTN.getMethods( ).size( ); i++ ) {
-				ArrowTypeNode superField = ( ArrowTypeNode ) superCTN.getMethods( ).get( i );
-				ArrowTypeNode myField = ( ArrowTypeNode ) thisCTN.getMethods( ).get( i );
+			for ( Node f : element.getFields( ) ) {
+				int fieldOffset = -1 -( ( FieldNode ) f ).getOffset( );
 
-				if ( ! FOOLlib.isSubtype( myField, superField ) )
-					throw new TypeException( "Overrided method is not supertype" );
+				if ( fieldOffset < superCTN.getFields( ).size( ) ) { // override
+					FieldNode superField = ( FieldNode ) superCTN.getFields( ).get( fieldOffset );
+					FieldNode myField = ( FieldNode ) thisCTN.getFields( ).get( fieldOffset );
+
+					if ( ! FOOLlib.isSubtype( myField, superField ) )
+						throw new TypeException( "Overriding of field '" + superField.getID( ) + "' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ) );
+				}
+			}
+
+			for ( Node m : element.getMethods( ) ) {
+				MethodNode method = ( MethodNode ) m;
+
+				if ( method.getOffset( ) < superCTN.getMethods( ).size( ) ) { // override
+					ArrowTypeNode superMethod = ( ArrowTypeNode ) superCTN.getMethods( ).get( method.getOffset( ) );
+					ArrowTypeNode myMethod = ( ArrowTypeNode ) thisCTN.getMethods( ).get( method.getOffset( ) );
+
+					if ( ! FOOLlib.isSubtype( myMethod, superMethod ) )
+						throw new TypeException( "Overriding of method '" + method.getID( ) + "' has wrong type" );
+				}
 			}
 		}
-		
+
 		return null;
 	}
 

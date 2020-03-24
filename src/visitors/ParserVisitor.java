@@ -3,6 +3,7 @@ package visitors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import ast.AndNode;
 import ast.ArrowTypeNode;
@@ -207,11 +208,11 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			} else {
 
 				// add method in class table
-				stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset++, true ) );
+				stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset, true ) );
 				methodNode.setOffset( methodOffset++ );
 			}
       	}
-      	
+
       	// get (this) class declarations' table and add it to classTable
       	Map<String, STentry> virtualTable = symTable.popTable( );
       	classTable.addClassVT( clsID, virtualTable );
@@ -249,7 +250,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			FunNode funNode = new FunNode( ctx.fID.getText( ), visit( ctx.fT ) );
 			
 			List<Node> parTypes = new ArrayList<Node>( );
-			
+
 			if ( stFront.put( funNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( parTypes, funNode.getSymType( ) ), offset-- ) ) != null ) {
                 System.out.println( "Fun ID '" + funNode.getID( ) + "' at line " + ctx.fID.getLine( ) + " already declared" );
                 stErrors++;
@@ -497,7 +498,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
          	System.out.println( "ID '" + ctx.ID( ).getText( ) + "' at line " + ctx.ID( ).getSymbol( ).getLine( ) + " not declared" );
          	stErrors++; 
         }
-        
+
        	return new IdNode( ctx.ID( ).getText( ), entry, symTable.getLevel( ) );
 	}
 
@@ -519,7 +520,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
        	for ( int i = 0; i < ctx.exp( ).size( ); i++ ) {
 			arglist.add( visit( ctx.exp( i ) ) );
 		}
-       	
+
        	return new CallNode( ctx.ID( ).getText( ), entry, arglist, symTable.getLevel( ) );
 	}
 
@@ -545,7 +546,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		for ( int i = 0; i < ctx.exp( ).size( ); i++) {
 			clsCallNode.addParameter( visit( ctx.exp( i ) ) );
 		}
-				
+
 		return clsCallNode;
 	}
 

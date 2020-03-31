@@ -36,10 +36,10 @@ import ast.PrintNode;
 import ast.ProgLetInNode;
 import ast.ProgNode;
 import ast.RefTypeNode;
-import ast.STentry;
+import ast.STEntry;
 import ast.TimesNode;
 import ast.VarNode;
-import lib.FOOLlib;
+import lib.FOOLLib;
 import lib.TypeException;
 
 // TODO commento
@@ -48,6 +48,12 @@ import lib.TypeException;
 	//per una dichiarazione, "null"
 public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeVisitor<Node> {
 
+	private final FOOLLib lib;
+	
+	public TypeCheckerVisitor( FOOLLib globalLib ) {
+		lib = globalLib;
+	}
+	
 	@Override
 	public Node visit( Node element ) {
 		try {
@@ -69,7 +75,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 		Node leftType = visit( element.getLeft( ) );  
 		Node rightType = visit( element.getRight( ) );  
 		if ( ! ( leftType instanceof BoolTypeNode && rightType instanceof BoolTypeNode ) )
-			throw new TypeException( "Incompatible types in and" );
+			throw TypeException.buildAndMark( "Incompatible types in and", lib );
 		return new BoolTypeNode();
 	}
 
@@ -91,27 +97,27 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	@Override
 	public Node visit( CallNode element ) {
 		if ( ! ( element.getType( ) instanceof ArrowTypeNode ) )
-			throw new TypeException( "Invocation of a non-function " + element.getID( ) );
+			throw TypeException.buildAndMark( "Invocation of a non-function " + element.getID( ), lib );
 		ArrowTypeNode callStructure = ( ArrowTypeNode ) element.getType( );
 		List<Node> callParameters = callStructure.getParameters( );
 		if ( ! ( callParameters.size( ) == element.getParameters( ).size( ) ) )
-			throw new TypeException( "Wrong number of parameters in the invocation of " + element.getID( ) );
+			throw TypeException.buildAndMark( "Wrong number of parameters in the invocation of " + element.getID( ), lib );
 		for ( int i = 0; i < element.getParameters( ).size( ); i++ )
-			if ( ! ( FOOLlib.isSubtype( visit( element.getParameters( ).get( i ) ), callParameters.get( i ) ) ) )
-				throw new TypeException( "Wrong type for " + (i + 1) + "-th parameter in the invocation of " + element.getID( ) );
+			if ( ! ( lib.isSubtype( visit( element.getParameters( ).get( i ) ), callParameters.get( i ) ) ) )
+				throw TypeException.buildAndMark( "Wrong type for " + (i + 1) + "-th parameter in the invocation of " + element.getID( ), lib );
 		return callStructure.getRetType( );
 	}
 
 	@Override
 	public Node visit( ClassCallNode element ) {
 		if ( ! ( element.getMethodEntry( ).getRetType( ) instanceof ArrowTypeNode ) )
-			throw new TypeException( "Invocation of a non-method " + element.getID( ) );
+			throw TypeException.buildAndMark( "Invocation of a non-method " + element.getID( ), lib );
 
 		ArrowTypeNode arrowNode = ( ArrowTypeNode ) element.getMethodEntry( ).getRetType( );
 		List<Node> parameters = arrowNode.getParameters( );
 
 		if ( ! ( parameters.size( ) == element.getParameters( ).size( ) ) )
-			throw new TypeException( "Wrong number of parameters in the invocation of method " + element.getID( ) );
+			throw TypeException.buildAndMark( "Wrong number of parameters in the invocation of method " + element.getID( ), lib );
 		
 		for ( int i = 0, count = 0; i < element.getParameters( ).size( ); i++, count++ ) {
 			Node parameter = element.getParameters( ).get( i );
@@ -129,8 +135,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 			if ( parameter instanceof ArrowTypeNode )
 				parameter = ( ( ArrowTypeNode ) parameter ).getRetType( );
 			
-			if ( ! ( FOOLlib.isSubtype( parameter, ( ( ParNode ) parameters.get( count ) ).getSymType( ) ) ) )
-				throw new TypeException( "Wrong type of " + ( i + 1 ) + "-th parameter in method " + element.getID( ) + " call" );
+			if ( ! ( lib.isSubtype( parameter, ( ( ParNode ) parameters.get( count ) ).getSymType( ) ) ) )
+				throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method " + element.getID( ) + " call", lib );
 		}
 		
 		return arrowNode.getRetType( );
@@ -151,8 +157,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 					FieldNode superField = ( FieldNode ) superCTN.getFields( ).get( fieldOffset );
 					FieldNode myField = ( FieldNode ) thisCTN.getFields( ).get( fieldOffset );
 
-					if ( ! FOOLlib.isSubtype( myField, superField ) )
-						throw new TypeException( "Overriding of field '" + superField.getID( ) + "' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ) );
+					if ( ! lib.isSubtype( myField, superField ) )
+						throw TypeException.buildAndMark( "Overriding of field '" + superField.getID( ) + "' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ), lib );
 				}
 			}
 
@@ -163,8 +169,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 					ArrowTypeNode superMethod = ( ArrowTypeNode ) superCTN.getMethods( ).get( method.getOffset( ) );
 					ArrowTypeNode myMethod = ( ArrowTypeNode ) thisCTN.getMethods( ).get( method.getOffset( ) );
 
-					if ( ! FOOLlib.isSubtype( myMethod, superMethod ) )
-						throw new TypeException( "Overriding of method '" + method.getID( ) + "' has wrong type" );
+					if ( ! lib.isSubtype( myMethod, superMethod ) )
+						throw TypeException.buildAndMark( "Overriding of method '" + method.getID( ) + "' has wrong type", lib );
 				}
 			}
 		}
@@ -179,10 +185,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( DivNode element ) {
-		if ( ! FOOLlib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) ) 
-			throw new TypeException( "First element in division is not an integer" );
-		if ( ! FOOLlib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) ) 
-			throw new TypeException( "Second element in division is not an integer" );
+		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) ) 
+			throw TypeException.buildAndMark( "First element in division is not an integer", lib );
+		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) ) 
+			throw TypeException.buildAndMark( "Second element in division is not an integer", lib );
 		return new IntTypeNode( );
 	}
 
@@ -202,10 +208,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 		Node right = visit( element.getRight( ) );
 
 		if ( left instanceof ArrowTypeNode || right instanceof ArrowTypeNode )
-			throw new TypeException( "Incompatible types in equal" );
+			throw TypeException.buildAndMark( "Incompatible types in equal", lib );
 
-		if ( ! ( FOOLlib.isSubtype( left, right ) || FOOLlib.isSubtype( right, left ) ) )
-			throw new TypeException( "Incompatible types in equal" );
+		if ( ! ( lib.isSubtype( left, right ) || lib.isSubtype( right, left ) ) )
+			throw TypeException.buildAndMark( "Incompatible types in equal", lib );
 
 		return new BoolTypeNode( );
 	}
@@ -219,8 +225,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	public Node visit( FunNode element ) {
 		for ( Node declaration : element.getDeclarations( ) ) visit( declaration );
 
-		if ( ! FOOLlib.isSubtype( visit( element.getExpession( ) ), element.getSymType( ) ) )
-			throw new TypeException( "Return-type mismatch in function " + element.getID( ) );
+		if ( ! lib.isSubtype( visit( element.getExpession( ) ), element.getSymType( ) ) )
+			throw TypeException.buildAndMark( "Return-type mismatch in function " + element.getID( ), lib );
 		return null;
 	}
 
@@ -229,34 +235,34 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 		Node left = visit( element.getLeft( ) );
 		Node right = visit( element.getRight( ) );
 
-		if ( ! ( FOOLlib.isSubtype( left, right ) || FOOLlib.isSubtype( right, left ) ) )
-			throw new TypeException( "Incompatible types in Greater/Equal comparison" );
+		if ( ! ( lib.isSubtype( left, right ) || lib.isSubtype( right, left ) ) )
+			throw TypeException.buildAndMark( "Incompatible types in Greater/Equal comparison", lib );
 		return new BoolTypeNode( );
 	}
 
 	@Override
 	public Node visit( IdNode element ) {
 		if ( element.getEntry( ).getRetType( ) instanceof ClassTypeNode )
-			throw new TypeException( "Object's ID '" + element.getID( ) + "' cannot be a class name" );// TODO object?
+			throw TypeException.buildAndMark( "Object's ID '" + element.getID( ) + "' cannot be a class name", lib );// TODO object?
 		if ( element.getEntry( ).isMethod( ) )
-			throw new TypeException( "Object's ID '" + element.getID( ) + "' cannot be a method name" );// TODO object?
+			throw TypeException.buildAndMark( "Object's ID '" + element.getID( ) + "' cannot be a method name", lib );// TODO object?
 		return element.getEntry( ).getRetType( );
 	}
 
 	@Override
 	public Node visit( IfNode element ) {
-		if ( ! ( FOOLlib.isSubtype( visit( element.getCondition( ) ), new BoolTypeNode( ) ) ) )
-			throw new TypeException( "Condition in IF is not a boolean" );
+		if ( ! ( lib.isSubtype( visit( element.getCondition( ) ), new BoolTypeNode( ) ) ) )
+			throw TypeException.buildAndMark( "Condition in IF is not a boolean", lib );
 
 		Node thenBranch = visit( element.getThenBranch( ) );
 		Node elseBranch = visit( element.getElseBranch( ) );
-		if ( FOOLlib.isSubtype( thenBranch, elseBranch ) ) return elseBranch;
-		if ( FOOLlib.isSubtype( elseBranch, thenBranch ) ) return thenBranch;
+		if ( lib.isSubtype( thenBranch, elseBranch ) ) return elseBranch;
+		if ( lib.isSubtype( elseBranch, thenBranch ) ) return thenBranch;
 		System.out.println( "ciao" );
 System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );System.out.println( "ciao2" );
-		Node type = FOOLlib.lowestCommonAncestor( thenBranch, elseBranch );
+		Node type = lib.lowestCommonAncestor( thenBranch, elseBranch );
 		if ( type == null )
-			throw new TypeException( "Incompatible types in then-else branches" );
+			throw TypeException.buildAndMark( "Incompatible types in then-else branches", lib );
 
 		return type;
 	}
@@ -276,8 +282,8 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 		Node left = visit( element.getLeft( ) );
 		Node right = visit( element.getRight( ) );
 
-		if ( ! ( FOOLlib.isSubtype( left, right ) || FOOLlib.isSubtype( right, left ) ) )
-			throw new TypeException( "Incompatible types in Lesser/Equal comparison" );
+		if ( ! ( lib.isSubtype( left, right ) || lib.isSubtype( right, left ) ) )
+			throw TypeException.buildAndMark( "Incompatible types in Lesser/Equal comparison", lib );
 
 		return new BoolTypeNode( );
 	}
@@ -286,17 +292,17 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 	public Node visit( MethodNode element ) {
 		for ( Node declaration : element.getDeclarations( ) ) visit( declaration );
 		
-		if ( ! FOOLlib.isSubtype( visit( element.getExpession( ) ), element.getSymType( ) ) )
-			throw new TypeException( "Return-type mismatch in method " + element.getID( ) );
+		if ( ! lib.isSubtype( visit( element.getExpession( ) ), element.getSymType( ) ) )
+			throw TypeException.buildAndMark( "Return-type mismatch in method " + element.getID( ), lib );
 		return null;
 	}
 
 	@Override
 	public Node visit( MinusNode element ) {
-		if ( ! ( FOOLlib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) ) )
-			throw new TypeException( "First element in subtraction is not an integer" );
-		if ( ! ( FOOLlib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) ) )
-			throw new TypeException( "First element in subtraction is not an integer" );
+		if ( ! ( lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) ) )
+			throw TypeException.buildAndMark( "First element in subtraction is not an integer", lib );
+		if ( ! ( lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) ) )
+			throw TypeException.buildAndMark( "First element in subtraction is not an integer", lib );
 
 		return new IntTypeNode( );
 	}
@@ -304,7 +310,7 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 	@Override
 	public Node visit( NewNode element ) {
 		if ( ! ( element.getEntry( ).getRetType( ) instanceof ClassTypeNode ) )
-			throw new TypeException( "Instantiation of a non-class: " + element.getID( ) );
+			throw TypeException.buildAndMark( "Instantiation of a non-class: " + element.getID( ), lib );
 
 		RefTypeNode refTypeNode = new RefTypeNode( element.getID( ) );
 
@@ -312,7 +318,7 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 		List<Node> requiredFields = classType.getFields( );
 
 		if ( requiredFields.size( ) != element.getFields( ).size( ) )
-			throw new TypeException( "Wrong number of parameters in " + element.getID( ) + " instantiation. " + requiredFields.size( ) + " required, " + element.getFields( ).size( ) + " given" );
+			throw TypeException.buildAndMark( "Wrong number of parameters in " + element.getID( ) + " instantiation. " + requiredFields.size( ) + " required, " + element.getFields( ).size( ) + " given", lib );
 		
 		
 		for ( int i = 0; i < element.getFields( ).size( ); i++ ) {
@@ -332,8 +338,8 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 			if ( field instanceof ArrowTypeNode )
 				field = ( ( ArrowTypeNode ) field ).getRetType( );
 
-			if ( ! ( FOOLlib.isSubtype( field, requiredField.getSymType( ) ) ) )
-				throw new TypeException( "Passed value for " + ( i + 1 ) + "-th parameter is not of type " + requiredField.getSymType( ) );
+			if ( ! ( lib.isSubtype( field, requiredField.getSymType( ) ) ) )
+				throw TypeException.buildAndMark( "Passed value for " + ( i + 1 ) + "-th parameter is not of type " + requiredField.getSymType( ), lib );
 		}
 
 		return refTypeNode;
@@ -343,7 +349,7 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 	public Node visit( NotNode element ) {
 		Node result = visit( element.getExpression( ) );
 		if ( ! ( result instanceof BoolTypeNode ) )
-			throw new TypeException( "Non-boolean type in NOT operation" );
+			throw TypeException.buildAndMark( "Non-boolean type in NOT operation", lib );
 
 		return new BoolTypeNode( );
 	}
@@ -354,9 +360,9 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 		Node right = visit( element.getRight( ) );
 
 		if ( ! ( left instanceof BoolTypeNode ) )
-			throw new TypeException( "First element in OR is not a boolean" );
+			throw TypeException.buildAndMark( "First element in OR is not a boolean", lib );
 		if ( ! ( right instanceof BoolTypeNode ) )
-			throw new TypeException( "Second element in OR is not a boolean" );
+			throw TypeException.buildAndMark( "Second element in OR is not a boolean", lib );
 
 		return new BoolTypeNode( );
 	}
@@ -368,10 +374,10 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 
 	@Override
 	public Node visit( PlusNode element ) {
-		if ( ! FOOLlib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) )
-			throw new TypeException( "First element in sum is not an integer" );
-		if ( ! FOOLlib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) )
-			throw new TypeException( "Second element in sum is not an integer" );
+		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) )
+			throw TypeException.buildAndMark( "First element in sum is not an integer", lib );
+		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) )
+			throw TypeException.buildAndMark( "Second element in sum is not an integer", lib );
 
 		return new IntTypeNode( );
 	}
@@ -399,24 +405,24 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 	}
 
 	@Override
-	public Node visit( STentry element ) {
+	public Node visit( STEntry element ) {
 		return null;
 	}
 
 	@Override
 	public Node visit( TimesNode element ) {
-		if ( ! FOOLlib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) )
-			throw new TypeException( "First element in multiplication is not an integer" );
-		if ( ! FOOLlib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) )
-			throw new TypeException( "Second element in multiplication is not an integer" );
+		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) )
+			throw TypeException.buildAndMark( "First element in multiplication is not an integer", lib );
+		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) )
+			throw TypeException.buildAndMark( "Second element in multiplication is not an integer", lib );
 
 		return new IntTypeNode( );
 	}
 
 	@Override
 	public Node visit( VarNode element ) {
-		if ( ! FOOLlib.isSubtype( visit( element.getExpression( ) ), element.getSymType( ) ) )
-			throw new TypeException( "Incompatible value for variable " + element.getID( ) );
+		if ( ! lib.isSubtype( visit( element.getExpression( ) ), element.getSymType( ) ) )
+			throw TypeException.buildAndMark( "Incompatible value for variable " + element.getID( ), lib );
 		return null;
 	}
 }

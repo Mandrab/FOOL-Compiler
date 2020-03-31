@@ -58,7 +58,7 @@ term :
   		| 	DIV r = factor 
   	   	| 	AND r = factor 
   	   	)* ;
-  	
+
 factor :
 	l = value
 		(

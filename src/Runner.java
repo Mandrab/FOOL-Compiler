@@ -35,7 +35,7 @@ public class Runner {
 		CharStream charsASM = CharStreams.fromFileName( filePath );
 
 		// validate code through SVM (Stack Virtual Machine)
-        SVMVISLexer lexerASM = new SVMVISLexer( charsASM );
+		SVMVISLexer lexerASM = new SVMVISLexer( charsASM );
         CommonTokenStream tokensASM = new CommonTokenStream( lexerASM );
         SVMVISParser parserASM = new SVMVISParser( tokensASM ); 
         parserASM.assembly( );

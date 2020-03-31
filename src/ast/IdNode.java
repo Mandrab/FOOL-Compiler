@@ -5,10 +5,10 @@ import visitors.NodeVisitor;
 public class IdNode implements Node {
 
 	private String ID;
-	private STentry entry;
+	private STEntry entry;
 	private int nestingLevel;
 
-	public IdNode( String id, STentry stEntry, int nestingLevel ) {
+	public IdNode( String id, STEntry stEntry, int nestingLevel ) {
 		this.ID = id;
 		this.nestingLevel = nestingLevel;
 		this.entry = stEntry;
@@ -18,7 +18,7 @@ public class IdNode implements Node {
 		return ID;
 	}
 	
-	public STentry getEntry( ) {
+	public STEntry getEntry( ) {
 		return entry;
 	}
 	

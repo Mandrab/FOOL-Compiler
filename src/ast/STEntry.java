@@ -2,21 +2,21 @@ package ast;
 
 import visitors.NodeVisitor;
 
-public class STentry implements Visitable {
+public class STEntry implements Visitable {
 
 	private int nestingLevel;
 	private int offset;
 	private Node type;
 	private boolean isMethod;
 
-	public STentry( int nestingLevel, Node type, int offset ) {
+	public STEntry( int nestingLevel, Node type, int offset ) {
 		this.nestingLevel = nestingLevel;
 		this.offset = offset;
 		this.type = type;
 		this.isMethod = false;
 	}
 
-	public STentry( int nestingLevel, Node type, int offset, boolean isMethod ) {
+	public STEntry( int nestingLevel, Node type, int offset, boolean isMethod ) {
 		this.nestingLevel = nestingLevel;
 		this.offset = offset;
 		this.type = type;

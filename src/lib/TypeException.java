@@ -6,13 +6,21 @@ public class TypeException extends RuntimeException {
 	
 	private String text;
 
-	public TypeException( String t ) {
-		 FOOLlib.typeErrors++;
-		 text = t;
+	private TypeException( String msg ) {
+		 text = msg;
     }
 	
 	@Override
 	public String getMessage( ) {
 		return text;
+	}
+	
+	public static TypeException build( String msg ) {
+		 return new TypeException( msg );
+	}
+	
+	public static TypeException buildAndMark( String msg, FOOLLib lib ) {
+		 lib.incTypeErrors( );
+		 return new TypeException( msg );
 	}
 }

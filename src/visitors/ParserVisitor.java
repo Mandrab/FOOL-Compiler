@@ -1,8 +1,10 @@
 package visitors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ast.AndNode;
 import ast.ArrowTypeNode;
@@ -35,25 +37,27 @@ import ast.PrintNode;
 import ast.ProgLetInNode;
 import ast.ProgNode;
 import ast.RefTypeNode;
-import ast.STentry;
+import ast.STEntry;
 import ast.TimesNode;
 import ast.VarNode;
 import generated.FOOLBaseVisitor;
 import generated.FOOLParser;
 import lib.ClassTable;
+import lib.FOOLLib;
 import lib.SymbolTable;
 
-import static lib.FOOLlib.superType;
-
 public class ParserVisitor extends FOOLBaseVisitor<Node> {
+
+	private final FOOLLib lib;
+	private final SymbolTable symTable;
+	private final ClassTable classTable;
 	
 	private int stErrors;
 	
-	private SymbolTable symTable;
-	private ClassTable classTable;
 	private int offset;
 	
-	public ParserVisitor( ) {
+	public ParserVisitor( FOOLLib globalLib ) {
+		lib = globalLib;
 		symTable = new SymbolTable( );
 		classTable = new ClassTable( );
 		offset = -2;
@@ -103,16 +107,16 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		ClassNode clsNode = new ClassNode( clsTypeNode, ctx.clsID.getText( ) );
 
 		// get last symbol table (where put class declaration)
-		Map<String, STentry> stFront = symTable.getTable( );
+		Map<String, STEntry> stFront = symTable.getTable( );
 		
 		// add class declaration to symTable
-		if ( stFront.put( clsID, new STentry( symTable.getLevel( ), clsTypeNode, offset--, false ) ) != null ) {
+		if ( stFront.put( clsID, new STEntry( symTable.getLevel( ), clsTypeNode, offset--, false ) ) != null ) {
 	        System.out.println( "Class ID '" + clsID + "' at line " + ctx.clsID.getLine( ) + " already declared" );
 	    	stErrors++;
 	    }
 
 		// create a nested table for class' declarations
-      	Map<String,STentry> stClsNestedLevel = symTable.nestTable( );
+      	Map<String,STEntry> stClsNestedLevel = symTable.nestTable( );
       	
       	// set fields and methods starting offsets
       	int fieldOffset = -1;
@@ -141,8 +145,11 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	        // copy each superclass' definition into (this) class table 
 	        classTable.getClassVT( suID ).forEach( (k, v) -> stClsNestedLevel.put( k, v ) );
 	        // declare supertyping
-	        superType.put( clsID, suID ); 
+	        lib.setSuperType( clsID, suID ); 
       	}
+      	
+	   	// data structure for redefinition-check optimization
+	   	Set<String> definedElements = new HashSet<>( );
       	
       	// FIELDS
       	for ( int i = 0; ctx.field( ) != null && i < ctx.field( ).size( ); i++ ) {
@@ -151,9 +158,15 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
       		
       		// add field to class
       		clsNode.addField( fieldNode );
+
+      		// check for field redefinition (in this class)
+      		if( definedElements.stream( ).anyMatch( e -> e.equals( fieldNode.getID( ) ) ) ) {
+      			System.out.println( "Redefinition of field " + fieldNode.getID( ) + " at line " + ctx.field( i ).fID.getLine( ) );
+      			stErrors++;
+      		} else definedElements.add( fieldNode.getID( ) );
       		
       		// try to get previous field declaration
-			STentry val = stClsNestedLevel.get( fieldNode.getID( ) );
+			STEntry val = stClsNestedLevel.get( fieldNode.getID( ) );
 
 			// a previous declared field exist
 			if( val != null ) {
@@ -162,7 +175,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 				if ( superClassType != null && superClassType.getFields( ).stream( ).map( e -> ( FieldNode ) e ).anyMatch( e -> e.getID( ).equals( fieldNode.getID( ) ) ) ) {
 
 					// substitute field in (this) class table
-					stClsNestedLevel.put( fieldNode.getID( ), new STentry( symTable.getLevel( ), fieldNode.getSymType( ), val.getOffset( ), false ) );
+					stClsNestedLevel.put( fieldNode.getID( ), new STEntry( symTable.getLevel( ), fieldNode.getSymType( ), val.getOffset( ), false ) );
 					fieldNode.setOffset( val.getOffset( ) );
 					
 				// superclass does not contains this field -> the duplicate declaration is made in this class
@@ -175,7 +188,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			} else {
 
 				// add field in class table
-				stClsNestedLevel.put( fieldNode.getID( ), new STentry( symTable.getLevel( ), fieldNode.getSymType( ), fieldOffset, false ) );
+				stClsNestedLevel.put( fieldNode.getID( ), new STEntry( symTable.getLevel( ), fieldNode.getSymType( ), fieldOffset, false ) );
 				fieldNode.setOffset( fieldOffset-- );
 			}
       	}
@@ -187,9 +200,15 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
       		// add method to class
       		clsNode.addMethod( methodNode );
+      		
+      		// check for method redefinition (in this class)
+      		if( definedElements.stream( ).anyMatch( e -> e.equals( methodNode.getID( ) ) ) ) {
+      			System.out.println( "Redefinition of field " + methodNode.getID( ) + " at line " + ctx.method( i ).mID.getLine( ) );
+      			stErrors++;
+      		} else definedElements.add( methodNode.getID( ) );
 
       		// try to get previous method declaration
-      		STentry val = stClsNestedLevel.get( methodNode.getID( ) );
+      		STEntry val = stClsNestedLevel.get( methodNode.getID( ) );
 
       		// a previous declared method exist
 			if( val != null ){
@@ -198,7 +217,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 				if ( superClassType != null && classTable.getClassVT( ctx.suID.getText( ) ).get( methodNode.getID( ) ) != null ) {
 
 					// substitute method in (this) class table
-					stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), val.getOffset( ), true ) );
+					stClsNestedLevel.put( methodNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), val.getOffset( ), true ) );
 					methodNode.setOffset( val.getOffset( ) );
 					
 				// superclass does not contains this method -> the duplicate declaration is made in this class
@@ -211,30 +230,30 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			} else {
 
 				// add method in class table
-				stClsNestedLevel.put( methodNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset, true ) );
+				stClsNestedLevel.put( methodNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset, true ) );
 				methodNode.setOffset( methodOffset++ );
 			}
       	}
 
       	// get (this) class declarations' table and add it to classTable
-      	Map<String, STentry> virtualTable = symTable.popTable( );
+      	Map<String, STEntry> virtualTable = symTable.popTable( );
       	classTable.addClassVT( clsID, virtualTable );
 
       	// get (offset-sorted) methods and add them to ClassTypeNode
-      	virtualTable.values( ).stream( ).filter( STentry::isMethod )
+      	virtualTable.values( ).stream( ).filter( STEntry::isMethod )
       			.sorted( ( e1, e2 ) -> e1.getOffset( ) - e2.getOffset( ) ).forEach( e -> clsTypeNode.addMethod( e.getRetType( ) ) );
 
       	// get (offset-sorted) fields and add them to ClassTypeNode
 		virtualTable.entrySet( ).stream( ).filter( e -> ! e.getValue( ).isMethod( ) )
 				.sorted( ( e1, e2 ) -> e2.getValue( ).getOffset( ) - e1.getValue( ).getOffset( ) )
-				.forEach( e -> clsTypeNode.addField( new FieldNode( e.getKey( ), e.getValue( ).getRetType( ) ) ) );
+				.forEach( e -> clsTypeNode.addField( new FieldNode( e.getKey( ), e.getValue( ).getRetType( ), e.getValue( ).getOffset( ) ) ) );
 
 		return clsNode;
 	}
 
 	@Override
 	public Node visitDec(FOOLParser.DecContext ctx) {
-		Map<String,STentry> stFront = symTable.getTable( );
+		Map<String,STEntry> stFront = symTable.getTable( );
 		
 		if ( ctx.VAR( ) != null ) {
 			VarNode varNode = new VarNode( ctx.vID.getText( ), visit( ctx.vT ), visit( ctx.vE ) );  
@@ -243,7 +262,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			if ( varNode.getSymType( ) instanceof ArrowTypeNode )
 				offset--;
 
-			if ( stFront.put( varNode.getID( ), new STentry( symTable.getLevel( ), varNode.getSymType( ), offset-- ) ) != null ) {
+			if ( stFront.put( varNode.getID( ), new STEntry( symTable.getLevel( ), varNode.getSymType( ), offset-- ) ) != null ) {
 				System.out.println( "Var ID '" + varNode.getID( ) + "' at line " + ctx.vID.getLine( ) + " already declared" );
 				stErrors++;
 			}
@@ -254,14 +273,14 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			
 			List<Node> parTypes = new ArrayList<Node>( );
 
-			if ( stFront.put( funNode.getID( ), new STentry( symTable.getLevel( ), new ArrowTypeNode( parTypes, funNode.getSymType( ) ), offset-- ) ) != null ) {
+			if ( stFront.put( funNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( parTypes, funNode.getSymType( ) ), offset-- ) ) != null ) {
                 System.out.println( "Fun ID '" + funNode.getID( ) + "' at line " + ctx.fID.getLine( ) + " already declared" );
                 stErrors++;
 			}
 
             offset--;  // perche e' funzionale
             
-            Map<String,STentry> funNestingLevel = symTable.nestTable( );
+            Map<String,STEntry> funNestingLevel = symTable.nestTable( );
             
             int parOffset = 1;
             
@@ -275,7 +294,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
             	
             	funNode.addParameter( parNode );
             	
-            	if ( funNestingLevel.put( parNode.getID( ), new STentry( symTable.getLevel( ), parNode.getSymType( ), parOffset++ ) ) != null ) { //aggiungo dich a hmn
+            	if ( funNestingLevel.put( parNode.getID( ), new STEntry( symTable.getLevel( ), parNode.getSymType( ), parOffset++ ) ) != null ) { //aggiungo dich a hmn
             		System.out.println( "Parameter ID '" + parNode.getID( ) + "' at line " + ctx.parameter( i ).pID.getLine( ) + " already declared" );
             		stErrors++;
             	}
@@ -300,10 +319,10 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			return funNode;
 		}
 	}
-	
+
 	@Override
 	public Node visitField(FOOLParser.FieldContext ctx) {
-		return new FieldNode( ctx.fID.getText( ), visit( ctx.fT ) );
+		return new FieldNode( ctx.fID.getText( ), visit( ctx.fT ), 0 );
 	}
 	
 	@Override
@@ -312,7 +331,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		MethodNode methodNode = new MethodNode( ctx.mID.getText( ), visit( ctx.mT ) );
 
 		// create new "nested" table in symTable (method scope)
-		Map<String,STentry> mthdNestingLevel = symTable.nestTable( );
+		Map<String,STEntry> mthdNestingLevel = symTable.nestTable( );
 		
 		// parameters start offset
 		int parOffset = 1;
@@ -325,7 +344,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
           	methodNode.addParameter( par );
           	
           	// check parameter existence in method's symbol table
-          	if ( mthdNestingLevel.put( par.getID( ), new STentry( symTable.getLevel( ), par.getSymType( ), parOffset++, false ) ) != null  ) {
+          	if ( mthdNestingLevel.put( par.getID( ), new STEntry( symTable.getLevel( ), par.getSymType( ), parOffset++, false ) ) != null  ) {
            		System.out.println( "Parameter ID '" + par.getID( ) + "' at line " + ctx.parameter( i ).pID.getLine( ) + " already declared" );
         		stErrors++;
         	}
@@ -361,13 +380,13 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	public Node visitVar(FOOLParser.VarContext ctx) {
 		VarNode varNode = new VarNode( ctx.vID.getText( ), visit( ctx.vT ), visit( ctx.vE ) ); 
 		
-		Map<String,STentry> stFront = symTable.getTable( );
+		Map<String,STEntry> stFront = symTable.getTable( );
 		   
 		// functional-type variables take double space (function addr. & Frame Pointer, i.e. addr. of this Activation Record) -> decrement offset two time
 		if ( varNode.getSymType( ) instanceof ArrowTypeNode )
 			offset--;
 
-		if ( stFront.put( varNode.getID( ), new STentry( symTable.getLevel( ), varNode.getSymType( ), offset-- ) ) != null ) {
+		if ( stFront.put( varNode.getID( ), new STEntry( symTable.getLevel( ), varNode.getSymType( ), offset-- ) ) != null ) {
 			System.out.println( "Var ID '" + varNode.getID( ) + "' at line " + ctx.vID.getLine( ) + " already declared" );
 			stErrors++;
 		}
@@ -414,7 +433,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	}
 	
 	@Override
-	public Node visitTerm(FOOLParser.TermContext ctx) {
+	public Node visitTerm(FOOLParser.TermContext ctx) {		
 		if ( ! ctx.TIMES( ).isEmpty( ) ) return new TimesNode( visit( ctx.l ), visit( ctx.r ) );
 		if ( ! ctx.DIV( ).isEmpty( ) ) return new DivNode( visit( ctx.l ), visit( ctx.r ) );
 		if ( ! ctx.AND( ).isEmpty( ) ) return new AndNode( visit( ctx.l ), visit( ctx.r ) );
@@ -446,14 +465,14 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	
 	@Override
 	public Node visitNewValue(FOOLParser.NewValueContext ctx) {
-		Map<String, STentry> virtualTable = classTable.getClassVT( ctx.ID( ).getText( ) );
+		Map<String, STEntry> virtualTable = classTable.getClassVT( ctx.ID( ).getText( ) );
 
 		if ( virtualTable == null ) {
 			System.out.println( "Class ID '" + ctx.ID( ).getText( ) + "' not found at line " + ctx.ID( ).getSymbol( ).getLine( ) );
     		stErrors++;
 		}
 		
-		STentry classRef = symTable.getTable( 0 ).get( ctx.ID( ).getText( ) );
+		STEntry classRef = symTable.getTable( 0 ).get( ctx.ID( ).getText( ) );
 		
 		if ( classRef == null ) {
 			System.out.println( "Class ID '" + ctx.ID( ).getText( ) + "' doesn't exist at line " + ctx.ID( ).getSymbol( ).getLine( ) );
@@ -491,7 +510,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 	@Override
 	public Node visitIdValue(FOOLParser.IdValueContext ctx) {		
-		STentry entry = null;
+		STEntry entry = null;
 		
 		for ( int nl = symTable.getLevel( ); nl >= 0 && entry == null; nl-- ) {
 			entry = ( symTable.getTable( nl ) ).get( ctx.ID( ).getText( ) );
@@ -507,7 +526,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 	@Override
 	public Node visitFunctionCallValue(FOOLParser.FunctionCallValueContext ctx) {
-		STentry entry = null;
+		STEntry entry = null;
 		
 		for ( int nl = symTable.getLevel( ); nl >= 0 && entry == null; nl-- ) {
 			entry=( symTable.getTable( nl ) ).get( ctx.ID( ).getText( ) );
@@ -529,7 +548,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 	@Override
 	public Node visitMethodCallValue(FOOLParser.MethodCallValueContext ctx) {
-		STentry entry = null;
+		STEntry entry = null;
 		
 		for ( int nl = symTable.getLevel( ); nl >= 0 && entry == null; nl-- ) {
 			entry=( symTable.getTable( nl ) ).get( ctx.oID.getText( ) );
@@ -542,7 +561,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
        	
 		RefTypeNode reference = ( RefTypeNode ) entry.getRetType( );
 
-		STentry methodEntry = classTable.getClassVT( reference.getID( ) ).get( ctx.mID.getText( ) );		// method entry
+		STEntry methodEntry = classTable.getClassVT( reference.getID( ) ).get( ctx.mID.getText( ) );		// method entry
 
 		ClassCallNode clsCallNode = new ClassCallNode( ctx.mID.getText( ), entry, methodEntry, symTable.getLevel( ) );
 

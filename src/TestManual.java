@@ -2,7 +2,7 @@ import java.io.File;
 
 public class TestManual {
 
-	private static final String FILE_PATH = "fool_files" + File.separator + "test";
+	private static final String FILE_PATH = "fool_files" + File.separator + "bankloan";
 	
 	public static void main( String[] args ) throws Exception {
 

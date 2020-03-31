@@ -38,14 +38,19 @@ import ast.PrintNode;
 import ast.ProgLetInNode;
 import ast.ProgNode;
 import ast.RefTypeNode;
-import ast.STentry;
+import ast.STEntry;
 import ast.TimesNode;
 import ast.VarNode;
-import lib.FOOLlib;
+import lib.FOOLLib;
 
 public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements NodeVisitor<String> {
 
 	private static final String INC_HP = "push 1\n" + "lhp\n" + "add\n" + "shp\n";
+	private final FOOLLib lib;
+	
+	public CodeGeneratorVisitor( FOOLLib globalLib ) {
+		lib = globalLib;
+	}
 	
 	@Override
 	public String visit( Node element ) {
@@ -142,12 +147,12 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	@Override
 	public String visit( ClassNode element ) {
 		List<String> myDispatchTable = new ArrayList<>( );
-		FOOLlib.dispatchTable.add( myDispatchTable );
+		lib.addDispatchTable( myDispatchTable );
 
 		int parentMethods = 0;
 		if ( element.getSuper( ) != null ) {
 			parentMethods = ( ( ClassTypeNode ) ( element.getSuper( ).getRetType( ) ) ).getMethods( ).size( );
-			List<String> superLabel = FOOLlib.dispatchTable.get( -2 -element.getSuper( ).getOffset( ) );
+			List<String> superLabel = lib.getDispatchTable( -2 -element.getSuper( ).getOffset( ) );
 			
 			for( String s : superLabel )
 				myDispatchTable.add( s );
@@ -195,8 +200,8 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	@Override
 	public String visit( EqualNode element ) {
-		String l1 = FOOLlib.freshLabel( );
-		String l2 = FOOLlib.freshLabel( );
+		String l1 = lib.freshLabel( );
+		String l2 = lib.freshLabel( );
 		return visit( element.getLeft( ) ) + 
 				visit( element.getRight( ) ) + 
 				"beq " + l1 + "\n" + 
@@ -214,7 +219,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	@Override
 	public String visit( FunNode element ) {
-		final String functionLabel = FOOLlib.freshFunLabel( );
+		final String functionLabel = lib.freshFunctionLabel( );
 
 		final String result = functionLabel + ":\n" + "cfp\n" + // setta il registro $fp / copy stack pointer into frame pointer
 				"lra\n" + // load from ra sullo stack
@@ -228,7 +233,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 				? "pop\n" + "pop\n" //pop dei parametri se funzionale + pop dei parametri
 				: "pop\n" ).collect( Collectors.joining( ) );
 
-		FOOLlib.putCode( result +
+		lib.putCode( result +
 				visit( element.getExpession( ) ) + "stm\n" + // salvo il risultato in un registro
 				remdeclCode + // devo svuotare lo stack, e faccio pop tanti quanti sono le var/fun dichiarate
 				"sra\n" + // salvo il return address
@@ -245,8 +250,8 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	@Override
 	public String visit( GreaterEqualNode element ) {
-		final String l1 = FOOLlib.freshLabel( );
-		final String l2 = FOOLlib.freshLabel( );
+		final String l1 = lib.freshLabel( );
+		final String l2 = lib.freshLabel( );
 		return visit( element.getRight( ) ) +
 				visit( element.getLeft( ) ) +
 				"bleq " + l1 + "\n" +
@@ -293,8 +298,8 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	@Override
 	public String visit( IfNode element ) {
-		String l1 = FOOLlib.freshLabel( );
-	    String l2 = FOOLlib.freshLabel( );
+		String l1 = lib.freshLabel( );
+	    String l2 = lib.freshLabel( );
 	    return visit( element.getCondition( ) ) +
 	    		"push 1\n" +
 				"beq " + l1 + "\n" +				 				  
@@ -317,8 +322,8 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	@Override
 	public String visit( LessEqualNode element ) {
-		String l1= FOOLlib.freshLabel();
-	    String l2= FOOLlib.freshLabel();
+		String l1= lib.freshLabel();
+	    String l2= lib.freshLabel();
 	    return visit( element.getLeft( ) ) +
 	    		visit( element.getRight( ) ) +
 				"bleq " + l1 + "\n" +
@@ -332,7 +337,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	@Override
 	public String visit( MethodNode element ) {
 
-		element.setLabel( FOOLlib.freshMethodLabel( ) );
+		element.setLabel( lib.freshMethodLabel( ) );
 		
 		String declarationsCode = element.getDeclarations( ).stream( ).map( this::visit ).collect( Collectors.joining( ) );
 		
@@ -344,7 +349,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 				? "pop\n" + "pop\n"
 				: "pop\n" ).collect( Collectors.joining( ) );
 
-		FOOLlib.putCode(
+		lib.putCode(
 				element.getLabel( ) + ":\n" + 
 				"cfp\n" + // setta il registro $fp / copy stack pointer into frame pointer
 				"lra\n" + // load from ra sullo stack
@@ -373,11 +378,11 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 		//fa push dei valori sullo stack
 		String fieldCode = element.getFields( ).stream( ).map( this::visit ).collect( Collectors.joining( ) );
 		
-		fieldCode += element.getFields( ).stream( ).map( e -> "lhp " + "\n" + //push hp
+		fieldCode += element.getFields( ).stream( ).map( e -> "lhp\n" + //push hp
 				"sw\n" + 
 				"push 1\n" + "lhp\n" + "add\n" + "shp\n" ).collect( Collectors.joining( ) ); //hp++	
 		
-		fieldCode += "push " + ( element.getEntry( ).getOffset( ) + FOOLlib.MEMSIZE ) + "\n" + // push DP
+		fieldCode += "push " + ( element.getEntry( ).getOffset( ) + FOOLLib.MEMSIZE ) + "\n" + // push DP
 				"lw\n" +
 				"lhp\n" +
 				"sw\n" +
@@ -411,8 +416,8 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	 * La logica � invertita rispetto all'AND.
 	 */
 	public String visit( OrNode element ) {
-		String l1= FOOLlib.freshLabel( );
-	    String l2= FOOLlib.freshLabel( );
+		String l1= lib.freshLabel( );
+	    String l2= lib.freshLabel( );
 	    return visit( element.getLeft( ) ) +
 	    		visit( element.getRight( ) ) +
 	    		"add\n" +
@@ -446,7 +451,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 				element.getDeclarations( ).stream( ).map( this::visit ).collect( Collectors.joining( ) ) +
 				visit( element.getExpression( ) ) +
 				"halt\n" +
-				FOOLlib.getCode( );
+				lib.getCode( );
 	}
 
 	@Override
@@ -460,7 +465,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	}
 	
 	@Override
-	public String visit( STentry visitable ) {
+	public String visit( STEntry visitable ) {
 		return null;
 	}
 

@@ -46,13 +46,15 @@ class TestCompiler {
 		testFool( "test_00", s -> s, RUNNER_LOGS + "8\n" );
 		testFool( "test_01", s -> s, RUNNER_LOGS + "2\n" );
 		testFool( "test_02", s -> s, RUNNER_LOGS + "10\n" );
+		testFool( "test_03", s -> s, RUNNER_LOGS + "250\n" );
 		testFool( "test_04", s -> s, RUNNER_LOGS + "0\n" );
 		testFool( "test_05", s -> s, RUNNER_LOGS + "1\n" );
 	}
 
 	private <T> void testFool( String foolFile, Function<String,T> resultMapper, T expectedResult ) throws Exception {
+		
 		String fileName = FOOL_FILES_PATH + foolFile;
-
+System.out.println(foolFile);
         Compiler.compile( fileName + ".fool" );
 
         redirectIO( );
@@ -62,6 +64,8 @@ class TestCompiler {
         restoreIO( );
 
         assertEquals( expectedResult, resultMapper.apply( testStream.toString( ) ) );
+        
+        System.out.flush( );
 	}
 	
 	private void redirectIO( ) {

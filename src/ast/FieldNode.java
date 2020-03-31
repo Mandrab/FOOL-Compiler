@@ -8,10 +8,10 @@ public class FieldNode implements DecNode, Node {
 	private Node type;
 	private int offset;
 
-	public FieldNode( String id, Node type ) {
+	public FieldNode( String id, Node type, int offset ) {
 		this.ID = id;
 		this.type = type;
-		this.offset = 0;
+		this.offset = offset;
 	}
 	
 	public String getID( ) {

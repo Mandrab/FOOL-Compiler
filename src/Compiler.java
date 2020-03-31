@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import ast.Node;
 import generated.FOOLLexer;
 import generated.FOOLParser;
+import lib.FOOLLib;
 import visitors.CodeGeneratorVisitor;
 import visitors.ParserVisitor;
 import visitors.PrinterVisitor;
@@ -26,6 +27,7 @@ public class Compiler {
 	}
 
 	public static void compile( String filePath ) throws Exception {
+
 		// check path file validity
 		if ( filePath == null || ! filePath.endsWith( ".fool" ) )
 			throw new Exception( "Path does not point to any .fool file!" );
@@ -46,8 +48,11 @@ public class Compiler {
         if ( parser.getNumberOfSyntaxErrors( ) > 0 )
         	throw new Exception( "The program has generated " + parser.getNumberOfSyntaxErrors( ) + " syntax errors" );
 
+        // create a global utilities library to pass to the visitors
+        final FOOLLib globalLib = new FOOLLib( );
+        
         // generate abstract syntax tree and check for symbol table errors (eventually throwing an exception)
-        ParserVisitor parserVisitor = new ParserVisitor( );
+        ParserVisitor parserVisitor = new ParserVisitor( globalLib );
         Node ast = parserVisitor.visit( parser.prog( ) );        
         if ( parserVisitor.getSymbolTableError( ) > 0 )
         	throw new Exception( "The program has generated " + parserVisitor.getSymbolTableError( ) + " symbol table errors" );
@@ -58,15 +63,16 @@ public class Compiler {
         System.out.println( printerVisitor.visit( ast ) );
 
         // type-check the ast bottom-up
-        TypeCheckerVisitor typeCheckerVisitor = new TypeCheckerVisitor( );
+        TypeCheckerVisitor typeCheckerVisitor = new TypeCheckerVisitor( globalLib );
         System.out.println( "Type checking ok! Type of the program is: " 
         		+ printerVisitor.visit( typeCheckerVisitor.visit( ast ) ) );
 
         // generate the assembly code
-        CodeGeneratorVisitor codeGeneratorVisitor = new CodeGeneratorVisitor( );
+        CodeGeneratorVisitor codeGeneratorVisitor = new CodeGeneratorVisitor( globalLib );
         String code = codeGeneratorVisitor.visit( ast );
         BufferedWriter out = new BufferedWriter( new FileWriter( filePath.substring( 0, filePath.indexOf( ".fool" ) ) + ".asm" ) ); 
         out.write( code );
+        out.flush( );
         out.close( );
 
         System.out.println( "Code generated successfully!" );

@@ -29,7 +29,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import static lib.FOOLlib.MEMSIZE;
+import static lib.FOOLLib.MEMSIZE;
 
 public class VMView {
 

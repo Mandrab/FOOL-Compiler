@@ -2,7 +2,7 @@ package virtual.machine;
 
 import generated.SVMParser;
 
-import static lib.FOOLlib.MEMSIZE;
+import static lib.FOOLLib.MEMSIZE;
 
 public class ExecuteVM {
 

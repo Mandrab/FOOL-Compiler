@@ -32,7 +32,7 @@ import ast.PrintNode;
 import ast.ProgLetInNode;
 import ast.ProgNode;
 import ast.RefTypeNode;
-import ast.STentry;
+import ast.STEntry;
 import ast.TimesNode;
 import ast.VarNode;
 
@@ -102,7 +102,7 @@ public interface NodeVisitor<R> {
 	
 	R visit( RefTypeNode visitable );
 	
-	R visit( STentry visitable );
+	R visit( STEntry visitable );
 	
 	R visit( TimesNode visitable );
 	

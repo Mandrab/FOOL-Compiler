@@ -9,12 +9,12 @@ public class ClassCallNode implements Node {
 	
 	private String ID;
 	private int nestingLevel;
-	private STentry entry;	//Tipo dell'obj su cui richiamo il metodo
-	private STentry methodEntry; //Mio metodo
+	private STEntry entry;	//Tipo dell'obj su cui richiamo il metodo
+	private STEntry methodEntry; //Mio metodo
 	private List<Node> parameters; //lista di parametri passati
 	
 	
-	public ClassCallNode( String ID, STentry entry, STentry methodEntry, int nestingLevel ) {
+	public ClassCallNode( String ID, STEntry entry, STEntry methodEntry, int nestingLevel ) {
 		this.ID = ID;
 		this.entry = entry;
 		this.methodEntry = methodEntry;
@@ -31,11 +31,11 @@ public class ClassCallNode implements Node {
 		return nestingLevel;
 	}
 
-	public STentry getEntry( ) {
+	public STEntry getEntry( ) {
 		return entry;
 	}
 
-	public STentry getMethodEntry( ) {
+	public STEntry getMethodEntry( ) {
 		return methodEntry;
 	}
 	

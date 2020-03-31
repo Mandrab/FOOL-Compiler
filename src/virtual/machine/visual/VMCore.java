@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-import static lib.FOOLlib.MEMSIZE;
+import static lib.FOOLLib.MEMSIZE;
 
 public class VMCore {
 

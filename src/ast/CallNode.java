@@ -8,10 +8,10 @@ public class CallNode implements Node {
 
 	private String ID;
 	private int nestingLevel;
-	private STentry definition;
+	private STEntry definition;
 	private List<Node> parameters;
 
-	public CallNode( String id, STentry stEntry, List<Node> pars, int nl ) {
+	public CallNode( String id, STEntry stEntry, List<Node> pars, int nl ) {
 		ID = id;
 		definition = stEntry;
 		parameters = pars;
@@ -26,7 +26,7 @@ public class CallNode implements Node {
 		return nestingLevel;
 	}
 	
-	public STentry getEntry() {
+	public STEntry getEntry() {
 		return definition;
 	}
 	

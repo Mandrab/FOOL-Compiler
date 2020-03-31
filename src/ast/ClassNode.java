@@ -8,7 +8,7 @@ import visitors.NodeVisitor;
 public class ClassNode implements DecNode, Node {
 
 	private String ID;
-	private STentry superEntry;
+	private STEntry superEntry;
 	private Node symType;  //ClassTypeNode
 	private List<Node> fields;	//fieldNode
 	private List<Node> methods;	//methodNode
@@ -26,11 +26,11 @@ public class ClassNode implements DecNode, Node {
 		return ID;
 	}
 	
-	public void setSuper( STentry superEntry ) {
+	public void setSuper( STEntry superEntry ) {
 		this.superEntry = superEntry;
 	}
 	
-	public STentry getSuper( ) {
+	public STEntry getSuper( ) {
 		return superEntry;
 	}
 	

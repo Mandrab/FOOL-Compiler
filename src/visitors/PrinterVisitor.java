@@ -34,7 +34,7 @@ import ast.PrintNode;
 import ast.ProgLetInNode;
 import ast.ProgNode;
 import ast.RefTypeNode;
-import ast.STentry;
+import ast.STEntry;
 import ast.TimesNode;
 import ast.VarNode;
 
@@ -341,7 +341,7 @@ public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVis
 	}
 
 	@Override
-	public String visit( STentry element ) {
+	public String visit( STEntry element ) {
 		String result = indent( ) + "nesting level: " + element.getNestingLevel( ) + "\n";
 		result += indent( ) + "offset: " + element.getOffset( ) + "\n";
 		result += indent( ) + "type:\n";

@@ -8,10 +8,10 @@ import visitors.NodeVisitor;
 public class NewNode implements Node {
 
 	private String ID;
-	private STentry entry;
+	private STEntry entry;
 	private List<Node> fields;
 
-	public NewNode( String name, STentry entry ) {
+	public NewNode( String name, STEntry entry ) {
 		this.ID = name;
 		this.entry = entry;
 		this.fields = new ArrayList<Node>( );
@@ -21,7 +21,7 @@ public class NewNode implements Node {
 		return ID;
 	}
 
-	public STentry getEntry( ) {
+	public STEntry getEntry( ) {
 		return entry;
 	}
 	

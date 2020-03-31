@@ -1,6 +1,6 @@
 package virtual.machine.visual;
 
-import static lib.FOOLlib.MEMSIZE;
+import static lib.FOOLLib.MEMSIZE;
 
 import java.util.Optional;
 

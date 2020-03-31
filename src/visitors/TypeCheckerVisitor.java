@@ -312,8 +312,6 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 		if ( ! ( element.getEntry( ).getRetType( ) instanceof ClassTypeNode ) )
 			throw TypeException.buildAndMark( "Instantiation of a non-class: " + element.getID( ), lib );
 
-		RefTypeNode refTypeNode = new RefTypeNode( element.getID( ) );
-
 		ClassTypeNode classType = ( ClassTypeNode ) element.getEntry( ).getRetType( );
 		List<Node> requiredFields = classType.getFields( );
 
@@ -342,7 +340,7 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 				throw TypeException.buildAndMark( "Passed value for " + ( i + 1 ) + "-th parameter is not of type " + requiredField.getSymType( ), lib );
 		}
 
-		return refTypeNode;
+		return new RefTypeNode( element.getID( ) );
 	}
 
 	@Override

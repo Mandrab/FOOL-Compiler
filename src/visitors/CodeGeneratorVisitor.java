@@ -250,16 +250,18 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	@Override
 	public String visit( GreaterEqualNode element ) {
-		final String l1 = lib.freshLabel( );
-		final String l2 = lib.freshLabel( );
+		final String lesserEqual = lib.freshLabel( );
+		final String greater = lib.freshLabel( );
+		
+		// NOTE that right and left code generation is swapped!
 		return visit( element.getRight( ) ) +
 				visit( element.getLeft( ) ) +
-				"bleq " + l1 + "\n" +
+				"bleq " + lesserEqual + "\n" +
 				"push 0\n" + //in caso negativo pusho 0 (false)
-				"b " + l2 + "\n" +
-				l1 + ": \n" +
+				"b " + greater + "\n" +
+				lesserEqual + ": \n" +
 				"push 1\n" + //in caso positivo pusho 1 (true)
-				l2 + ": \n";
+				greater + ": \n";
 	}
 
 	@Override
@@ -322,16 +324,17 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	@Override
 	public String visit( LessEqualNode element ) {
-		String l1= lib.freshLabel();
-	    String l2= lib.freshLabel();
+		String lesserEqual = lib.freshLabel( );
+	    String greater = lib.freshLabel( );
+
 	    return visit( element.getLeft( ) ) +
 	    		visit( element.getRight( ) ) +
-				"bleq " + l1 + "\n" +
+				"bleq " + lesserEqual + "\n" +
 				"push 0\n" + //in caso negativo pusho 0 (false)
-				"b " + l2 + "\n" +
-				l1 + ": \n" +
+				"b " + greater + "\n" +
+				lesserEqual + ": \n" +
 				"push 1\n" + //in caso positivo pusho 1 (true)
-				l2 + ": \n";	         
+				greater + ": \n";	         
 	}
 
 	@Override

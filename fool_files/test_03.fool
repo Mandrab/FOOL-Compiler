@@ -1,0 +1,11 @@
+let
+	class Class (f:int) {
+		fun m:int() 
+			let
+				var x:int = f;
+				var y:int = f * 2;
+			in x*(y*f);
+	}
+	var cls:Class = new Class( 5 );
+in
+  print( cls.m() );

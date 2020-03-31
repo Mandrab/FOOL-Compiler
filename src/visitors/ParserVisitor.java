@@ -433,7 +433,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	}
 	
 	@Override
-	public Node visitTerm(FOOLParser.TermContext ctx) {		
+	public Node visitTerm(FOOLParser.TermContext ctx) {
 		if ( ! ctx.TIMES( ).isEmpty( ) ) return new TimesNode( visit( ctx.l ), visit( ctx.r ) );
 		if ( ! ctx.DIV( ).isEmpty( ) ) return new DivNode( visit( ctx.l ), visit( ctx.r ) );
 		if ( ! ctx.AND( ).isEmpty( ) ) return new AndNode( visit( ctx.l ), visit( ctx.r ) );

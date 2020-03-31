@@ -54,7 +54,7 @@ class TestCompiler {
 	private <T> void testFool( String foolFile, Function<String,T> resultMapper, T expectedResult ) throws Exception {
 		
 		String fileName = FOOL_FILES_PATH + foolFile;
-System.out.println(foolFile);
+
         Compiler.compile( fileName + ".fool" );
 
         redirectIO( );
@@ -64,8 +64,6 @@ System.out.println(foolFile);
         restoreIO( );
 
         assertEquals( expectedResult, resultMapper.apply( testStream.toString( ) ) );
-        
-        System.out.flush( );
 	}
 	
 	private void redirectIO( ) {

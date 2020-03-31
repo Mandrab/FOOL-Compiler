@@ -36,18 +36,18 @@ public class Runner {
 
 		// validate code through SVM (Stack Virtual Machine)
 		SVMVISLexer lexerASM = new SVMVISLexer( charsASM );
-        CommonTokenStream tokensASM = new CommonTokenStream( lexerASM );
-        SVMVISParser parserASM = new SVMVISParser( tokensASM ); 
-        parserASM.assembly( );
+		CommonTokenStream tokensASM = new CommonTokenStream( lexerASM );
+		SVMVISParser parserASM = new SVMVISParser( tokensASM ); 
+		parserASM.assembly( );
 
-        // check error in assembly code
-        if ( lexerASM.lexicalErrors + parserASM.getNumberOfSyntaxErrors() > 0 )
-        	throw new Exception( "You had " + lexerASM.lexicalErrors + " lexical errors and " + parserASM.getNumberOfSyntaxErrors() + " syntax errors." );
-
-        // run the code
-        System.out.println( "Starting Virtual Machine..." );
-        if ( visual )
-        	new VirtualMachine( parserASM.code, parserASM.sourceMap, Files.readAllLines( Paths.get( filePath ) ) );
-        else new ExecuteVM( parserASM.code ).cpu( );
+		// check error in assembly code
+		if ( lexerASM.lexicalErrors + parserASM.getNumberOfSyntaxErrors() > 0 )
+			throw new Exception( "You had " + lexerASM.lexicalErrors + " lexical errors and " + parserASM.getNumberOfSyntaxErrors() + " syntax errors." );
+	
+		// run the code
+		System.out.println( "Starting Virtual Machine..." );
+		if ( visual )
+			new VirtualMachine( parserASM.code, parserASM.sourceMap, Files.readAllLines( Paths.get( filePath ) ) );
+		else new ExecuteVM( parserASM.code ).cpu( );
 	}
 }

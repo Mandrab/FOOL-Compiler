@@ -72,10 +72,24 @@ However, being that a learning project, FOOL is not intended to be used as a rea
 
 ## The Compiler
 
-It has been built in Java through the use of ANTLR tool.
+It has been built in Java through the use of **ANTLR** tool. It's composed by *Lexer*, *Parser*, *Type-Checker* and *Code-Generator*. No optimization is made on the code.</br>
+All these components are implemented using the *Visitor pattern* to divide the tasks in the best possible way.
+
+### Lexer
+This component is automatically builded by the ANTLR tool based on the .g4 file. In this one, the keywords of all the tokens are described.
+
+### Parser
+ANTLR auto-build a class that allow to parse the code *top-down*. This one is constructed through the grammar rules defined in the .g4 file. The rules to create the *Abstract Syntax Tree* (a "condensed" version of the *Parse Tree*) are instead defined in the *ParserVisitor* file.
+
+### Type-Checker
+This is the component that checks that the code is correctly typed (some check are indeed also done by the parser component). 
+
+    This section has to be expanded
+    
+### Code-Generator
 
     This section has to be expanded
 
 ## Credits
-Mario Bravetti, teacher of the course. He established a working path.</br>
-Marco Meluzzi, Matteo Scucchia and Francesca Tonetti with whom I have implemented a different version of the compiler that does *not* use the visitor pattern.
+**Mario Bravetti**, teacher of the course. He established a working path.</br>
+**Marco Meluzzi**, **Matteo Scucchia** and **Francesca Tonetti** with whom I have implemented a different version of the compiler that does *not* use the visitor pattern.

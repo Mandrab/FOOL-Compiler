@@ -1,6 +1,6 @@
 # FOOL Project
 
-This project started with the aim of better understand how programming languages and compilers work.
+This project started with the aim of better understand how programming languages and compilers work. It has been made after following the *Languages, Compilers and Computational Models* course at UniBo.
 
 ## A Functional and Object Oriented Language
 
@@ -75,3 +75,7 @@ However, being that a learning project, FOOL is not intended to be used as a rea
 It has been built in Java through the use of ANTLR tool.
 
     This section has to be expanded
+
+## Credits
+Mario Bravetti, teacher of the course. He established a working path.</br>
+Marco Meluzzi, Matteo Scucchia and Francesca Tonetti with whom I have implemented a different version of the compiler that does *not* use the visitor pattern.

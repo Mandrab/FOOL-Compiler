@@ -324,7 +324,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	public Node visitField(FOOLParser.FieldContext ctx) {
 		return new FieldNode( ctx.fID.getText( ), visit( ctx.fT ), 0 );
 	}
-	
+
 	@Override
 	public Node visitMethod(FOOLParser.MethodContext ctx) {
 		// create method node

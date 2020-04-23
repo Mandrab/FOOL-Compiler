@@ -243,9 +243,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	@Override
 	public Node visit( IdNode element ) {
 		if ( element.getEntry( ).getRetType( ) instanceof ClassTypeNode )
-			throw TypeException.buildAndMark( "Object's ID '" + element.getID( ) + "' cannot be a class name", lib );// TODO object?
+			throw TypeException.buildAndMark( "ID '" + element.getID( ) + "' cannot be a class name", lib );
 		if ( element.getEntry( ).isMethod( ) )
-			throw TypeException.buildAndMark( "Object's ID '" + element.getID( ) + "' cannot be a method name", lib );// TODO object?
+			throw TypeException.buildAndMark( "ID '" + element.getID( ) + "' cannot be a method name", lib );
 		return element.getEntry( ).getRetType( );
 	}
 

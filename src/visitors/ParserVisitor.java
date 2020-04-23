@@ -100,7 +100,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		String clsID = ctx.clsID.getText( );
 		// define (optional) superclass type ('extends' case)
 		ClassTypeNode superClassType = null;
-	   	
+
 		// create classTypeNode (specify class structure)
 	   	ClassTypeNode clsTypeNode = new ClassTypeNode( );
 	   	// create class node (contains also methods' implementations)
@@ -116,7 +116,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	    }
 
 		// create a nested table for class' declarations
-      	Map<String,STEntry> stClsNestedLevel = symTable.nestTable( );
+      	Map<String,STEntry> virtualTable = symTable.nestTable( );
       	
       	// set fields and methods starting offsets
       	int fieldOffset = -1;
@@ -143,7 +143,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	        methodOffset = superClassType.getMethods( ).size( );
 	        
 	        // copy each superclass' definition into (this) class table 
-	        classTable.getClassVT( suID ).forEach( (k, v) -> stClsNestedLevel.put( k, v ) );
+	        classTable.getClassVT( suID ).forEach( (k, v) -> virtualTable.put( k, v ) );
 	        // declare supertyping
 	        lib.setSuperType( clsID, suID ); 
       	}
@@ -166,7 +166,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
       		} else definedElements.add( fieldNode.getID( ) );
       		
       		// try to get previous field declaration
-			STEntry val = stClsNestedLevel.get( fieldNode.getID( ) );
+			STEntry val = virtualTable.get( fieldNode.getID( ) );
 
 			// a previous declared field exist
 			if( val != null ) {
@@ -175,7 +175,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 				if ( superClassType != null && superClassType.getFields( ).stream( ).map( e -> ( FieldNode ) e ).anyMatch( e -> e.getID( ).equals( fieldNode.getID( ) ) ) ) {
 
 					// substitute field in (this) class table
-					stClsNestedLevel.put( fieldNode.getID( ), new STEntry( symTable.getLevel( ), fieldNode.getSymType( ), val.getOffset( ), false ) );
+					virtualTable.put( fieldNode.getID( ), new STEntry( symTable.getLevel( ), fieldNode.getSymType( ), val.getOffset( ), false ) );
 					fieldNode.setOffset( val.getOffset( ) );
 					
 				// superclass does not contains this field -> the duplicate declaration is made in this class
@@ -188,7 +188,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			} else {
 
 				// add field in class table
-				stClsNestedLevel.put( fieldNode.getID( ), new STEntry( symTable.getLevel( ), fieldNode.getSymType( ), fieldOffset, false ) );
+				virtualTable.put( fieldNode.getID( ), new STEntry( symTable.getLevel( ), fieldNode.getSymType( ), fieldOffset, false ) );
 				fieldNode.setOffset( fieldOffset-- );
 			}
       	}
@@ -208,7 +208,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
       		} else definedElements.add( methodNode.getID( ) );
 
       		// try to get previous method declaration
-      		STEntry val = stClsNestedLevel.get( methodNode.getID( ) );
+      		STEntry val = virtualTable.get( methodNode.getID( ) );
 
       		// a previous declared method exist
 			if( val != null ){
@@ -217,7 +217,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 				if ( superClassType != null && classTable.getClassVT( ctx.suID.getText( ) ).get( methodNode.getID( ) ) != null ) {
 
 					// substitute method in (this) class table
-					stClsNestedLevel.put( methodNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), val.getOffset( ), true ) );
+					virtualTable.put( methodNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), val.getOffset( ), true ) );
 					methodNode.setOffset( val.getOffset( ) );
 					
 				// superclass does not contains this method -> the duplicate declaration is made in this class
@@ -230,14 +230,14 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			} else {
 
 				// add method in class table
-				stClsNestedLevel.put( methodNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset, true ) );
+				virtualTable.put( methodNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset, true ) );
 				methodNode.setOffset( methodOffset++ );
 			}
       	}
 
-      	// get (this) class declarations' table and add it to classTable
-      	Map<String, STEntry> virtualTable = symTable.popTable( );
+      	// add virtual table of this class to class-table and remove it from symbol table
       	classTable.addClassVT( clsID, virtualTable );
+      	symTable.popTable( );
 
       	// get (offset-sorted) methods and add them to ClassTypeNode
       	virtualTable.values( ).stream( ).filter( STEntry::isMethod )

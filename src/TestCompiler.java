@@ -50,6 +50,16 @@ class TestCompiler {
 		testFool( "test_04", s -> s, RUNNER_LOGS + "0\n" );
 		testFool( "test_05", s -> s, RUNNER_LOGS + "1\n" );
 	}
+	
+	@Test
+	public void testException( ) {
+		try {
+			testFool( "test_type_exception", s -> s, RUNNER_LOGS + "8\n" );
+		} catch (Exception e) {
+			return;
+		}
+		fail( );
+	}
 
 	private <T> void testFool( String foolFile, Function<String,T> resultMapper, T expectedResult ) throws Exception {
 		

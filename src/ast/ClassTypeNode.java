@@ -8,7 +8,6 @@ import visitors.NodeVisitor;
 /***
  * Contiene tutti i campi/metodi (anche quelli ereditati)
  * Usato per TypeCheck
- * @author Sophia Fantoni
  *
  */
 public class ClassTypeNode implements Node {

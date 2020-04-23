@@ -10,6 +10,6 @@ public class TestManual {
 		Compiler.compile( FILE_PATH + ".fool" );
 
 		// run compiled program
-        Runner.runCode( FILE_PATH + ".asm", false );
+        Runner.runCode( FILE_PATH + ".asm", true );
 	}
 }

@@ -157,7 +157,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 					FieldNode superField = ( FieldNode ) superCTN.getFields( ).get( fieldOffset );
 					FieldNode myField = ( FieldNode ) thisCTN.getFields( ).get( fieldOffset );
 
-					if ( ! lib.isSubtype( myField, superField ) )
+					if ( ! lib.isSubtype( myField.getSymType( ), superField.getSymType( ) ) )
 						throw TypeException.buildAndMark( "Overriding of field '" + superField.getID( ) + "' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ), lib );
 				}
 			}
@@ -291,7 +291,7 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 	@Override
 	public Node visit( MethodNode element ) {
 		for ( Node declaration : element.getDeclarations( ) ) visit( declaration );
-		
+
 		if ( ! lib.isSubtype( visit( element.getExpession( ) ), element.getSymType( ) ) )
 			throw TypeException.buildAndMark( "Return-type mismatch in method " + element.getID( ), lib );
 		return null;

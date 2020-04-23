@@ -14,11 +14,22 @@ import visitors.ParserVisitor;
 import visitors.PrinterVisitor;
 import visitors.TypeCheckerVisitor;
 
+/**
+ * Compiles FOOL program generating assembly code
+ */
 public class Compiler {
 
+	/**
+	 * Compile the specified file (with .fool extension) into assembly code
+	 * 
+	 * @param args
+	 * 		must contains file's path
+	 * @throws Exception
+	 * 		if no .fool file is specified or a compile error occurs
+	 */
 	public static void main( String[] args ) throws Exception {
 
-		// file name(path) is required
+		// file name (path) is required
 		if ( args.length == 0 )
 			throw new IllegalArgumentException( );
 
@@ -26,6 +37,14 @@ public class Compiler {
 		compile( args[0] );
 	}
 
+	/**
+	 * Compile the specified file (with .fool extension) into assembly code
+	 * 
+	 * @param filePath
+	 * 		the path to the file
+	 * @throws Exception
+	 * 		if no .fool file is specified or a compile error occurs
+	 */
 	public static void compile( String filePath ) throws Exception {
 
 		// check path file validity

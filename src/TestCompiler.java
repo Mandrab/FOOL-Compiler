@@ -7,6 +7,9 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests the compiler by comparing outputs of compiled programs with expected results
+ */
 class TestCompiler {
 	
 	private static final String RUNNER_LOGS = "Starting Virtual Machine...\n";

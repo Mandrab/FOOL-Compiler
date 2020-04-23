@@ -1,4 +1,5 @@
 package lib;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -6,6 +7,11 @@ import java.util.Map;
 
 import ast.STEntry;
 
+/**
+ * Store symbol's table of class after exiting the declaration (otherwise the tables will be lost)
+ * 
+ * @author Paolo Baldini
+ */
 public class SymbolTable {
 
 	private List<Map<String, STEntry>> symTable;

@@ -4,10 +4,12 @@ import java.util.Optional;
 
 /**
  * Compile and run FOOL programs
+ * 
+ * @author Paolo Baldini
  */
 public class FOOLExecutor {
 
-	private static final String DEFAULT_FILE_PATH = "fool_files" + File.separator + "bankloan";
+	private static final String DEFAULT_FILE_PATH = "fool_files" + File.separator + "quicksort_ho";
 
 	/**
 	 * Compile and run a program. If no file is specified, run a default one.

@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests the compiler by comparing outputs of compiled programs with expected results
+ * 
+ * @author Paolo Baldini
  */
 class TestCompiler {
 	

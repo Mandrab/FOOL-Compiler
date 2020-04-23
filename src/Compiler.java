@@ -16,6 +16,8 @@ import visitors.TypeCheckerVisitor;
 
 /**
  * Compiles FOOL program generating assembly code
+ * 
+ * @author Paolo Baldini
  */
 public class Compiler {
 

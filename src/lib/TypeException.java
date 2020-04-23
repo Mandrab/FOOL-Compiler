@@ -1,5 +1,10 @@
 package lib;
 
+/**
+ * Represent an error in using types
+ * 
+ * @author Paolo Baldini
+ */
 public class TypeException extends RuntimeException {
 	
 	private static final long serialVersionUID = -4973176543505016805L;

@@ -1,4 +1,5 @@
 package lib;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -6,6 +7,8 @@ import ast.STEntry;
 
 /**
  * Contains the definition of fields and methods of each class
+ * 
+ * @author Paolo Baldini
  */
 public class ClassTable {
 
@@ -22,5 +25,4 @@ public class ClassTable {
 	public Map<String, STEntry> getClassVT( String classID ) {
 		return classTable.get( classID );
 	}
-
 }

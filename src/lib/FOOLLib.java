@@ -7,6 +7,11 @@ import java.util.Map;
 
 import ast.*;
 
+/**
+ * Store useful informations for the compilation process
+ * 
+ * @author Paolo Baldini
+ */
 public class FOOLLib {
 
     public static final int MEMSIZE = 10000;		// memory size of the virtual machine

@@ -91,5 +91,6 @@ This is the component that checks that the code is correctly typed (some check a
     This section has to be expanded
 
 ## Credits
-**Mario Bravetti**, teacher of the course. He established a working path.</br>
+**Mario Bravetti**, teacher of the course. He established the working path.</br>
 **Marco Meluzzi**, **Matteo Scucchia** and **Francesca Tonetti** with whom I have implemented a different version of the compiler that does *not* use the visitor pattern.
+**Ylenia Battistini**, **Sophia Fantoni** and **Enrico Gnagnarella** with which various issues were discussed

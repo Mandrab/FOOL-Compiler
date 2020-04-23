@@ -12,6 +12,8 @@ import virtual.machine.visual.VirtualMachine;
 
 /**
  * Runs assembly code on the virtual machine
+ * 
+ * @author Paolo Baldini
  */
 public class Runner {
 

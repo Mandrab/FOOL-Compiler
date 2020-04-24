@@ -2,4 +2,3 @@ bin/
 fool_files/*.asm
 src/*.tokens
 src/generated/
-res/

@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents 'x + y' expression
+ * 
+ * @author Paolo Baldini
+ */
 public class PlusNode implements Node {
 
 	private Node left;

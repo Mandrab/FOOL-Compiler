@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents a print instruction (print the top value on the stack to stdout)
+ * 
+ * @author Paolo Baldini
+ */
 public class PrintNode implements Node {
 
 	private Node exp;
@@ -9,7 +14,7 @@ public class PrintNode implements Node {
 	public PrintNode( Node expression ) {
 		exp = expression;
 	}
-	
+
 	public Node getExpression( ) {
 		return exp;
 	}

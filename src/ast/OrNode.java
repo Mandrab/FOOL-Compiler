@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents 'x || y' expression
+ * 
+ * @author Paolo Baldini
+ */
 public class OrNode implements Node {
 
 	private Node left;
@@ -11,7 +16,7 @@ public class OrNode implements Node {
 		this.left = left;
 		this.right = right;
 	}
-	
+
 	public Node getLeft( ) {
 		return left;
 	}

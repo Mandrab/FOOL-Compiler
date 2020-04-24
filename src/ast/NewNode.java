@@ -5,11 +5,16 @@ import java.util.List;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents an object instantiation
+ * 
+ * @author Paolo Baldini
+ */
 public class NewNode implements Node {
 
-	private String ID;
-	private STEntry entry;
-	private List<Node> fields;
+	private String ID;			// instantiated class name
+	private STEntry entry;		// class' symbol-table-entry
+	private List<Node> fields;	// passed fields' values
 
 	public NewNode( String name, STEntry entry ) {
 		this.ID = name;
@@ -25,8 +30,8 @@ public class NewNode implements Node {
 		return entry;
 	}
 	
-	public void addField(Node field) {
-		fields.add(field);
+	public void addField( Node field ) {
+		fields.add( field );
 	}
 	
 	public List<Node> getFields( ) {

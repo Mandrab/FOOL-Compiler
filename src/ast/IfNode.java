@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents an 'if ( COND ) then { EXP } else { EXP }' expression
+ * 
+ * @author Paolo Baldini
+ */
 public class IfNode implements Node {
 
 	private Node condition;

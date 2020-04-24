@@ -13,14 +13,14 @@ import visitors.NodeVisitor;
 public class FunNode implements Node, DecNode {
 
 	private String ID;					// function ID
-	private Node type;					// function's type
+	private Node returnType;			// function's return-type
 	private List<Node> parameters;		// function's required parameters' types
 	private List<Node> declarations;	// variables declarations in function's body (let-in block)
 	private Node exp;					// function's main expression
 
 	public FunNode( String id, Node type ) {
 		this.ID = id;
-		this.type = type;
+		this.returnType = type;
 		this.parameters = new ArrayList<Node>( );
 		this.declarations = new ArrayList<Node>( );
 	}
@@ -31,7 +31,7 @@ public class FunNode implements Node, DecNode {
 	
 	@Override
 	public Node getSymType( ) {
-		return type;
+		return returnType;
 	}
 	
 	public void addParameter( Node parameter ) {

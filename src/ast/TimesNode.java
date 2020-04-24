@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents 'x * y' expression
+ * 
+ * @author Paolo Baldini
+ */
 public class TimesNode implements Node {
 
 	private Node left;
@@ -11,7 +16,7 @@ public class TimesNode implements Node {
 		this.left = left;
 		this.right = right;
 	}
-	
+
 	public Node getLeft( ) {
 		return left;
 	}

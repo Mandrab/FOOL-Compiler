@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents 'x / y' expression
+ * 
+ * @author Paolo Baldini
+ */
 public class DivNode implements Node {
 
 	private Node left;
@@ -12,11 +17,11 @@ public class DivNode implements Node {
 		this.right = right;
 	}
 	
-	public Node getLeft() {
+	public Node getLeft( ) {
 		return left;
 	}
 
-	public Node getRight() {
+	public Node getRight( ) {
 		return right;
 	}
 

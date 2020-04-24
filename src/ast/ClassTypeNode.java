@@ -5,15 +5,16 @@ import java.util.List;
 
 import visitors.NodeVisitor;
 
-/***
- * Contiene tutti i campi/metodi (anche quelli ereditati)
- * Usato per TypeCheck
- *
+/**
+ * Represents the type of a class. I.e., contains all class' fields and methods definitions
+ * (included the ones of the optional super-type)
+ * 
+ * @author Paolo Baldini
  */
 public class ClassTypeNode implements Node {
 	
-	private List<Node> allFields;
-	private List<Node> allMethods;
+	private List<Node> allFields;	// fields types
+	private List<Node> allMethods;	// methods types
 	
 	public ClassTypeNode( ) {
 		allFields = new ArrayList<>( );

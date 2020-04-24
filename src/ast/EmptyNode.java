@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents 'null' value
+ * 
+ * @author Paolo Baldini
+ */
 public class EmptyNode implements Node {
 
 	@Override

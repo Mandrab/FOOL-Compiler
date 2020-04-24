@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents boolean-type in the AST
+ * 
+ * @author Paolo Baldini
+ */
 public class BoolTypeNode implements Node {
 
 	@Override

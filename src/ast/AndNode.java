@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents 'x && y' expression
+ * 
+ * @author Paolo Baldini
+ */
 public class AndNode implements Node {
 
 	private Node left;
@@ -12,16 +17,16 @@ public class AndNode implements Node {
 		this.right = right;
 	}
 
-	public Node getLeft() {
+	public Node getLeft( ) {
 		return left;
 	}
 
-	public Node getRight() {
+	public Node getRight( ) {
 		return right;
 	}
 
 	@Override
-	public <T> T accept(NodeVisitor<T> visitor) {
+	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );
 	}
 

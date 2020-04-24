@@ -2,11 +2,16 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents a field
+ * 
+ * @author Paolo Baldini
+ */
 public class FieldNode implements DecNode, Node {
 
-	private String ID;
-	private Node type;
-	private int offset;
+	private String ID;	// field ID
+	private Node type;	// field's type
+	private int offset;	// field's offset in the class declaration
 
 	public FieldNode( String id, Node type, int offset ) {
 		this.ID = id;
@@ -26,7 +31,7 @@ public class FieldNode implements DecNode, Node {
 		this.offset = offset;
 	}
 	
-	public int getOffset() {
+	public int getOffset( ) {
 		return this.offset;
 	}
 

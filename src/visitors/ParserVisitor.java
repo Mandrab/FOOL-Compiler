@@ -104,7 +104,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		// create classTypeNode (specify class structure)
 	   	ClassTypeNode clsTypeNode = new ClassTypeNode( );
 	   	// create class node (contains also methods' implementations)
-		ClassNode clsNode = new ClassNode( clsTypeNode, ctx.clsID.getText( ) );
+		ClassNode clsNode = new ClassNode( ctx.clsID.getText( ), clsTypeNode );
 
 		// get last symbol table (where put class declaration)
 		Map<String, STEntry> stFront = symTable.getTable( );

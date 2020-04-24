@@ -2,7 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
-/*Tipo null. Utilizzato da EmptyNode come tipo di ritorno.*/
+/**
+ * Represents 'null' type in AST
+ * 
+ * @author Paolo Baldini
+ */
 public class EmptyTypeNode implements Node {
 
 	@Override

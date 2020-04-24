@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents 'x == y' expression
+ * 
+ * @author Paolo Baldini
+ */
 public class EqualNode implements Node {
 
 	private Node left;

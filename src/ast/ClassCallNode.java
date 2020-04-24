@@ -5,13 +5,18 @@ import java.util.List;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents a method call
+ * 
+ * @author Paolo Baldini
+ */
 public class ClassCallNode implements Node {
 	
-	private String ID;
-	private int nestingLevel;
-	private STEntry entry;	//Tipo dell'obj su cui richiamo il metodo
-	private STEntry methodEntry; //Mio metodo
-	private List<Node> parameters; //lista di parametri passati
+	private String ID;				// method ID
+	private int nestingLevel;		// nl of the call
+	private STEntry entry;			// obj's class entry
+	private STEntry methodEntry; 	// called method
+	private List<Node> parameters; 	// passed parameters
 	
 	
 	public ClassCallNode( String ID, STEntry entry, STEntry methodEntry, int nestingLevel ) {
@@ -47,7 +52,7 @@ public class ClassCallNode implements Node {
 		return parameters;
 	}
 
-	public Node getRetType() {
+	public Node getRetType( ) {
 		return methodEntry.getRetType( );
 	}
 	

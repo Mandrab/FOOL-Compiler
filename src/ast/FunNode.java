@@ -5,19 +5,24 @@ import java.util.List;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents a funtion
+ * 
+ * @author Paolo Baldini
+ */
 public class FunNode implements Node, DecNode {
 
-	private String ID;
-	private Node type;
-	private List<Node> parameters; // campo "parameters" che � lista di Node
-	private List<Node> declarations;
-	private Node exp;
+	private String ID;					// function ID
+	private Node type;					// function's type
+	private List<Node> parameters;		// function's required parameters' types
+	private List<Node> declarations;	// variables declarations in function's body (let-in block)
+	private Node exp;					// function's main expression
 
 	public FunNode( String id, Node type ) {
 		this.ID = id;
 		this.type = type;
 		this.parameters = new ArrayList<Node>( );
-		this.declarations = new ArrayList<Node>();
+		this.declarations = new ArrayList<Node>( );
 	}
 	
 	public String getID( ) {
@@ -29,11 +34,11 @@ public class FunNode implements Node, DecNode {
 		return type;
 	}
 	
-	public void addParameter( Node parameter ) { // metodo "addPar" che aggiunge un nodo a campo "parameters"
+	public void addParameter( Node parameter ) {
 		parameters.add( parameter );
 	}
 	
-	public List<Node> getParameters( ) { // metodo "addPar" che aggiunge un nodo a campo "parameters"
+	public List<Node> getParameters( ) {
 		return parameters;
 	}
 
@@ -41,7 +46,7 @@ public class FunNode implements Node, DecNode {
 		declarations.add( declaration );
 	}
 	
-	public List<Node> getDeclarations( ) { // metodo "addPar" che aggiunge un nodo a campo "parameters"
+	public List<Node> getDeclarations( ) {
 		return declarations;
 	}
 

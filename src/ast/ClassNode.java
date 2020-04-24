@@ -5,21 +5,26 @@ import java.util.List;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents the definition of a class
+ * 
+ * @author Paolo Baldini
+ */
 public class ClassNode implements DecNode, Node {
 
-	private String ID;
-	private STEntry superEntry;
-	private Node symType;  //ClassTypeNode
-	private List<Node> fields;	//fieldNode
-	private List<Node> methods;	//methodNode
+	private String ID;			// class ID
+	private STEntry superEntry;	// optional super-type
+	private Node symType;  		// class-type
+	private List<Node> fields;	// list of required fields
+	private List<Node> methods;	// list of methods
 	
 	
-	public ClassNode( Node type, String name ) {
+	public ClassNode( String name, Node type ) {
 		this.symType = type;
 		this.superEntry = null;
 		this.ID = name;
-		this.fields = new ArrayList<>();
-		this.methods = new ArrayList<>();
+		this.fields = new ArrayList<>( );
+		this.methods = new ArrayList<>( );
 	}
 	
 	public String getID( ) {

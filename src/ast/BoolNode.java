@@ -2,6 +2,11 @@ package ast;
 
 import visitors.NodeVisitor;
 
+/**
+ * Represents a boolean value
+ * 
+ * @author Paolo Baldini
+ */
 public class BoolNode implements Node {
 
 	private boolean value;

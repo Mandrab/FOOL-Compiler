@@ -55,7 +55,7 @@ class TestCompiler {
 		testFool( "test_04", s -> s, RUNNER_LOGS + "0\n" );
 		testFool( "test_05", s -> s, RUNNER_LOGS + "1\n" );
 	}
-	
+
 	@Test
 	public void testException( ) {
 		try {
@@ -66,21 +66,40 @@ class TestCompiler {
 		fail( );
 	}
 
+	/**
+	 * Test program comparing provided result with expected one
+	 * 
+	 * @param <T>
+	 * 		type of result (converted from string): I might want an obj
+	 * @param foolFile
+	 * 		file to compile, run and test
+	 * @param resultMapper
+	 * 		map string result to required type
+	 * @param expectedResult
+	 * 		the expected result
+	 * @throws Exception
+	 * 		classical compile or run exception
+	 */
 	private <T> void testFool( String foolFile, Function<String,T> resultMapper, T expectedResult ) throws Exception {
 		
 		String fileName = FOOL_FILES_PATH + foolFile;
 
         Compiler.compile( fileName + ".fool" );
 
+        // set to catch result
         redirectIO( );
 
         Runner.runCode( fileName + ".asm", false );
 
+        // reset System.out
         restoreIO( );
 
         assertEquals( expectedResult, resultMapper.apply( testStream.toString( ) ) );
 	}
-	
+
+	/**
+	 * Redirect System.out to test-output-stream
+	 */
 	private void redirectIO( ) {
 		// Create a stream to hold the output
 		testStream = new ByteArrayOutputStream( );
@@ -91,6 +110,9 @@ class TestCompiler {
 		System.setOut( ps );
 	}
 
+	/**
+	 * Restore System.out to default output-stream
+	 */
 	private void restoreIO( ) {
 		// Put things back
 		System.out.flush( );

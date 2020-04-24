@@ -6,7 +6,7 @@ import java.util.Map;
 import ast.STEntry;
 
 /**
- * Contains the definition of fields and methods of each class
+ * Store virtual tables of class after exiting the declaration (otherwise the tables will be lost)
  * 
  * @author Paolo Baldini
  */
@@ -25,4 +25,5 @@ public class ClassTable {
 	public Map<String, STEntry> getClassVT( String classID ) {
 		return classTable.get( classID );
 	}
+
 }

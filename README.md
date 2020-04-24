@@ -62,13 +62,13 @@ Object-oriented code:
 
 However, being that a learning project, FOOL is not intended to be used as a real language. That's observable in some characteristics:
 
-* only a code file available (no imports)
+* no imports (only a code file available)
 * class declarations as first elements of the file
 * no *class* variables (variables exist outside the class or in methods/functions!)
-* immutable *class* parameters
-* *class* parameters can't be lambdas (but methods and functions parameters can!)
+* immutable *class'* fields
+* *class* fields can't be lambdas (but methods/functions' parameters can!)
 * no deallocation of objects
-* no file descriptors support
+* only *stdout* file descriptor available
 
 ## The Compiler
 
@@ -89,6 +89,23 @@ This is the component that checks that the code is correctly typed (some check a
 ### Code-Generator
 
     This section has to be expanded
+
+### Compiler API
+The final version of the compiler contains a CLI interface for build a FOOL file and run his generated code on the virtual machine. The available commands, to pass as arguments at the main file, are listed below:</br>
+
+Compiler main class: `Compiler path/to/file.fool`
+
+Runner main class: `Runner [-gui] path/to/file.asm`
+
+FOOLExecutor main class: `FOOLExecutor [-gui] [path/to/file]`
+
+Where `path/to/file` is, obviously, the path to the file. Note that `Compiler` and `Runner` class require extension but `FOOLExecutor` doesn't want it. Also, for the `FOOLExecutor` class the path is optional (if not specified, a default file will be used).</br>
+The `-gui` optional flag specifies, instead, if the GUI version of the virtual machine should be runned.
+
+## The Virtual Machine
+Generated assembly can be runned over a provided virtual machine. This one is, more precisely, a *stack* virtual machine that's provided with six register. Also, both a CLI and a GUI version are provided. Specifically, the last one has a great utility in debug, both for the compiler code and the FOOL code.
+
+![Visual virtual machine use](res/visual-virtual-machine.gif)
 
 ## Credits
 **Mario Bravetti**, teacher of the course. He established the working path.</br>

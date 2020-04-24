@@ -4,6 +4,11 @@ import static lib.FOOLLib.MEMSIZE;
 
 import java.util.Optional;
 
+/**
+ * Represents an instant of the execution of the code in the virtual machine
+ * 
+ * @author Paolo Baldini
+ */
 public class VMState {
 
 	private int[] memory;

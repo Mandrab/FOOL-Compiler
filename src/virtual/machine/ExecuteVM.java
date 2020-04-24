@@ -4,6 +4,11 @@ import generated.SVMParser;
 
 import static lib.FOOLLib.MEMSIZE;
 
+/**
+ * The basic (CLI) virtual machine on which run the assembly code
+ * 
+ * @author Mario Bravetti
+ */
 public class ExecuteVM {
 
 	public static final int CODESIZE = 10000;
@@ -19,113 +24,116 @@ public class ExecuteVM {
 	private int ra;
 	private int tm;
 
-	public ExecuteVM(int[] code) {
+	public ExecuteVM( int[] code ) {
 		this.code = code;
 	}
 
-	public void cpu() {
-		while (true) {
-			int bytecode = code[ip++]; // fetch
+	/**
+	 * Executes the assembly code
+	 */
+	public void cpu( ) {
+		while ( true ) {
+			int bytecode = code[ip++];	// fetch instruction
 			int v1, v2;
 			int address;
-			switch (bytecode) {
-			case SVMParser.PUSH:
-				push(code[ip++]);
+			switch ( bytecode ) {
+			case SVMParser.PUSH:	// push value on top of the stack
+				push( code[ip++] );
 				break;
-			case SVMParser.POP:
-				pop();
+			case SVMParser.POP:		// remove the top of the stack
+				pop( );
 				break;
-			case SVMParser.ADD:
-				v1 = pop();
-				v2 = pop();
-				push(v2 + v1);
+			case SVMParser.ADD:		// sum the two value on top of the stack
+				v1 = pop( );		// put the result on top of stack after removed the two operands
+				v2 = pop( );
+				push( v2 + v1 );
 				break;
-			case SVMParser.MULT:
-				v1 = pop();
-				v2 = pop();
-				push(v2 * v1);
+			case SVMParser.MULT:	// multiply the two value on top of the stack
+				v1 = pop( );		// put the result on top of stack after removed the two operands
+				v2 = pop( );
+				push( v2 * v1 );
 				break;
-			case SVMParser.DIV:
-				v1 = pop();
-				v2 = pop();
-				push(v2 / v1);
+			case SVMParser.DIV:		// divide the second value from the top of the stack by the value on top of the stack
+				v1 = pop( );		// put the result on top of stack after removed the two operands
+				v2 = pop( );
+				push( v2 / v1 );
 				break;
-			case SVMParser.SUB:
-				v1 = pop();
-				v2 = pop();
-				push(v2 - v1);
+			case SVMParser.SUB:		// subtract the first value on top of the stack from the second one
+				v1 = pop( );		// put the result on top of stack after removed the two operands
+				v2 = pop( );
+				push( v2 - v1 );
 				break;
-			case SVMParser.STOREW: //
-				address = pop();
-				memory[address] = pop();
+			case SVMParser.STOREW:	// consider the value at the top of the stack as an address
+				address = pop( );	// remove the address and save in the memory pointed by it
+				memory[address] = pop( );	// the value NOW on top of stack (and remove it from top)
 				break;
-			case SVMParser.LOADW: //
-				push(memory[pop()]);
+			case SVMParser.LOADW:		// consider the value at the top of the stack as an address
+				push( memory[pop( )] );	// remove the address and push the value pointed by it
 				break;
-			case SVMParser.BRANCH:
+			case SVMParser.BRANCH:		// jump to address specified in code
 				address = code[ip];
 				ip = address;
 				break;
-			case SVMParser.BRANCHEQ:
-				address = code[ip++];
-				v1 = pop();
-				v2 = pop();
-				if (v2 == v1)
+			case SVMParser.BRANCHEQ:	// if the value on top of the stack is equal to
+				address = code[ip++];	// the second one, then jump to address specified in code
+				v1 = pop( );
+				v2 = pop( );
+				if ( v2 == v1 )
 					ip = address;
 				break;
-			case SVMParser.BRANCHLESSEQ:
-				address = code[ip++];
-				v1 = pop();
-				v2 = pop();
-				if (v2 <= v1)
+			case SVMParser.BRANCHLESSEQ:// if the value on top of the stack is greater than
+				address = code[ip++];	// the second one, then jump to address specified in code
+				v1 = pop( );
+				v2 = pop( );
+				if ( v2 <= v1 )
 					ip = address;
 				break;
-			case SVMParser.JS: //
-				address = pop();
+			case SVMParser.JS:		// save the instruction pointer (to which return in the future) in ra
+				address = pop( );	// and jump to sub-routine (address on top of the stack)
 				ra = ip;
 				ip = address;
 				break;
-			case SVMParser.STORERA: //
-				ra = pop();
+			case SVMParser.STORERA:	// set ra to the value on top of the stack
+				ra = pop( );
 				break;
-			case SVMParser.LOADRA: //
-				push(ra);
+			case SVMParser.LOADRA:	// push value of ra on the stack
+				push( ra );
 				break;
-			case SVMParser.STORETM:
-				tm = pop();
+			case SVMParser.STORETM:	// save top of the stack into tm
+				tm = pop( );
 				break;
-			case SVMParser.LOADTM:
-				push(tm);
+			case SVMParser.LOADTM:	// push value of tm on the stack
+				push( tm );
 				break;
-			case SVMParser.LOADFP: //
-				push(fp);
+			case SVMParser.LOADFP:	// copy value of fp on the stack
+				push( fp );
 				break;
-			case SVMParser.STOREFP: //
-				fp = pop();
+			case SVMParser.STOREFP: // save top of the stack into fp
+				fp = pop( );
 				break;
-			case SVMParser.COPYFP: //
+			case SVMParser.COPYFP:	// save in fp the sp
 				fp = sp;
 				break;
-			case SVMParser.STOREHP: //
-				hp = pop();
+			case SVMParser.STOREHP:	// save top of the stack into hp
+				hp = pop( );
 				break;
-			case SVMParser.LOADHP: //
-				push(hp);
+			case SVMParser.LOADHP:	// put hp register value on the stack
+				push( hp );
 				break;
-			case SVMParser.PRINT:
-				System.out.println((sp < MEMSIZE) ? memory[sp] : "Empty stack!");
+			case SVMParser.PRINT:	// print top of the stack
+				System.out.println( ( sp < MEMSIZE) ? memory[sp] : "Empty stack!" );
 				break;
-			case SVMParser.HALT:
+			case SVMParser.HALT:	// exit program (execution)
 				return;
 			}
 		}
 	}
 
-	private int pop() {
+	private int pop( ) {
 		return memory[sp++];
 	}
 
-	private void push(int v) {
+	private void push( int v ) {
 		memory[--sp] = v;
 	}
 

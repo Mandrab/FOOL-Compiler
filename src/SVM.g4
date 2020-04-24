@@ -76,7 +76,7 @@ STOREW	 	: 'sw' ;
 LOADW		: 'lw' ;	
 BRANCH	 	: 'b' ;	
 BRANCHEQ 	: 'beq' ;	
-BRANCHLESSEQ:'bleq' ;	
+BRANCHLESSEQ: 'bleq' ;	
 JS	 		: 'js' ;	
 LOADRA	 	: 'lra' ;	
 STORERA  	: 'sra' ;	 

@@ -31,6 +31,11 @@ import javax.swing.SwingUtilities;
 
 import static lib.FOOLLib.MEMSIZE;
 
+/**
+ * GUI of the visual virtual machine
+ * 
+ * @author Paolo Baldini
+ */
 public class VMView {
 
 	private static final Font FONT = new Font( Font.MONOSPACED, Font.PLAIN, 12 );

@@ -52,7 +52,8 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 		lib = globalLib;
 	}
 
-	@Override public String visit( Node element ) {
+	@Override
+	public String visit( Node element ) {
 		try {
 			return super.visit( element );
 		} catch ( Exception e ) { e.printStackTrace( ); }
@@ -61,6 +62,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	}
 
 	/**
+	 * Evaluate AND expression
 	 * Multiply two boolean (0 false, 1 true):
 	 * 		0 * 0 = 0 (false)
 	 * 		0 * 1 = 0 (false)
@@ -381,127 +383,148 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 				end + ": \n";
 	}
 
+	/**
+	 * Code generation for method definition
+	 */
 	@Override public String visit( MethodNode element ) {
 
-		element.setLabel( lib.freshMethodLabel( ) );
-		
-		String declarationsCode = element.getDeclarations( ).stream( ).map( this::visit ).collect( Collectors.joining( ) );
-		
-		String removeDeclarationsCode = element.getDeclarations( ).stream( ).map( e -> e instanceof MethodNode
-				? "pop\n" + "pop\n" //pop del codice dichiarazione se funzionale + pop del codice dichiarazione
-				: "pop\n" ).collect( Collectors.joining( ) );
+		element.setLabel( lib.freshMethodLabel( ) );// generate a label for method
 
-		String removeParametersCode = element.getParameters( ).stream( ).map( e -> ( ( DecNode ) e ).getSymType( ) instanceof ArrowTypeNode
-				? "pop\n" + "pop\n"
-				: "pop\n" ).collect( Collectors.joining( ) );
+		String declarationsCode = element.getDeclarations( ).stream( )
+				.map( this::visit )					// generate code for every declaration
+				.collect( Collectors.joining( ) );
 
-		lib.putCode(
-				element.getLabel( ) + ":\n" + 
-				"cfp\n" + // setta il registro $fp / copy stack pointer into frame pointer
-				"lra\n" + // load from ra sullo stack
-				declarationsCode + // codice delle dichiarazioni
-				visit( element.getExpession( ) ) + "stm\n" + // salvo il risultato in un registro
-				removeDeclarationsCode + // devo svuotare lo stack, e faccio pop tanti quanti sono le var/fun dichiarate
-				"sra\n" + // salvo il return address
-				"pop\n" + // pop dell'AL (access link)
-				removeParametersCode + // pop dei parametri che ho in parlist
-				"sfp\n" + // ripristino il registro $fp al CL, in maniera che sia l'fp dell'AR del
-							// chiamante.
-				"ltm\n" + "lra\n" + "js\n" // js salta all'indirizzo che � in cima allo stack e salva la prossima
-											// istruzione in ra.
+		// NOTE that methods cannot have functional declarations
+		String removeDeclarationsCode = element.getDeclarations( ).stream( )
+				.map( e -> "pop\n" )				// pop declarations
+				.collect( Collectors.joining( ) );
+
+		// parameters push is done by call/class-call node
+
+		String removeParametersCode = element.getParameters( ).stream( )
+				.map( e -> ( ( DecNode ) e ).getSymType( ) instanceof ArrowTypeNode	// functional parameters use double size in memory (so needs two pop)
+						? "pop\n" + "pop\n"			// pop parameters (functional ones)
+						: "pop\n"					// pop parameters (non-functional ones)
+				).collect( Collectors.joining( ) );
+
+		lib.putCode( element.getLabel( ) + ":\n" +	// insert method's start point
+				"cfp\n" +							// copy sp into fp
+				"lra\n" +							// push ra on stack
+				declarationsCode +					// generate code for every declaration
+				visit( element.getExpession( ) ) +	// generate expression's code
+				"stm\n" +							// store expression's result in tm
+				removeDeclarationsCode +			// pop declarations (now unneeded)
+				"sra\n" +							// restore ra
+				"pop\n" +							// pop AL (access link)
+				removeParametersCode +				// pop parameters (now unneeded)
+				"sfp\n" +							// reset fp to CL (caller AR)
+				"ltm\n" +							// push function's result on top of the stack
+				"lra\n" + "js\n"					// load return address and jump to it
 		);
-			
+
 		return "";
 	}
 
-	@Override
-	public String visit( MinusNode element ) {
+	/**
+	 * Generate code for subtraction
+	 */
+	@Override public String visit( MinusNode element ) {
 		return visit( element.getLeft( ) ) + visit( element.getRight( ) ) + "sub\n";
 	}
 
-	@Override
-	public String visit( NewNode element ) {
-		//fa push dei valori sullo stack
-		String fieldCode = element.getFields( ).stream( ).map( this::visit ).collect( Collectors.joining( ) );
-		
-		fieldCode += element.getFields( ).stream( ).map( e -> "lhp\n" + //push hp
-				"sw\n" + 
-				"push 1\n" + "lhp\n" + "add\n" + "shp\n" ).collect( Collectors.joining( ) ); //hp++	
-		
-		fieldCode += "push " + ( element.getEntry( ).getOffset( ) + FOOLLib.MEMSIZE ) + "\n" + // push DP
-				"lw\n" +
-				"lhp\n" +
-				"sw\n" +
-				"lhp\n";
+	/**
+	 * Generate code for object instantiation
+	 */
+	@Override public String visit( NewNode element ) {
+		String fieldCode = element.getFields( ).stream( )
+				.map( this::visit )					// generate code for every field
+				.collect( Collectors.joining( ) );
 
-		return fieldCode + "push 1\n" + "lhp\n" + "add\n" + "shp\n";
+		fieldCode += element.getFields( ).stream( )
+				.map( e -> "lhp\n" +				// push hp
+						"sw\n" +					// store second value on the stack in heap
+						INC_HP						// increment hp
+				).collect( Collectors.joining( ) );
+
+		// get global AR (memsize) and add class offset
+		int dispatchTableStackOffset = element.getEntry( ).getOffset( ) + FOOLLib.MEMSIZE; 
+		fieldCode += "push " + dispatchTableStackOffset + "\n" + // push dispatch pointer's address 
+				"lw\n" +							// put the dispatch pointer on top of the stack
+				"lhp\n" +							// push hp on stack
+				"sw\n" +							// store dispatch pointer on heap
+				"lhp\n";							// put hp on stack
+
+		return fieldCode + INC_HP;
 	}
 
-	@Override
-	/*
-	 * Per fare il not di un booleano pusha 1, poi il valore del booleano (0 false,
-	 * 1 true) e poi sottrae. Cos� se era true (1) con la sottrazione fa a 0
-	 * (false). Viceversa se era false (0) con la sottrazione va a 1 (true).
+	/**
+	 * Generate code for negate a boolean:
+	 * 		1 - 0 = 1 (true)
+	 * 		1 - 1 = 0 (false)
 	 */
-	public String visit( NotNode element ) {
+	@Override public String visit( NotNode element ) {
 		return "push 1\n" +
 				visit( element.getExpression( ) ) +
 				"sub\n";
 	}
 
-	@Override
-	/*
-	 * crea due etichette fresh. Per vedere se i due valori di codeGeneration sono
-	 * uguali (booleani dove 0 = false e 1 = true) allora basta SOMMARE i due
-	 * valori. Infatti nell'or se la somma fa 0 significa che sono entrambi 0 e
-	 * quindi torner� false. Dopodich� confronta questa somma con 0 che viene
-	 * pushato e se sono uguali allora l'or � false e salta a l1 dove viene pushato
-	 * 0 che � il valore di ritorno false, se sono diversi allora � true, pusha 1
-	 * che � il valore di ritorno true e salta a l2.
-	 * 
-	 * La logica � invertita rispetto all'AND.
+	/**
+	 * Evaluate OR expression
+	 * If the sum of the two boolean is 0, then OR
+	 * result is 'false', otherwise is 'true' (false = 0, true = 1)
 	 */
-	public String visit( OrNode element ) {
-		String l1= lib.freshLabel( );
-	    String l2= lib.freshLabel( );
+	@Override public String visit( OrNode element ) {
+		String False = lib.freshLabel( );
+	    String end = lib.freshLabel( );
+
 	    return visit( element.getLeft( ) ) +
 	    		visit( element.getRight( ) ) +
-	    		"add\n" +
-				"push 0\n" +
-				"beq " + l1 + "\n" +
-				"push 1\n" +
-				"b " + l2 + "\n" +
-				l1 + ": \n" +
-				"push 0\n" +
-				l2 + ": \n";	 
+	    		"add\n" +							// sum the two boolean (false = 0, true = 1)
+				"push 0\n" +						// push 0 to compare
+				"beq " + False + "\n" +				// if sum equals to 0, then jump to False ...
+				"push 1\n" +						// otherwise push 'true' ...
+				"b " + end + "\n" +					// ... and jump to end
+				False + ": \n" +
+				"push 0\n" +						// push 'false'
+				end + ": \n";	 
 	}
 
-	@Override
-	public String visit( ParNode element ) {
-		return null;
-	}
+	/**
+	 * A parameter-node contains only information needed in type-check
+	 */
+	@Override public String visit( ParNode element ) { return null; }
 
-	@Override
-	public String visit( PlusNode element ) {
+	/**
+	 * Generate code for sum
+	 */
+	@Override public String visit( PlusNode element ) {
 		return visit( element.getLeft( ) ) + visit( element.getRight( ) ) + "add\n";
 	}
 
-	@Override
-	public String visit( PrintNode element ) {
+	/**
+	 * Add print instruction to code
+	 */
+	@Override public String visit( PrintNode element ) {
 		return visit( element.getExpression( ) ) + "print\n";
 	}
 
-	@Override
-	public String visit( ProgLetInNode element ) {
-		return "push 0\n" +
-				element.getDeclarations( ).stream( ).map( this::visit ).collect( Collectors.joining( ) ) +
-				visit( element.getExpression( ) ) +
-				"halt\n" +
-				lib.getCode( );
+	/**
+	 * Generate code for program node (with let-in)
+	 */
+	@Override public String visit( ProgLetInNode element ) {
+		return "push 0\n" +							// initial instruction
+				element.getDeclarations( ).stream( )
+					.map( this::visit )				// generate code for declarations
+					.collect( Collectors.joining( ) ) +
+				visit( element.getExpression( ) ) +	// generate code for expression
+				"halt\n" +							// exit instruction
+				lib.getCode( );						// subroutines code
 	}
 
-	@Override
-	public String visit( ProgNode element ) {
+	/**
+	 * Generate code for program node (without let-in)
+	 */
+	@Override public String visit( ProgNode element ) {
 		return visit( element.getExpression( ) ) + "halt\n";
 	}
 
@@ -509,19 +532,23 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	 * Reference-type-node is used only in type-check, so it doesn't produce assembly code
 	 */
 	@Override public String visit( RefTypeNode element ) { return null; }
-	
-	@Override
-	public String visit( STEntry visitable ) {
-		return null;
-	}
 
-	@Override
-	public String visit( TimesNode element ) {
+	/**
+	 * STEntry is not (directly) used in AST and so doesn't generate code
+	 */
+	@Override public String visit( STEntry visitable ) { return null; }
+
+	/**
+	 * Generate code for multiplication
+	 */
+	@Override public String visit( TimesNode element ) {
 		return visit( element.getLeft( ) ) + visit( element.getRight( ) ) + "mult\n";
 	}
 
-	@Override
-	public String visit(VarNode element) {
+	/**
+	 * Generate variable code (evaluate expression)
+	 */
+	@Override public String visit( VarNode element ) {
 		return visit( element.getExpression( ) );
 	}
 

@@ -38,6 +38,11 @@ import ast.STEntry;
 import ast.TimesNode;
 import ast.VarNode;
 
+/**
+ * Print out AST visiting it
+ * 
+ * @author Paolo Baldini
+ */
 public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVisitor<String> {
 	
 	private String baseIndent;

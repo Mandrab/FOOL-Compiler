@@ -42,10 +42,11 @@ import ast.VarNode;
 import lib.FOOLLib;
 import lib.TypeException;
 
-// TODO commento
-//fa il type checking e ritorna: 
-	//per una espressione, il suo tipo (oggetto BoolTypeNode o IntTypeNode)
-	//per una dichiarazione, "null"
+/**
+ * AST visitor to type-check program
+ * 
+ * @author Paolo Baldini
+ */
 public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeVisitor<Node> {
 
 	private final FOOLLib lib;

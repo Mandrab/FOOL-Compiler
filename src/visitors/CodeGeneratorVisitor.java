@@ -43,6 +43,11 @@ import ast.TimesNode;
 import ast.VarNode;
 import lib.FOOLLib;
 
+/**
+ * AST visitor to generate program (assembly) code
+ * 
+ * @author Paolo Baldini
+ */
 public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements NodeVisitor<String> {
 
 	private static final String INC_HP = "push 1\n" + "lhp\n" + "add\n" + "shp\n";

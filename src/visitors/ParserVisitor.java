@@ -46,6 +46,11 @@ import lib.ClassTable;
 import lib.FOOLLib;
 import lib.SymbolTable;
 
+/**
+ * Parse tree visitor to generate AST ('decorated' with symbol table informations)
+ * 
+ * @author Paolo Baldini
+ */
 public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 	private final FOOLLib lib;

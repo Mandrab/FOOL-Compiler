@@ -47,124 +47,143 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 	private static final String INC_HP = "push 1\n" + "lhp\n" + "add\n" + "shp\n";
 	private final FOOLLib lib;
-	
+
 	public CodeGeneratorVisitor( FOOLLib globalLib ) {
 		lib = globalLib;
 	}
-	
-	@Override
-	public String visit( Node element ) {
+
+	@Override public String visit( Node element ) {
 		try {
 			return super.visit( element );
-		} catch ( Exception e ) { e.printStackTrace(); }
+		} catch ( Exception e ) { e.printStackTrace( ); }
 
 		return null;
 	}
-	
-	@Override
-	public String visit( AndNode element ) {
+
+	/**
+	 * Multiply two boolean (0 false, 1 true):
+	 * 		0 * 0 = 0 (false)
+	 * 		0 * 1 = 0 (false)
+	 * 		1 * 1 = 1 (true)
+	 */
+	@Override public String visit( AndNode element ) {
 		return visit( element.getLeft( ) ) +
 				visit( element.getRight( ) ) +
-				 "mult\n";	   // 1 per True, 0 per False.
+				"mult\n";
 	}
 
-	@Override
-	public String visit( ArrowTypeNode element ) {
-		return null;
-	}
+	/**
+	 * Arrow-type-node is used only in type-check, so it doesn't produce assembly code
+	 */
+	@Override public String visit( ArrowTypeNode element ) { return null; }
 
-	@Override
-	public String visit( BoolNode element ) {
+	/**
+	 * If boolean value is true return 1, otherwise return 0
+	 */
+	@Override public String visit( BoolNode element ) {
 		return "push " + ( element.getValue( ) ? 1 : 0 ) + "\n";
 	}
 
-	@Override
-	public String visit( BoolTypeNode element ) {
-		return null;
-	}
+	/**
+	 * Bool-type-node is used only in type-check, so it doesn't produce assembly code
+	 */
+	@Override public String visit( BoolTypeNode element ) { return null; }
 
-	@Override
-	public String visit( CallNode element ) {
-		String result = "lfp\n"; // push Control Link (pointer to frame of function id caller)
+	/**
+	 * Produce assembly code for routine call (function call or method call inside the class)
+	 */
+	@Override public String visit( CallNode element ) {
+		String result = "lfp\n";	// push Control Link (pointer to frame of call)
 
 		// generate code for parameter expressions in reversed order
 		for ( int i = element.getParameters( ).size( ) - 1; i >= 0; i-- )
 			result += visit( element.getParameters( ).get( i ) );
 
-		result += "lfp\n";
-		
-		// push Access Link (pointer to frame of function id declaration, reached as for variable id)
+		result += "lfp\n";	// push Control Link used to ascend to declaration AR
+
+		// find Access Link (pointer to frame of function's declaration, reached as for variable id)
 		for ( int i = 0; i < element.getNestingLevel( ) - element.getEntry( ).getNestingLevel( ); i++ )
 			result += "lw\n";
 
-		if ( element.getEntry( ).isMethod( ) ) {
+		// for a method, the label is found in dispatch table
+		if ( element.getEntry( ).isMethod( ) )
 			return result + 
-					"stm\n" + "ltm\n" + "ltm\n" + // duplicate top of the stack
-					"lw\n" + //vado nella DT
-			        "push " + element.getEntry( ).getOffset( ) + "\n"+ //pusho indirizzo della funzione recuperato a offset ID
-					"add\n" +
-		            "lw\n" + // push function address (value at: pointer to frame of function id declaration + its offset)
-			        "js\n";// jump to popped address (putting in $ra address of subsequent instruction)
-		} else {
-			return result +
-					"push " + element.getEntry( ).getOffset( ) + "\n" + // push indirizzo ad AR dichiarazione funzione, recuperato a offset ID
-					"add\n" + 
-					"stm\n" + // duplicate top of the stack.
-					"ltm\n" +
-					"lw\n" + 
-					"ltm\n" + // ripusho l'indirizzo ottenuto precedentemente, per poi calcolarmi offset ID - 1
-					"push 1\n" + // push 1, 
-					"sub\n" + // sottraggo a offset ID - 1, per recuperare l'indirizzo funzione.
-					"lw\n" + // push function address.
-					"js\n";
-		}
+					"stm\n" + "ltm\n" + "ltm\n" +	// duplicate top of the stack (contains AR of declaration)
+					"lw\n" +						// get value (dispatch pointer)
+			        "push " + element.getEntry( ).getOffset( ) + "\n"+ // push method offset
+					"add\n" +						// get method's label address
+		            "lw\n" + 						// get value (label of method's subroutine)
+			        "js\n";							// jump to subroutine (put address of next instruction in ra)
+
+		// for a function, the label is found in AR of declaration
+		return result +
+				"push " + element.getEntry( ).getOffset( ) + "\n" +	// push function offset
+				"add\n" + 							// get function's declaration-AR's address
+				"stm\n" + "ltm\n" +					// save top of stack in tm register
+				"lw\n" +							// get value (AR address of function's declaration)
+				"ltm\n" +							// put AR address again on stack
+				"push 1\n" +						// label address is saved after the AR address in the stack
+				"sub\n" +							// get function's label address
+				"lw\n" +							// get value (label of function's subroutine)
+				"js\n";								// jump to subroutine (put address of next instruction in ra)
 	}
 
-	@Override
-	public String visit( ClassCallNode element ) {
-		String result = "lfp\n";// push Control Link (pointer to frame of function id caller)
+	/**
+	 * Produce assembly code for method call
+	 */
+	@Override public String visit( ClassCallNode element ) {
+		String result = "lfp\n";	// push Control Link (pointer to frame of function id caller)
+
 		// generate code for parameter expressions in reversed order
 		for ( int i = element.getParameters( ).size( ) - 1; i >= 0; i-- )
 			result += visit( element.getParameters( ).get( i ) );
 
-		result += "lfp\n";
-		// Find the correct AR address.
+		result += "lfp\n";	// push Control Link used to ascend to declaration AR
+
+		// Find the correct AR of (object) declaration.
 		for ( int i = 0; i < element.getNestingLevel( ) - element.getEntry( ).getNestingLevel( ); i++ )
 			result += "lw\n";
 
 		return result +
-				"push " + element.getEntry( ).getOffset( ) + "\n" + // push indirizzo ad AR dichiarazione funzione, recuperato a offset ID 
-				"add\n" + //Cos� ho l'Obj Pointer dell'obj nell'AR
-				"lw\n" +//Carico sullo stack
-				"stm\n" + "ltm\n" + "ltm\n" + // duplico il val sullo stack
-				"lw\n" + // stack <- indirizzo dt --- paul (?)
-				"push " + element.getMethodEntry( ).getOffset( ) + "\n"+
-				"add\n" +
-				"lw\n" + //Carico sullo stack
-				"js\n"; //Salto all'indirizzo
+				"push " + element.getEntry( ).getOffset( ) + "\n" +	// push object offset
+				"add\n" +							// get object pointer's address
+				"lw\n" +							// get value (address of object instance)
+				"stm\n" + "ltm\n" + "ltm\n" +		// duplicate top of the stack (contains object pointer)
+				"lw\n" +							// put dispatch pointer on stack
+				"push " + element.getMethodEntry( ).getOffset( ) + "\n" +	// push method offset
+				"add\n" +							// get method's label address
+				"lw\n" +							// get value (label of method's subroutine)
+				"js\n";								// jump to subroutine (put address of next instruction in ra)
 	}
 
-	@Override
-	public String visit( ClassNode element ) {
+	/**
+	 * Generate code for class definition
+	 */
+	@Override public String visit( ClassNode element ) {
+		// list of methods' labels
 		List<String> myDispatchTable = new ArrayList<>( );
 		lib.addDispatchTable( myDispatchTable );
 
 		int parentMethods = 0;
+
+		// if extends, get labels of parent's methods
 		if ( element.getSuper( ) != null ) {
 			parentMethods = ( ( ClassTypeNode ) ( element.getSuper( ).getRetType( ) ) ).getMethods( ).size( );
 			List<String> superLabel = lib.getDispatchTable( -2 -element.getSuper( ).getOffset( ) );
-			
+
 			for( String s : superLabel )
 				myDispatchTable.add( s );
 		}
-		
+
 		for( Node method : element.getMethods( ) ) {
-			visit( method );
+			visit( method );	// generate code for each method
 
 			String methodLabel = ( ( MethodNode ) method ).getLabel( );
 			int methodOffset = ( ( MethodNode ) method ).getOffset( );
 
-			if ( methodOffset < parentMethods ) { // override
+			// if offset belong to parent's method, then there's override (replace to the new label)
+			// otherwise, simply add the method
+			if ( methodOffset < parentMethods ) {
 				myDispatchTable.remove( methodOffset );
 				myDispatchTable.add( methodOffset, methodLabel );
 			} else {
@@ -172,173 +191,197 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 			}
 		}
 
-		return "lhp\n" + myDispatchTable.stream( ).map( s -> "push " + s + "\n" + //push label
-				"lhp\n" + //push hp
-				"sw\n" +
-				INC_HP ).collect( Collectors.joining( ) );
+		return "lhp\n" +
+				myDispatchTable.stream( ).map( s -> // for each method
+						"push " + s + "\n" +		// push the label
+						"lhp\n" + "sw\n" +			// store label at address pointed by hp
+						INC_HP						// increase hp
+				).collect( Collectors.joining( ) );
 	}
 
-	@Override
-	public String visit( ClassTypeNode element ) {
-		return null;
-	}
+	/**
+	 * Class-type-node is used only in type-check, so it doesn't produce assembly code
+	 */
+	@Override public String visit( ClassTypeNode element ) { return null; }
 
-	@Override
-	public String visit( DivNode element ) {
+	/**
+	 * Generate code for division
+	 */
+	@Override public String visit( DivNode element ) {
 		return visit( element.getLeft( ) ) + visit( element.getRight( ) ) + "div\n";
 	}
 
-	@Override
-	public String visit( EmptyNode element ) {
-		return "push -1\n"; // -1 e' certamente diverso da qualsiasi indirizzo sullo stack
+	/**
+	 * Generate code for 'null' address (equals to -1: is different by any other address)
+	 */
+	@Override public String visit( EmptyNode element ) {
+		return "push -1\n";
 	}
 
-	@Override
-	public String visit( EmptyTypeNode element ) {
-		return null;
+	/**
+	 * Empty-type-node is used only in type-check, so it doesn't produce assembly code
+	 */
+	@Override public String visit( EmptyTypeNode element ) { return null; }
+
+	/**
+	 * Generate code for equal compare
+	 */
+	@Override public String visit( EqualNode element ) {
+		String equal = lib.freshLabel( );
+		String end = lib.freshLabel( );
+
+		return visit( element.getLeft( ) ) +	// get left value
+				visit( element.getRight( ) ) +	// get right value
+				"beq " + equal + "\n" + 		// if equals, jump to equals label ...
+				"push 0\n" + 					// ... otherwise push 'false' ...
+				"b " + end + "\n" + 			// ... then jump to end
+				equal + ": \n" +
+				"push 1\n" +					// push 'true'
+				end + ": \n";
 	}
 
-	@Override
-	public String visit( EqualNode element ) {
-		String l1 = lib.freshLabel( );
-		String l2 = lib.freshLabel( );
-		return visit( element.getLeft( ) ) + 
-				visit( element.getRight( ) ) + 
-				"beq " + l1 + "\n" + 
-				"push 0\n" + 
-				"b " + l2 + "\n" + 
-				l1 + ": \n" + 
-				"push 1\n" + 
-				l2 + ": \n";
-	}
+	/**
+	 * A field-node contains only information needed in type-check
+	 */
+	@Override public String visit( FieldNode element ) { return null; }
 
-	@Override
-	public String visit(FieldNode element) {
-		return null;
-	}
+	/**
+	 * Code generation for function definition
+	 */
+	@Override public String visit( FunNode element ) {
+		final String functionLabel = lib.freshFunctionLabel( );	// generate function label
 
-	@Override
-	public String visit( FunNode element ) {
-		final String functionLabel = lib.freshFunctionLabel( );
+		final String result = functionLabel + ":\n" +
+				"cfp\n" +							// copy sp into fp
+				"lra\n" +							// push ra on stack
+				element.getDeclarations( ).stream( )
+				.map( this::visit )					// generate code for every declaration
+				.collect( Collectors.joining( ) );
 
-		final String result = functionLabel + ":\n" + "cfp\n" + // setta il registro $fp / copy stack pointer into frame pointer
-				"lra\n" + // load from ra sullo stack
-				element.getDeclarations( ).stream( ).map( this::visit ).collect( Collectors.joining( ) );
-		
-		final String remdeclCode = element.getDeclarations( ).stream( ).map( e -> e instanceof FunNode 
-				? "pop\n" + "pop\n" //pop del codice dichiarazione se funzionale + pop del codice dichiarazione
-				: "pop\n" ).collect( Collectors.joining( ) );
-		
-		final String parCode = element.getParameters( ).stream( ).map( e -> ( ( DecNode ) e ).getSymType( ) instanceof ArrowTypeNode 
-				? "pop\n" + "pop\n" //pop dei parametri se funzionale + pop dei parametri
-				: "pop\n" ).collect( Collectors.joining( ) );
+		final String popDeclarations = element.getDeclarations( ).stream( )
+				.map( e -> e instanceof FunNode		// functional declaration use double size in memory (so needs two pop)
+						? "pop\n" + "pop\n"			// pop declarations (functional ones)
+						: "pop\n"					// pop declarations (non-functional ones)
+				).collect( Collectors.joining( ) );
+
+		// parameters push is done by call node
+
+		final String popParameters = element.getParameters( ).stream( )
+				.map( e -> ( ( DecNode ) e ).getSymType( ) instanceof ArrowTypeNode // functional parameters use double size in memory (so needs two pop)
+						? "pop\n" + "pop\n"			// pop parameters (functional ones)
+						: "pop\n"					// pop parameters (non-functional ones)
+				).collect( Collectors.joining( ) );
 
 		lib.putCode( result +
-				visit( element.getExpession( ) ) + "stm\n" + // salvo il risultato in un registro
-				remdeclCode + // devo svuotare lo stack, e faccio pop tanti quanti sono le var/fun dichiarate
-				"sra\n" + // salvo il return address
-				"pop\n" + // pop dell'AL (access link)
-				parCode + // pop dei parametri che ho in parlist
-				"sfp\n" + // ripristino il registro $fp al CL, in maniera che sia l'fp dell'AR del
-							// chiamante.
-				"ltm\n" + "lra\n" + "js\n" // js salta all'indirizzo che � in cima allo stack e salva la prossima
-											// istruzione in ra.
+				visit( element.getExpession( ) ) +	// generate expression's code
+				"stm\n" +							// store expression's result in tm
+				popDeclarations +					// pop declarations (now unneeded)
+				"sra\n" +							// restore ra
+				"pop\n" +							// pop AL (access link)
+				popParameters +						// pop parameters (now unneeded)
+				"sfp\n" +							// reset fp to CL (caller AR)
+				"ltm\n" +							// push function's result on top of the stack
+				"lra\n" + "js\n"					// load return address and jump to it
 		);
 
-		return "lfp\n" + "push " + functionLabel + "\n";
+		return "lfp\n" +							// push AR of declaration
+				"push " + functionLabel + "\n";		// push function label
 	}
 
-	@Override
-	public String visit( GreaterEqualNode element ) {
+	/**
+	 * Generate code for greater-equal node
+	 */
+	@Override public String visit( GreaterEqualNode element ) {
 		final String lesserEqual = lib.freshLabel( );
-		final String greater = lib.freshLabel( );
+		final String end = lib.freshLabel( );
 		
-		// NOTE that right and left code generation is swapped!
+		// NOTE that right and left code generation is swapped! A >= B --> B <= A
 		return visit( element.getRight( ) ) +
 				visit( element.getLeft( ) ) +
-				"bleq " + lesserEqual + "\n" +
-				"push 0\n" + //in caso negativo pusho 0 (false)
-				"b " + greater + "\n" +
+				"bleq " + lesserEqual + "\n" +		// if less-equal, jump to less-equal label ...
+				"push 0\n" +						// ... otherwise push 'false' ...
+				"b " + end + "\n" +					// ... then jump to end
 				lesserEqual + ": \n" +
-				"push 1\n" + //in caso positivo pusho 1 (true)
-				greater + ": \n";
+				"push 1\n" +						// push 'true' (greater-equal)
+				end + ": \n";
 	}
 
-	@Override
-	public String visit( IdNode element ) {
-		String getAR = IntStream.range( 0, element.getNestingLevel( ) - element.getEntry( ).getNestingLevel( ) ).mapToObj( e -> "lw\n" ).collect( Collectors.joining( ) );
+	/**
+	 * Generate code for an 'id'
+	 */
+	@Override public String visit( IdNode element ) {
+		// generate code for obtain the AR of declaration of id
+		// ascend Control Links until AR of declaration
+		String findAR = "lfp\n" +
+				IntStream.range( 0, element.getNestingLevel( ) - element.getEntry( ).getNestingLevel( ) )
+				.mapToObj( e -> "lw\n" ).collect( Collectors.joining( ) );
 
-		if ( ! ( element.getEntry( ).getRetType( ) instanceof ArrowTypeNode ) ) {
-			return "lfp\n" +	// AL
-					getAR +		// Andiamo nel suo AR. getAr ci da l'AL.
-					"push " + element.getEntry( ).getOffset( ) + "\n" +	// e aggiungiamo 
-					"add\n" +
-					"lw\n";
-		} else {
-			/* ArrowTypeNode
-			 * qualsiasi ID con tipo funzionale (vero ID di funzione oppure
-			 * ID di variabile o parametro di tipo funzione) occupa un offset doppio:
-			 * [a offset messo in symbol table  ] FP ad AR dichiarazione funzione
-			 * [a offset messo in symbol table-1] indir funzione (per invocazione suo codice)
-			 */
-			return  // Salviamo sullo Stack l'FP ad AR dichiarazione funzione. FP del frame dove � dichiarata la funzione.
-					"lfp\n" +
-					getAR +		// Andiamo nel suo AR. getAR ci da l'AL.
-					"push " + element.getEntry( ).getOffset( ) + "\n" +
-					"add\n" +
-					"lw\n" +
-					// Salviamo ora sullo Stack l'indir della funzione (per invocazione del suo codice). La sua label.
-					"lfp\n" +
-					getAR +		// Andiamo nel suo AR. getAR ci da l'AL.
-					"push " + element.getEntry( ).getOffset( ) + "\n" +
-					"push 1\n" +
-					"sub\n" +
-					"add\n" +
-					"lw\n";	// Mettiamo sullo stack l'indirizzo della funzione (di nouvo). Ma non sono sicuro.
-		}
+		// if it's not a functional id ...
+		if ( ! ( element.getEntry( ).getRetType( ) instanceof ArrowTypeNode ) )
+			return findAR +							// find AR of declaration
+					"push " + element.getEntry( ).getOffset( ) + "\n" +	// push id offset 
+					"add\n" +						// get address of value
+					"lw\n";							// put value on top of the stack
+
+		// if it's a functional id, then it occupies double space in memory (AL and function's label)
+		return findAR +								// find AR of declaration of id
+				"push " + element.getEntry( ).getOffset( ) + "\n" +	// push id offset
+				"add\n" +							// get address of function's AL
+				"stm\n" + "ltm\n" +               	// save top of stack in tm (contains address of id)
+				"lw\n" +							// load AL on top of the stack
+				"ltm\n" +							// put address of id on stack
+				"push 1\n" +						// previous value on stack contains function's label
+				"sub\n" +							// get function's label
+				"lw\n";								// put on top of the stack the function's label
 	}
 
-	@Override
-	public String visit( IfNode element ) {
-		String l1 = lib.freshLabel( );
-	    String l2 = lib.freshLabel( );
-	    return visit( element.getCondition( ) ) +
-	    		"push 1\n" +
-				"beq " + l1 + "\n" +				 				  
-				visit( element.getElseBranch( ) ) +
-				"b " + l2 + "\n" +
-				l1 + ": \n" +
-				visit( element.getThenBranch( ) ) +
-				l2 + ": \n";	     
+	/**
+	 * Generate code for if-then-else node
+	 */
+	@Override public String visit( IfNode element ) {
+		String then = lib.freshLabel( );
+	    String end = lib.freshLabel( );
+
+	    return visit( element.getCondition( ) ) +	// get condition result (0 or 1)
+	    		"push 1\n" +						// push 'true' to compare
+				"beq " + then + "\n" +				// if condition is 'true', then jump to 'then-branch' ...
+				visit( element.getElseBranch( ) ) +	// ... else execute code of 'else-branch' ...
+				"b " + end + "\n" +					// ... and jump to end
+				then + ": \n" +
+				visit( element.getThenBranch( ) ) +	// execute code of 'then-branch'
+				end + ": \n";	     
 	}
 
-	@Override
-	public String visit( IntNode element ) {
+	/**
+	 * Push int value on top of the stack
+	 */
+	@Override public String visit( IntNode element ) {
 		return "push " + element.getValue( ) + "\n";
 	}
 
-	@Override
-	public String visit( IntTypeNode element ) {
-		return null;
-	}
+	/**
+	 * Int-type-node is used only in type-check, so it doesn't produce assembly code
+	 */
+	@Override public String visit( IntTypeNode element ) { return null; }
 
-	@Override
-	public String visit( LessEqualNode element ) {
+	/**
+	 * Generate code for less-equal node
+	 */
+	@Override public String visit( LessEqualNode element ) {
 		String lesserEqual = lib.freshLabel( );
-	    String greater = lib.freshLabel( );
+	    String end = lib.freshLabel( );
 
 	    return visit( element.getLeft( ) ) +
 	    		visit( element.getRight( ) ) +
-				"bleq " + lesserEqual + "\n" +
-				"push 0\n" + //in caso negativo pusho 0 (false)
-				"b " + greater + "\n" +
+				"bleq " + lesserEqual + "\n" +	// if less-equal, jump to less-equal label ...
+				"push 0\n" +					// ... otherwise push 'false' ...
+				"b " + end + "\n" +				// ... then jump to end
 				lesserEqual + ": \n" +
-				"push 1\n" + //in caso positivo pusho 1 (true)
-				greater + ": \n";	         
+				"push 1\n" +					// push 'true' (greater-equal)
+				end + ": \n";
 	}
 
-	@Override
-	public String visit( MethodNode element ) {
+	@Override public String visit( MethodNode element ) {
 
 		element.setLabel( lib.freshMethodLabel( ) );
 		
@@ -462,10 +505,10 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 		return visit( element.getExpression( ) ) + "halt\n";
 	}
 
-	@Override
-	public String visit( RefTypeNode element ) {
-		return null;
-	}
+	/**
+	 * Reference-type-node is used only in type-check, so it doesn't produce assembly code
+	 */
+	@Override public String visit( RefTypeNode element ) { return null; }
 	
 	@Override
 	public String visit( STEntry visitable ) {

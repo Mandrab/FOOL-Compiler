@@ -44,31 +44,26 @@ var :
 	VAR vID = ID COLON vT = type ASS vE = exp ;
 
 exp	:
-	l = term
-		(
-			PLUS r = term  
-    	| 	MINUS r = term 
-        | 	OR r = term    
-        )* ;
+		term
+	|	l = exp PLUS r = exp
+	|	l = exp MINUS r = exp
+	|	l = exp OR r = exp ;
 
 term :
-	l = factor
-		(
-			TIMES r = factor 
-  		| 	DIV r = factor 
-  	   	| 	AND r = factor 
-  	   	)* ;
+		factor
+	|	l = term TIMES r = term
+	|	l = term DIV r = term
+	|	l = term AND r = term ;
 
 factor :
-	l = value
-		(
-			EQ r = value 
-	   	| 	GE r = value 
-	   	| 	LE r = value
-	   	)* ;
-  	
+		value
+	|	l = factor EQ r = factor 
+   	| 	l = factor GE r = factor 
+   	| 	l = factor LE r = factor ;
+
 value :
-		INTEGER																	#integerValue
+		
+		MINUS? INTEGER															#integerValue
 	| 	( TRUE | FALSE )														#booleanValue
 	| 	NULL																	#nullValue
 	| 	NEW ID LPAR ( exp ( COMMA exp )* )? RPAR								#newValue
@@ -130,8 +125,8 @@ NEW 	: 'new' ;
 NULL    : 'null' ;	  
 INT	    : 'int' ;
 BOOL	: 'bool' ;
-ARROW   : '->' ; 	
-INTEGER : '0' | ('-')?(('1'..'9')('0'..'9')*) ; 
+ARROW   : '->' ;
+INTEGER : '0' | ('1'..'9')('0'..'9')* ; 
 
 ID  	: ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;
 

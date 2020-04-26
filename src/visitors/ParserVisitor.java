@@ -428,33 +428,35 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		
 		return new ArrowTypeNode( parameters, visit( ctx.type( ) ) );
 	}
-	
+
 	@Override
 	public Node visitExp(FOOLParser.ExpContext ctx) {
-		if ( ! ctx.PLUS( ).isEmpty( ) ) return new PlusNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ! ctx.MINUS( ).isEmpty( ) ) return new MinusNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ! ctx.OR( ).isEmpty( ) ) return new OrNode( visit( ctx.l ), visit( ctx.r ) );
-		return visit( ctx.l );
+		if ( ctx.PLUS( ) != null ) return new PlusNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.MINUS( ) != null ) return new MinusNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.OR( ) != null ) return new OrNode( visit( ctx.l ), visit( ctx.r ) );
+		return visit( ctx.term( ) );
 	}
 	
 	@Override
 	public Node visitTerm(FOOLParser.TermContext ctx) {
-		if ( ! ctx.TIMES( ).isEmpty( ) ) return new TimesNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ! ctx.DIV( ).isEmpty( ) ) return new DivNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ! ctx.AND( ).isEmpty( ) ) return new AndNode( visit( ctx.l ), visit( ctx.r ) );
-		return visit( ctx.l );
+		if ( ctx.TIMES( ) != null ) return new TimesNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.DIV( ) != null ) return new DivNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.AND( ) != null ) return new AndNode( visit( ctx.l ), visit( ctx.r ) );
+		return visit( ctx.factor( ) );
 	}
-	
+
 	@Override
 	public Node visitFactor(FOOLParser.FactorContext ctx) {
-		if ( ! ctx.EQ( ).isEmpty( ) ) return new EqualNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ! ctx.GE( ).isEmpty( ) ) return new GreaterEqualNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ! ctx.LE( ).isEmpty( ) ) return new LessEqualNode( visit( ctx.l ), visit( ctx.r ) );
-		return visit( ctx.l );
+		if ( ctx.EQ( ) != null ) return new EqualNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.GE( ) != null ) return new GreaterEqualNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.LE( ) != null ) return new LessEqualNode( visit( ctx.l ), visit( ctx.r ) );
+		return visit( ctx.value( ) );
 	}
 	
 	@Override
 	public Node visitIntegerValue(FOOLParser.IntegerValueContext ctx) {
+		if ( ctx.MINUS( ) != null )
+			return new IntNode( - Integer.parseInt( ctx.INTEGER( ).getText( ) ) );
 		return new IntNode( Integer.parseInt( ctx.INTEGER( ).getText( ) ) );
 	}
 	

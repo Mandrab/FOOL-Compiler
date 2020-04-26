@@ -44,7 +44,8 @@ class TestCompiler {
 	public void testAverage( ) throws Exception {
 		testFool( "test_06", s -> s, RUNNER_LOGS + "-1\n" );
 		testFool( "test_07", s -> s, RUNNER_LOGS + "5\n" );
-		testFool( "test_08", s -> s, RUNNER_LOGS + "" );
+		testFool( "test_08", s -> s, RUNNER_LOGS + "2\n" );
+		testFool( "test_09", s -> s, RUNNER_LOGS + "11\n" );
 	}
 
 	@Test

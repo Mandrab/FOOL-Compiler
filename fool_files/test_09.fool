@@ -1,0 +1,14 @@
+let
+	class Class( field1: int, field2: int ) {
+		fun method: int ( parameter1: int, parameter2: int )
+			parameter1 + parameter2;
+
+		fun method2: int ( ) 5;
+	}
+
+	var cls: Class = new Class( 0, true );
+	var variable: int = 6;
+	
+	fun function: int ( ) variable;
+
+in print( cls.method( function( ), cls.method2( ) ) );

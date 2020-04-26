@@ -49,41 +49,47 @@ import lib.TypeException;
  */
 public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeVisitor<Node> {
 
-	private final FOOLLib lib;
-	
+	private final FOOLLib lib;						// store info used by other visitors
+
 	public TypeCheckerVisitor( FOOLLib globalLib ) {
 		lib = globalLib;
 	}
-	
-	@Override
-	public Node visit( Node element ) {
+
+	/**
+	 * Type-check generic node. Use a trick to throw type-exception without modify
+	 * visitor's interface
+	 */
+	@Override public Node visit( Node element ) {
+		// catch type-exceptions (wrapped by runtime exception)
 		try {
 			return super.visit( element );
 		} catch ( InvocationTargetException exception ) {
+			// find root exception (presumably, a type-exception)
 			Throwable throwable = exception;
 			while( throwable.getCause( ) != null )
 				throwable = exception.getCause( );
 
+			// if it's a type-exception, throw it again
 			if ( throwable instanceof TypeException ) throw ( RuntimeException ) throwable;
 			exception.printStackTrace( );
 		}
 
 		return null;
 	}
-	
+
 	@Override
 	public Node visit( AndNode element ) {
-		Node leftType = visit( element.getLeft( ) );  
-		Node rightType = visit( element.getRight( ) );  
+		Node leftType = visit( element.getLeft( ) );	// type-check left
+		Node rightType = visit( element.getRight( ) );	// type-check right
+
+		// if expression's operands are not boolean, then throw an exception
 		if ( ! ( leftType instanceof BoolTypeNode && rightType instanceof BoolTypeNode ) )
 			throw TypeException.buildAndMark( "Incompatible types in and", lib );
-		return new BoolTypeNode();
+		return new BoolTypeNode( );
 	}
 
 	@Override
-	public Node visit( ArrowTypeNode element ) {
-		return null;
-	}
+	public Node visit( ArrowTypeNode element ) { return null; }
 
 	@Override
 	public Node visit( BoolNode element ) {
@@ -91,53 +97,58 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	}
 
 	@Override
-	public Node visit( BoolTypeNode element ) {
-		return null;
-	}
+	public Node visit( BoolTypeNode element ) { return null; }
 
 	@Override
 	public Node visit( CallNode element ) {
+		// type of call has to be functional, otherwise throw a type-exception
 		if ( ! ( element.getType( ) instanceof ArrowTypeNode ) )
 			throw TypeException.buildAndMark( "Invocation of a non-function " + element.getID( ), lib );
+
 		ArrowTypeNode callStructure = ( ArrowTypeNode ) element.getType( );
 		List<Node> callParameters = callStructure.getParameters( );
-		if ( ! ( callParameters.size( ) == element.getParameters( ).size( ) ) )
+
+		// I want the right number of parameters, otherwise throw a type-exception
+		if ( callParameters.size( ) != element.getParameters( ).size( ) )
 			throw TypeException.buildAndMark( "Wrong number of parameters in the invocation of " + element.getID( ), lib );
+
+		// type-check every passed parameter and control that's sub-type of expected one
 		for ( int i = 0; i < element.getParameters( ).size( ); i++ )
 			if ( ! ( lib.isSubtype( visit( element.getParameters( ).get( i ) ), callParameters.get( i ) ) ) )
-				throw TypeException.buildAndMark( "Wrong type for " + (i + 1) + "-th parameter in the invocation of " + element.getID( ), lib );
+				throw TypeException.buildAndMark( "Wrong type for " + (i + 1) + "-th parameter in the invocation of '" + element.getID( ) + "'", lib );
 		return callStructure.getRetType( );
 	}
 
 	@Override
 	public Node visit( ClassCallNode element ) {
+		// type of class-call has to be functional, otherwise throw a type-exception
 		if ( ! ( element.getMethodEntry( ).getRetType( ) instanceof ArrowTypeNode ) )
 			throw TypeException.buildAndMark( "Invocation of a non-method " + element.getID( ), lib );
 
 		ArrowTypeNode arrowNode = ( ArrowTypeNode ) element.getMethodEntry( ).getRetType( );
 		List<Node> parameters = arrowNode.getParameters( );
 
-		if ( ! ( parameters.size( ) == element.getParameters( ).size( ) ) )
+		// I want the right number of parameters, otherwise throw a type-exception
+		if ( parameters.size( ) != element.getParameters( ).size( ) )
 			throw TypeException.buildAndMark( "Wrong number of parameters in the invocation of method " + element.getID( ), lib );
-		
-		for ( int i = 0, count = 0; i < element.getParameters( ).size( ); i++, count++ ) {
+
+		// type-check every passed parameter and control that's sub-type of expected one
+		for ( int i = 0; i < element.getParameters( ).size( ); i++ ) {
 			Node parameter = element.getParameters( ).get( i );
+			Node expectedParameterType = ( ( ParNode ) parameters.get( i ) ).getSymType( );
 
 			if ( parameter instanceof IdNode )
 				parameter = ( ( IdNode ) parameter).getEntry( ).getRetType( );
-			else if ( parameter instanceof DecNode )
-				parameter = ( ( DecNode ) parameter ).getSymType( );
-			else if ( parameter instanceof CallNode )
-				parameter = ( ( CallNode ) parameter ).getType( );
-			else if ( parameter instanceof ClassCallNode )
-				parameter = ( ( ClassCallNode ) parameter ).getRetType( );
 			else parameter = visit( parameter );
-
-			if ( parameter instanceof ArrowTypeNode )
-				parameter = ( ( ArrowTypeNode ) parameter ).getRetType( );
 			
-			if ( ! ( lib.isSubtype( parameter, ( ( ParNode ) parameters.get( count ) ).getSymType( ) ) ) )
-				throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method " + element.getID( ) + " call", lib );
+			if ( expectedParameterType instanceof ArrowTypeNode ) {
+				if ( ! ( parameter instanceof ArrowTypeNode ) )
+					throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method '" + element.getID( ) + "' call", lib );
+			} else if ( parameter instanceof ArrowTypeNode )
+				parameter = ( ( ArrowTypeNode ) parameter ).getRetType( );
+
+			if ( ! ( lib.isSubtype( parameter, expectedParameterType ) ) )
+				throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method '" + element.getID( ) + "' call", lib );
 		}
 		
 		return arrowNode.getRetType( );

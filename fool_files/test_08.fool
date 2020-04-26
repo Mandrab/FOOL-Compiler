@@ -1,0 +1,20 @@
+let
+	class Class( field1: int, field2: bool ) {
+		fun method: int ( parameter1: int, parameter2: bool, parameter3: (int, int)->int )
+			parameter3( parameter1, parameter2 + 2 );
+
+		fun methodCall1: bool ( parameter1: int, parameter2: bool )
+			let
+				var x: int = parameter1 * 2;
+				var y: int = parameter2 * 4;
+			in	( x + parameter1 + y + parameter2 ) >= 10;
+
+		fun methodCall2: bool ( parameter: bool ) ! ( methodCall1( 5, true ) );
+	}
+
+	fun function: int ( x:int, y:int ) ( x == y ) + x-y;
+
+	var cls: Class = new Class( 0, true );
+	var variable: int = 5;
+
+in print( cls.method( variable, cls.methodCall1( 2, true ), function ) );

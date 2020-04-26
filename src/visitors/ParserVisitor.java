@@ -347,7 +347,10 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			
 			// add parameter to method
           	methodNode.addParameter( par );
-          	
+
+          	if ( par.getSymType( ) instanceof ArrowTypeNode )
+        		parOffset++;
+
           	// check parameter existence in method's symbol table
           	if ( mthdNestingLevel.put( par.getID( ), new STEntry( symTable.getLevel( ), par.getSymType( ), parOffset++, false ) ) != null  ) {
            		System.out.println( "Parameter ID '" + par.getID( ) + "' at line " + ctx.parameter( i ).pID.getLine( ) + " already declared" );

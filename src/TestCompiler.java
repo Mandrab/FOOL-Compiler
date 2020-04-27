@@ -65,6 +65,7 @@ class TestCompiler {
 		testFool( "test_math_02", s -> s, RUNNER_LOGS + "10\n" );
 		testFool( "test_math_03", s -> s, RUNNER_LOGS + "4\n" );
 		testFool( "test_math_04", s -> s, RUNNER_LOGS + "40\n" );
+		testFool( "test_math_05", s -> s, RUNNER_LOGS + "4\n" );
 	}
 
 	@Test

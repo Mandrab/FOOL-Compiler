@@ -11,7 +11,6 @@ import ast.CallNode;
 import ast.ClassCallNode;
 import ast.ClassNode;
 import ast.ClassTypeNode;
-import ast.DecNode;
 import ast.DivNode;
 import ast.EmptyNode;
 import ast.EmptyTypeNode;
@@ -106,16 +105,31 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 			throw TypeException.buildAndMark( "Invocation of a non-function " + element.getID( ), lib );
 
 		ArrowTypeNode callStructure = ( ArrowTypeNode ) element.getType( );
-		List<Node> callParameters = callStructure.getParameters( );
+		List<Node> parameters = callStructure.getParameters( );
 
 		// I want the right number of parameters, otherwise throw a type-exception
-		if ( callParameters.size( ) != element.getParameters( ).size( ) )
+		if ( parameters.size( ) != element.getParameters( ).size( ) )
 			throw TypeException.buildAndMark( "Wrong number of parameters in the invocation of " + element.getID( ), lib );
 
 		// type-check every passed parameter and control that's sub-type of expected one
-		for ( int i = 0; i < element.getParameters( ).size( ); i++ )
-			if ( ! ( lib.isSubtype( visit( element.getParameters( ).get( i ) ), callParameters.get( i ) ) ) )
-				throw TypeException.buildAndMark( "Wrong type for " + (i + 1) + "-th parameter in the invocation of '" + element.getID( ) + "'", lib );
+		for ( int i = 0; i < element.getParameters( ).size( ); i++ ) {
+			Node parameter = element.getParameters( ).get( i );
+			Node expectedParameterType = parameters.get( i );
+
+			// visit parameter (get it's 'real' type)
+			Node parameterType = visit( parameter );
+
+			// if passed parameter is a functional one but i expect a value, then get it's return type (i need to pass result of function/method)
+			if ( parameterType instanceof ArrowTypeNode && ! ( expectedParameterType instanceof ArrowTypeNode ) )
+				if ( parameter instanceof CallNode || parameter instanceof ClassCallNode )
+					parameterType = ( ( ArrowTypeNode ) parameterType ).getRetType( );
+				else throw TypeException.buildAndMark( "Passed value for " + ( i + 1 ) + "-th field is not of type " + expectedParameterType, lib );
+
+			// check sub-typing of parameter
+			if ( ! ( lib.isSubtype( parameterType, expectedParameterType ) ) )
+				throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method '" + element.getID( ) + "' call", lib );
+		}
+
 		return callStructure.getRetType( );
 	}
 
@@ -138,14 +152,16 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 			Node expectedParameterType = ( ( ParNode ) parameters.get( i ) ).getSymType( );
 
 			// visit parameter (get it's 'real' type)
-			parameter = visit( parameter );
+			Node parameterType = visit( parameter );
 
 			// if passed parameter is a functional one but i expect a value, then get it's return type (i need to pass result of function/method)
-			if ( ! ( expectedParameterType instanceof ArrowTypeNode ) && parameter instanceof ArrowTypeNode )
-				parameter = ( ( ArrowTypeNode ) parameter ).getRetType( );
+			if ( parameterType instanceof ArrowTypeNode && ! ( expectedParameterType instanceof ArrowTypeNode ) )
+				if ( parameter instanceof CallNode || parameter instanceof ClassCallNode )
+					parameterType = ( ( ArrowTypeNode ) parameterType ).getRetType( );
+				else throw TypeException.buildAndMark( "Passed value for " + ( i + 1 ) + "-th field is not of type " + expectedParameterType, lib );
 
 			// check sub-typing of parameter
-			if ( ! ( lib.isSubtype( parameter, expectedParameterType ) ) )
+			if ( ! ( lib.isSubtype( parameterType, expectedParameterType ) ) )
 				throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method '" + element.getID( ) + "' call", lib );
 		}
 
@@ -276,14 +292,14 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( IfNode element ) {
+		// check that condition is a boolean
 		if ( ! ( lib.isSubtype( visit( element.getCondition( ) ), new BoolTypeNode( ) ) ) )
 			throw TypeException.buildAndMark( "Condition in IF is not a boolean", lib );
 
-		Node thenBranch = visit( element.getThenBranch( ) );
-		Node elseBranch = visit( element.getElseBranch( ) );
-		if ( lib.isSubtype( thenBranch, elseBranch ) ) return elseBranch;
-		if ( lib.isSubtype( elseBranch, thenBranch ) ) return thenBranch;
+		Node thenBranch = visit( element.getThenBranch( ) );	// type-check then branch
+		Node elseBranch = visit( element.getElseBranch( ) );	// type-check else branch
 
+		// try to find the lowest common ancestor and throw an exception if it doesn't exist
 		Node type = lib.lowestCommonAncestor( thenBranch, elseBranch );
 		if ( type == null )
 			throw TypeException.buildAndMark( "Incompatible types in then-else branches", lib );
@@ -297,9 +313,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	}
 
 	@Override
-	public Node visit( IntTypeNode element ) {
-		return null;
-	}
+	public Node visit( IntTypeNode element ) { return null; }
 
 	@Override
 	public Node visit( LessEqualNode element ) {
@@ -321,8 +335,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( MethodNode element ) {
+		// type-check every declaration
 		for ( Node declaration : element.getDeclarations( ) ) visit( declaration );
 
+		// check that expression return correct type (return-type)
 		if ( ! lib.isSubtype( visit( element.getExpession( ) ), element.getSymType( ) ) )
 			throw TypeException.buildAndMark( "Return-type mismatch in method " + element.getID( ), lib );
 		return null;
@@ -330,6 +346,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( MinusNode element ) {
+		// check that operands are integer (or sub-type)
 		if ( ! ( lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) ) )
 			throw TypeException.buildAndMark( "First element in subtraction is not an integer", lib );
 		if ( ! ( lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) ) )
@@ -340,35 +357,30 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( NewNode element ) {
-		if ( ! ( element.getEntry( ).getRetType( ) instanceof ClassTypeNode ) )
-			throw TypeException.buildAndMark( "Instantiation of a non-class: " + element.getID( ), lib );
-
 		ClassTypeNode classType = ( ClassTypeNode ) element.getEntry( ).getRetType( );
 		List<Node> requiredFields = classType.getFields( );
 
+		// passed fields have to be the same number of required fields
 		if ( requiredFields.size( ) != element.getFields( ).size( ) )
-			throw TypeException.buildAndMark( "Wrong number of parameters in " + element.getID( ) + " instantiation. " + requiredFields.size( ) + " required, " + element.getFields( ).size( ) + " given", lib );
-		
-		
+			throw TypeException.buildAndMark( "Wrong number of parameters in " + element.getID( ) + " instantiation. " +
+					requiredFields.size( ) + " required, " + element.getFields( ).size( ) + " given", lib );
+
 		for ( int i = 0; i < element.getFields( ).size( ); i++ ) {
 			Node field = element.getFields( ).get( i );
-			FieldNode requiredField = ( FieldNode ) requiredFields.get( i );
+			Node requiredType = ( ( FieldNode ) requiredFields.get( i ) ).getSymType( );
 
-			if ( field instanceof IdNode )
-				field = ( ( IdNode ) field ).getEntry( ).getRetType( );
-			else if ( field instanceof DecNode )
-				field = ( ( DecNode ) field ).getSymType( );
-			else if ( field instanceof CallNode )
-				field = ( ( CallNode ) field ).getType( );
-			else if ( field instanceof ClassCallNode )
-				field = ( ( ClassCallNode ) field ).getRetType( );
-			else field = visit( field );
+			// get field 'real' type
+			Node fieldType = visit( field );
 
-			if ( field instanceof ArrowTypeNode )
-				field = ( ( ArrowTypeNode ) field ).getRetType( );
+			// if it's a functional-type, then i pass it's result as parameter
+			if ( fieldType instanceof ArrowTypeNode )
+				if ( field instanceof CallNode || field instanceof ClassCallNode )
+					fieldType = ( ( ArrowTypeNode ) fieldType ).getRetType( );
+				else throw TypeException.buildAndMark( "Passed value for " + ( i + 1 ) + "-th field is not of type " + requiredType, lib );
 
-			if ( ! ( lib.isSubtype( field, requiredField.getSymType( ) ) ) )
-				throw TypeException.buildAndMark( "Passed value for " + ( i + 1 ) + "-th parameter is not of type " + requiredField.getSymType( ), lib );
+			// check sub-typing of field
+			if ( ! ( lib.isSubtype( fieldType, requiredType ) ) )
+				throw TypeException.buildAndMark( "Passed value for " + ( i + 1 ) + "-th field is not of type " + requiredType, lib );
 		}
 
 		return new RefTypeNode( element.getID( ) );
@@ -376,7 +388,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( NotNode element ) {
-		Node result = visit( element.getExpression( ) );
+		Node result = visit( element.getExpression( ) );	// get type of expression
+
+		// check that expression is a boolean
 		if ( ! ( result instanceof BoolTypeNode ) )
 			throw TypeException.buildAndMark( "Non-boolean type in NOT operation", lib );
 
@@ -385,8 +399,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( OrNode element ) {
-		Node left = visit( element.getLeft( ) );
-		Node right = visit( element.getRight( ) );
+		Node left = visit( element.getLeft( ) );	// type-check left
+		Node right = visit( element.getRight( ) );	// type-check right
 
 		if ( ! ( left instanceof BoolTypeNode ) )
 			throw TypeException.buildAndMark( "First element in OR is not a boolean", lib );

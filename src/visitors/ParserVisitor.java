@@ -476,21 +476,15 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	@Override
 	public Node visitNewValue(FOOLParser.NewValueContext ctx) {
 		Map<String, STEntry> virtualTable = classTable.getClassVT( ctx.ID( ).getText( ) );
+		STEntry classEntry = symTable.getTable( 0 ).get( ctx.ID( ).getText( ) );
 
-		if ( virtualTable == null ) {
+		if ( virtualTable == null || classEntry == null ) {
 			System.out.println( "Class ID '" + ctx.ID( ).getText( ) + "' not found at line " + ctx.ID( ).getSymbol( ).getLine( ) );
     		stErrors++;
 		}
-		
-		STEntry classRef = symTable.getTable( 0 ).get( ctx.ID( ).getText( ) );
-		
-		if ( classRef == null ) {
-			System.out.println( "Class ID '" + ctx.ID( ).getText( ) + "' doesn't exist at line " + ctx.ID( ).getSymbol( ).getLine( ) );
-    		stErrors++;
-		}
-		
-		NewNode newNode = new NewNode( ctx.ID( ).getText( ), symTable.getTable( 0 ).get( ctx.ID( ).getText( ) ) );
-		
+
+		NewNode newNode = new NewNode( ctx.ID( ).getText( ), classEntry );
+
 		for ( int i = 0; i < ctx.exp( ).size( ); i++ ) {
 			newNode.addField( visit( ctx.exp( i ) ) );
 		}

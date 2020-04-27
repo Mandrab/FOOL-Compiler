@@ -50,6 +50,7 @@ class TestCompiler {
 		testFool( "test_09", s -> s, RUNNER_LOGS + "11\n" );
 		testFool( "test_10", s -> s, RUNNER_LOGS + "0\n" );
 		testFool( "test_11", s -> s, RUNNER_LOGS + "0\n" );
+		testFool( "test_12", s -> s, RUNNER_LOGS + "0\n" );
 	}
 
 	@Test
@@ -83,6 +84,9 @@ class TestCompiler {
 		testException( "test_type_exception_06", false );	// symbol table exception
 		testException( "test_type_exception_07", false );	// symbol table exception
 		testException( "test_type_exception_08", false );	// symbol table exception
+		testException( "test_type_exception_09", true );	// lowest common ancestor test
+		testException( "test_type_exception_10", true );
+		testException( "test_type_exception_11", true );
 	}
 
 	/**

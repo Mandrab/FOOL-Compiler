@@ -1,0 +1,8 @@
+let
+	class A ( x: int ) {
+		fun m: int ( ) x;
+	}
+
+	fun x: int ( y: int ) 0;
+	var clsA: A = new A( x );
+in 	print( clsA.m( ) );

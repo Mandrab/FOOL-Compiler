@@ -1,0 +1,9 @@
+let
+	class A ( ) { }
+	class B extends A ( ) { }
+	class C extends A ( ) { }
+
+	var x: A = if ( 5 >= 10 )
+		then { new B( ) }
+		else { new C( ) };
+in 	print( 0 );

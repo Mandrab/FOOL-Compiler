@@ -1,0 +1,12 @@
+let
+	class Class( ) {
+		fun method: int ( parameter1: int, parameter2: (int, int) -> bool )
+			parameter2( parameter1, parameter1 );
+		
+		fun method2: bool ( parameter1: int, parameter2: int )
+			parameter1 == parameter2;
+	}
+
+	var cls: Class = new Class( );
+
+in print( cls.method( 5, cls.method2( 6, 6 ) ) );

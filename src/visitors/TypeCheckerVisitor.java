@@ -137,20 +137,19 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 			Node parameter = element.getParameters( ).get( i );
 			Node expectedParameterType = ( ( ParNode ) parameters.get( i ) ).getSymType( );
 
-			if ( parameter instanceof IdNode )
-				parameter = ( ( IdNode ) parameter).getEntry( ).getRetType( );
-			else parameter = visit( parameter );
-			
-			if ( expectedParameterType instanceof ArrowTypeNode ) {
-				if ( ! ( parameter instanceof ArrowTypeNode ) )
-					throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method '" + element.getID( ) + "' call", lib );
-			} else if ( parameter instanceof ArrowTypeNode )
+			// visit parameter (get it's 'real' type)
+			parameter = visit( parameter );
+
+			// if passed parameter is a functional one but i expect a value, then get it's return type (i need to pass result of function/method)
+			if ( ! ( expectedParameterType instanceof ArrowTypeNode ) && parameter instanceof ArrowTypeNode )
 				parameter = ( ( ArrowTypeNode ) parameter ).getRetType( );
 
+			// check sub-typing of parameter
 			if ( ! ( lib.isSubtype( parameter, expectedParameterType ) ) )
 				throw TypeException.buildAndMark( "Wrong type of " + ( i + 1 ) + "-th parameter in method '" + element.getID( ) + "' call", lib );
 		}
-		
+
+		// return arrow-type-node
 		return arrowNode.getRetType( );
 	}
 

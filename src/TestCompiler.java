@@ -7,6 +7,8 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
+import lib.TypeException;
+
 /**
  * Tests the compiler by comparing outputs of compiled programs with expected results
  * 
@@ -67,15 +69,11 @@ class TestCompiler {
 		testFool( "test_math_04", s -> s, RUNNER_LOGS + "40\n" );
 		testFool( "test_math_05", s -> s, RUNNER_LOGS + "4\n" );
 	}
-
+	
 	@Test
-	public void testException( ) {
-		try {
-			testFool( "test_type_exception", s -> s, RUNNER_LOGS + "8\n" );
-		} catch (Exception e) {
-			return;
-		}
-		fail( );
+	public void testExceptions( ) {
+		testException( "test_type_exception_00", true );
+		testException( "test_type_exception_01", true );
 	}
 
 	/**
@@ -120,6 +118,29 @@ class TestCompiler {
 		oldStream = System.out;
 		// Tell Java to use your special stream
 		System.setOut( ps );
+	}
+
+	/**
+	 * Test compiler/program to check if it launches expected exceptions
+	 * 
+	 * @param file
+	 * 		file to test (build/run)
+	 * @param expectedTypeException
+	 * 		true if i expect a type-exception,
+	 * 		false otherwise (i expect a different type of exception)
+	 */
+	public void testException( String file, boolean expectedTypeException ) {
+		try {
+			testFool( file, s -> s, RUNNER_LOGS + "" );
+		} catch ( TypeException e ) {
+			// if i don't expect a type-exception, then there was an unexpected error
+			if ( expectedTypeException ) return;
+			fail( );
+		} catch ( Exception e ) {
+			// if i expect a type-exception, then there was an unexpected error
+			if ( expectedTypeException ) fail( );
+			return;
+		}
 	}
 
 	/**

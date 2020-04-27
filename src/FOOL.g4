@@ -5,7 +5,7 @@ package generated;
 }
 
 @lexer::members {
-public int lexicalErrors=0;
+public int lexicalErrors = 0;
 }
   
 /*******************************************************************************************************
@@ -13,10 +13,8 @@ public int lexicalErrors=0;
  *******************************************************************************************************/
 
 prog :
-	(
-		LET ( ( cls )+ ( dec )* | ( dec )+ ) IN exp
-   	|	exp
-   	) SEMIC EOF ;
+	( LET ( ( cls )+ ( dec )* | ( dec )+ ) IN )? exp
+	SEMIC EOF ;
 
 cls :
 	CLASS clsID = ID ( EXTENDS suID = ID )? LPAR ( field ( COMMA field )* )? RPAR    
@@ -30,36 +28,36 @@ dec :
   	) SEMIC ;
 
 field :
-	fID = ID COLON fT = type ;
+	ID COLON type ;
 
 method :
-	FUN mID = ID COLON mT = type LPAR ( parameter ( COMMA parameter )* )? RPAR
-	( LET ( var SEMIC )+ IN )? mE = exp 
+	FUN ID COLON type LPAR ( parameter ( COMMA parameter )* )? RPAR
+	( LET ( var SEMIC )+ IN )? exp 
 	SEMIC ;
 
 parameter :
-	pID = ID COLON pT = hotype ;
+	ID COLON hotype ;
 	
 var :
-	VAR vID = ID COLON vT = type ASS vE = exp ;
+	VAR ID COLON type ASS exp ;
 
 exp	:
 		term
-	|	l = exp PLUS r = term
-	|	l = exp MINUS r = term
-	|	l = exp OR r = term ;
+	|	exp PLUS term
+	|	exp MINUS term
+	|	exp OR term ;
 
 term :
 		factor
-	|	l = term TIMES r = factor
-	|	l = term DIV r = factor
-	|	l = term AND r = factor ;
+	|	term TIMES factor
+	|	term DIV factor
+	|	term AND factor ;
 
 factor :
 		value
-	|	l = factor EQ r = value 
-   	| 	l = factor GE r = value 
-   	| 	l = factor LE r = value ;
+	|	factor EQ value 
+   	| 	factor GE value 
+   	| 	factor LE value ;
 
 value :
 		
@@ -131,9 +129,9 @@ INTEGER : '0' | ('1'..'9')('0'..'9')* ;
 ID  	: ('a'..'z'|'A'..'Z')('a'..'z' | 'A'..'Z' | '0'..'9')* ;
 
 
-WHITESP  : ( '\t' | ' ' | '\r' | '\n' )+    -> channel(HIDDEN) ;
+WHITESP : ( '\t' | ' ' | '\r' | '\n' )+    -> channel(HIDDEN) ;
 
 COMMENT : '/*' (.)*? '*/' -> channel(HIDDEN) ;
  
-ERR   	 : . { System.out.println("Invalid char: "+ getText()); lexicalErrors++; } -> channel(HIDDEN); 
+ERR   	: . { System.out.println("Invalid char: "+ getText()); lexicalErrors++; } -> channel(HIDDEN); 
 

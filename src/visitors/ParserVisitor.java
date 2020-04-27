@@ -166,7 +166,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
       		// check for field redefinition (in this class)
       		if( definedElements.stream( ).anyMatch( e -> e.equals( fieldNode.getID( ) ) ) ) {
-      			System.out.println( "Redefinition of field " + fieldNode.getID( ) + " at line " + ctx.field( i ).fID.getLine( ) );
+      			System.out.println( "Redefinition of field " + fieldNode.getID( ) + " at line " + ctx.field( i ).ID( ).getSymbol( ).getLine( ) );
       			stErrors++;
       		} else definedElements.add( fieldNode.getID( ) );
       		
@@ -185,7 +185,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 					
 				// superclass does not contains this field -> the duplicate declaration is made in this class
 				} else {
-					System.out.println( "Field '" + fieldNode.getID( ) + "' at line " + ctx.field( i ).fID.getLine( ) + " already defined in class '" + clsID + "'" );
+					System.out.println( "Field '" + fieldNode.getID( ) + "' at line " + ctx.field( i ).ID( ).getSymbol( ).getLine( ) + " already defined in class '" + clsID + "'" );
 		    		stErrors++;
 				}
 			
@@ -208,7 +208,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
       		
       		// check for method redefinition (in this class)
       		if( definedElements.stream( ).anyMatch( e -> e.equals( methodNode.getID( ) ) ) ) {
-      			System.out.println( "Redefinition of field " + methodNode.getID( ) + " at line " + ctx.method( i ).mID.getLine( ) );
+      			System.out.println( "Redefinition of field " + methodNode.getID( ) + " at line " + ctx.method( i ).ID( ).getSymbol( ).getLine( ) );
       			stErrors++;
       		} else definedElements.add( methodNode.getID( ) );
 
@@ -227,7 +227,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 					
 				// superclass does not contains this method -> the duplicate declaration is made in this class
 				} else {
-					System.out.println( "Method '" + methodNode.getID( ) + "' at line " + ctx.method( i ).mID.getLine( ) + " already defined in class '" + clsID + "'" );
+					System.out.println( "Method '" + methodNode.getID( ) + "' at line " + ctx.method( i ).ID( ).getSymbol( ).getLine( ) + " already defined in class '" + clsID + "'" );
 		    		stErrors++;
 				}
 
@@ -300,7 +300,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
             	funNode.addParameter( parNode );
             	
             	if ( funNestingLevel.put( parNode.getID( ), new STEntry( symTable.getLevel( ), parNode.getSymType( ), parOffset++ ) ) != null ) { //aggiungo dich a hmn
-            		System.out.println( "Parameter ID '" + parNode.getID( ) + "' at line " + ctx.parameter( i ).pID.getLine( ) + " already declared" );
+            		System.out.println( "Parameter ID '" + parNode.getID( ) + "' at line " + ctx.parameter( i ).ID( ).getSymbol( ).getLine( ) + " already declared" );
             		stErrors++;
             	}
 			}
@@ -327,13 +327,13 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 	@Override
 	public Node visitField(FOOLParser.FieldContext ctx) {
-		return new FieldNode( ctx.fID.getText( ), visit( ctx.fT ), 0 );
+		return new FieldNode( ctx.ID( ).getText( ), visit( ctx.type( ) ), 0 );
 	}
 
 	@Override
 	public Node visitMethod(FOOLParser.MethodContext ctx) {
 		// create method node
-		MethodNode methodNode = new MethodNode( ctx.mID.getText( ), visit( ctx.mT ) );
+		MethodNode methodNode = new MethodNode( ctx.ID( ).getSymbol( ).getText( ), visit( ctx.type( ) ) );
 
 		// create new "nested" table in symTable (method scope)
 		Map<String,STEntry> mthdNestingLevel = symTable.nestTable( );
@@ -353,7 +353,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
           	// check parameter existence in method's symbol table
           	if ( mthdNestingLevel.put( par.getID( ), new STEntry( symTable.getLevel( ), par.getSymType( ), parOffset++, false ) ) != null  ) {
-           		System.out.println( "Parameter ID '" + par.getID( ) + "' at line " + ctx.parameter( i ).pID.getLine( ) + " already declared" );
+           		System.out.println( "Parameter ID '" + par.getID( ) + "' at line " + ctx.parameter( i ).ID( ).getSymbol( ).getLine( ) + " already declared" );
         		stErrors++;
         	}
       	}
@@ -370,7 +370,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
     	offset = oldOffset;
 
     	// add method expression
-    	methodNode.setExpession( visit( ctx.mE ) );
+    	methodNode.setExpession( visit( ctx.exp( ) ) );
 
       	// remove method's symbol table (exiting the method scope)              
        	symTable.popTable( );
@@ -381,12 +381,12 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 	@Override
 	public Node visitParameter(FOOLParser.ParameterContext ctx) {
 		// create new parameter node
-     	return new ParNode( ctx.pID.getText( ), visit( ctx.pT ) );	
+     	return new ParNode( ctx.ID( ).getText( ), visit( ctx.hotype( ) ) );	
 	}
 
 	@Override
 	public Node visitVar(FOOLParser.VarContext ctx) {
-		VarNode varNode = new VarNode( ctx.vID.getText( ), visit( ctx.vT ), visit( ctx.vE ) ); 
+		VarNode varNode = new VarNode( ctx.ID( ).getText( ), visit( ctx.type( ) ), visit( ctx.exp( ) ) ); 
 		
 		Map<String,STEntry> stFront = symTable.getTable( );
 		   
@@ -395,7 +395,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			offset--;
 
 		if ( stFront.put( varNode.getID( ), new STEntry( symTable.getLevel( ), varNode.getSymType( ), offset-- ) ) != null ) {
-			System.out.println( "Var ID '" + varNode.getID( ) + "' at line " + ctx.vID.getLine( ) + " already declared" );
+			System.out.println( "Var ID '" + varNode.getID( ) + "' at line " + ctx.ID( ).getSymbol( ).getLine( ) + " already declared" );
 			stErrors++;
 		}
 		
@@ -434,25 +434,25 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 	@Override
 	public Node visitExp(FOOLParser.ExpContext ctx) {
-		if ( ctx.PLUS( ) != null ) return new PlusNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ctx.MINUS( ) != null ) return new MinusNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ctx.OR( ) != null ) return new OrNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.PLUS( ) != null ) return new PlusNode( visit( ctx.exp( ) ), visit( ctx.term( ) ) );
+		if ( ctx.MINUS( ) != null ) return new MinusNode( visit( ctx.exp( ) ), visit( ctx.term( ) ) );
+		if ( ctx.OR( ) != null ) return new OrNode( visit( ctx.exp( ) ), visit( ctx.term( ) ) );
 		return visit( ctx.term( ) );
 	}
 	
 	@Override
 	public Node visitTerm(FOOLParser.TermContext ctx) {
-		if ( ctx.TIMES( ) != null ) return new TimesNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ctx.DIV( ) != null ) return new DivNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ctx.AND( ) != null ) return new AndNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.TIMES( ) != null ) return new TimesNode( visit( ctx.term( ) ), visit( ctx.factor( ) ) );
+		if ( ctx.DIV( ) != null ) return new DivNode( visit( ctx.term( ) ), visit( ctx.factor( ) ) );
+		if ( ctx.AND( ) != null ) return new AndNode( visit( ctx.term( ) ), visit( ctx.factor( ) ) );
 		return visit( ctx.factor( ) );
 	}
 
 	@Override
 	public Node visitFactor(FOOLParser.FactorContext ctx) {
-		if ( ctx.EQ( ) != null ) return new EqualNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ctx.GE( ) != null ) return new GreaterEqualNode( visit( ctx.l ), visit( ctx.r ) );
-		if ( ctx.LE( ) != null ) return new LessEqualNode( visit( ctx.l ), visit( ctx.r ) );
+		if ( ctx.EQ( ) != null ) return new EqualNode( visit( ctx.factor( ) ), visit( ctx.value( ) ) );
+		if ( ctx.GE( ) != null ) return new GreaterEqualNode( visit( ctx.factor( ) ), visit( ctx.value( ) ) );
+		if ( ctx.LE( ) != null ) return new LessEqualNode( visit( ctx.factor( ) ), visit( ctx.value( ) ) );
 		return visit( ctx.value( ) );
 	}
 	

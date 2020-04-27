@@ -402,6 +402,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 		Node left = visit( element.getLeft( ) );	// type-check left
 		Node right = visit( element.getRight( ) );	// type-check right
 
+		// check correct types of operands
 		if ( ! ( left instanceof BoolTypeNode ) )
 			throw TypeException.buildAndMark( "First element in OR is not a boolean", lib );
 		if ( ! ( right instanceof BoolTypeNode ) )
@@ -411,12 +412,11 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	}
 
 	@Override
-	public Node visit( ParNode element ) {
-		return null;
-	}
+	public Node visit( ParNode element ) { return null; }
 
 	@Override
 	public Node visit( PlusNode element ) {
+		// check that operands are both integers (or sub-type)
 		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) )
 			throw TypeException.buildAndMark( "First element in sum is not an integer", lib );
 		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) )
@@ -432,6 +432,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( ProgLetInNode element ) {
+		// type-check every declaration
 		for ( Node declaration : element.getDeclarations( ) ) visit( declaration );
 
 		return visit( element.getExpression( ) );
@@ -443,17 +444,14 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	}
 
 	@Override
-	public Node visit( RefTypeNode element ) {
-		return null;
-	}
+	public Node visit( RefTypeNode element ) { return null; }
 
 	@Override
-	public Node visit( STEntry element ) {
-		return null;
-	}
+	public Node visit( STEntry element ) { return null; }
 
 	@Override
 	public Node visit( TimesNode element ) {
+		// check that operands are both integers (or sub-type)
 		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) )
 			throw TypeException.buildAndMark( "First element in multiplication is not an integer", lib );
 		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) )
@@ -464,8 +462,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( VarNode element ) {
+		// check that passed value has expected type
 		if ( ! lib.isSubtype( visit( element.getExpression( ) ), element.getSymType( ) ) )
 			throw TypeException.buildAndMark( "Incompatible value for variable " + element.getID( ), lib );
 		return null;
 	}
+
 }

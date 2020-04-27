@@ -1,0 +1,8 @@
+let
+	class A( ) { }
+	class B( ) { }
+
+	var clsA: A = new A( );
+	var clsB: B = new A( );
+
+in print( 0 );

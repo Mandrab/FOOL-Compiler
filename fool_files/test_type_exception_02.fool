@@ -1,0 +1,8 @@
+let
+	class A( ) { }
+
+	var clsA: A = new A( );
+
+	var variable: bool = clsA == A;
+
+in print( variable );

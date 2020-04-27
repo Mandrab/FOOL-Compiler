@@ -1,0 +1,10 @@
+let
+	class A( ) { }
+	class B( ) { }
+
+	var clsA: A = new A( );
+	var clsB: B = new B( );
+
+	var variable: bool = clsA == clsB;
+
+in print( variable );

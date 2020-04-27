@@ -155,27 +155,32 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( ClassNode element ) {
+		// type-check every method
 		for ( Node method : element.getMethods( ) ) visit( method );
-		
-		if( element.getSuper( ) != null ) { // check overriding
+
+		// additional checks if class extends
+		if( element.getSuper( ) != null ) {
 			ClassTypeNode superCTN = ( ClassTypeNode ) element.getSuper( ).getRetType( );
 			ClassTypeNode thisCTN = ( ClassTypeNode ) element.getSymType( );
 
 			for ( Node f : element.getFields( ) ) {
 				int fieldOffset = -1 -( ( FieldNode ) f ).getOffset( );
 
-				if ( fieldOffset < superCTN.getFields( ).size( ) ) { // override
+				// check if field override parent's field. If override, check sub-typing
+				if ( fieldOffset < superCTN.getFields( ).size( ) ) {
 					FieldNode superField = ( FieldNode ) superCTN.getFields( ).get( fieldOffset );
 					FieldNode myField = ( FieldNode ) thisCTN.getFields( ).get( fieldOffset );
 
 					if ( ! lib.isSubtype( myField.getSymType( ), superField.getSymType( ) ) )
-						throw TypeException.buildAndMark( "Overriding of field '" + superField.getID( ) + "' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ), lib );
+						throw TypeException.buildAndMark( "Overriding of field '" + superField.getID( ) + 
+								"' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ), lib );
 				}
 			}
 
 			for ( Node m : element.getMethods( ) ) {
 				MethodNode method = ( MethodNode ) m;
 
+				// check if method override parent's method. If override, check sub-typing
 				if ( method.getOffset( ) < superCTN.getMethods( ).size( ) ) { // override
 					ArrowTypeNode superMethod = ( ArrowTypeNode ) superCTN.getMethods( ).get( method.getOffset( ) );
 					ArrowTypeNode myMethod = ( ArrowTypeNode ) thisCTN.getMethods( ).get( method.getOffset( ) );
@@ -190,12 +195,11 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	}
 
 	@Override
-	public Node visit( ClassTypeNode element ) {
-		return null;
-	}
+	public Node visit( ClassTypeNode element ) { return null; }
 
 	@Override
 	public Node visit( DivNode element ) {
+		// check that operands are integers
 		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) ) 
 			throw TypeException.buildAndMark( "First element in division is not an integer", lib );
 		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) ) 
@@ -209,33 +213,35 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	}
 
 	@Override
-	public Node visit( EmptyTypeNode element ) {
-		return null;
-	}
+	public Node visit( EmptyTypeNode element ) { return null; }
 
 	@Override
 	public Node visit( EqualNode element ) {
-		Node left = visit( element.getLeft( ) );
-		Node right = visit( element.getRight( ) );
+		Node left = visit( element.getLeft( ) );	// type-check left
+		Node right = visit( element.getRight( ) );	// type-check right
 
+		// cannot compare functional-type (design choice)
 		if ( left instanceof ArrowTypeNode || right instanceof ArrowTypeNode )
-			throw TypeException.buildAndMark( "Incompatible types in equal", lib );
+			throw TypeException.buildAndMark( "Incompatible types in Equal comparison: cannot compare functional-types", lib );
 
-		if ( ! ( lib.isSubtype( left, right ) || lib.isSubtype( right, left ) ) )
-			throw TypeException.buildAndMark( "Incompatible types in equal", lib );
+		// cannot compare object with non-object/null
+		if ( left instanceof RefTypeNode && ! ( right instanceof RefTypeNode || right instanceof EmptyTypeNode ) )
+			throw TypeException.buildAndMark( "Incompatible types in Equal comparison", lib );
+		if ( right instanceof RefTypeNode && ! ( left instanceof RefTypeNode || left instanceof EmptyTypeNode ) )
+			throw TypeException.buildAndMark( "Incompatible types in Equal comparison", lib );
 
 		return new BoolTypeNode( );
 	}
 
 	@Override
-	public Node visit( FieldNode element ) {
-		return null;
-	}
+	public Node visit( FieldNode element ) { return null; }
 
 	@Override
 	public Node visit( FunNode element ) {
+		// type-check declarations
 		for ( Node declaration : element.getDeclarations( ) ) visit( declaration );
 
+		// check that expression return correct type (return-type)
 		if ( ! lib.isSubtype( visit( element.getExpession( ) ), element.getSymType( ) ) )
 			throw TypeException.buildAndMark( "Return-type mismatch in function " + element.getID( ), lib );
 		return null;
@@ -243,20 +249,28 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 
 	@Override
 	public Node visit( GreaterEqualNode element ) {
-		Node left = visit( element.getLeft( ) );
-		Node right = visit( element.getRight( ) );
+		Node left = visit( element.getLeft( ) );	// type-check left
+		Node right = visit( element.getRight( ) );	// type-check right
 
-		if ( ! ( lib.isSubtype( left, right ) || lib.isSubtype( right, left ) ) )
-			throw TypeException.buildAndMark( "Incompatible types in Greater/Equal comparison", lib );
+		// cannot compare functional-type (design choice)
+		if ( left instanceof ArrowTypeNode || right instanceof ArrowTypeNode )
+			throw TypeException.buildAndMark( "Incompatible types in Greater-Equal comparison: cannot compare functional-types", lib );
+
+		// cannot compare object with non-object/null
+		if ( left instanceof RefTypeNode && ! ( right instanceof RefTypeNode || right instanceof EmptyTypeNode ) )
+			throw TypeException.buildAndMark( "Incompatible types in Greater-Equal comparison", lib );
+		if ( right instanceof RefTypeNode && ! ( left instanceof RefTypeNode || left instanceof EmptyTypeNode ) )
+			throw TypeException.buildAndMark( "Incompatible types in Greater-Equal comparison", lib );
+
 		return new BoolTypeNode( );
 	}
 
 	@Override
 	public Node visit( IdNode element ) {
+		// check that id is not a class identifier
 		if ( element.getEntry( ).getRetType( ) instanceof ClassTypeNode )
 			throw TypeException.buildAndMark( "ID '" + element.getID( ) + "' cannot be a class name", lib );
-		if ( element.getEntry( ).isMethod( ) )
-			throw TypeException.buildAndMark( "ID '" + element.getID( ) + "' cannot be a method name", lib );
+
 		return element.getEntry( ).getRetType( );
 	}
 
@@ -269,8 +283,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 		Node elseBranch = visit( element.getElseBranch( ) );
 		if ( lib.isSubtype( thenBranch, elseBranch ) ) return elseBranch;
 		if ( lib.isSubtype( elseBranch, thenBranch ) ) return thenBranch;
-		System.out.println( "ciao" );
-System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );System.out.println( "ciao2" );
+
 		Node type = lib.lowestCommonAncestor( thenBranch, elseBranch );
 		if ( type == null )
 			throw TypeException.buildAndMark( "Incompatible types in then-else branches", lib );
@@ -290,11 +303,18 @@ System.out.println( thenBranch.getClass( ) + " " + elseBranch.getClass( ) );Syst
 
 	@Override
 	public Node visit( LessEqualNode element ) {
-		Node left = visit( element.getLeft( ) );
-		Node right = visit( element.getRight( ) );
+		Node left = visit( element.getLeft( ) );	// type-check left
+		Node right = visit( element.getRight( ) );	// type-check right
 
-		if ( ! ( lib.isSubtype( left, right ) || lib.isSubtype( right, left ) ) )
-			throw TypeException.buildAndMark( "Incompatible types in Lesser/Equal comparison", lib );
+		// cannot compare functional-type (design choice)
+		if ( left instanceof ArrowTypeNode || right instanceof ArrowTypeNode )
+			throw TypeException.buildAndMark( "Incompatible types in Greater-Equal comparison: cannot compare functional-types", lib );
+
+		// cannot compare object with non-object/null
+		if ( left instanceof RefTypeNode && ! ( right instanceof RefTypeNode || right instanceof EmptyTypeNode ) )
+			throw TypeException.buildAndMark( "Incompatible types in Greater-Equal comparison", lib );
+		if ( right instanceof RefTypeNode && ! ( left instanceof RefTypeNode || left instanceof EmptyTypeNode ) )
+			throw TypeException.buildAndMark( "Incompatible types in Greater-Equal comparison", lib );
 
 		return new BoolTypeNode( );
 	}

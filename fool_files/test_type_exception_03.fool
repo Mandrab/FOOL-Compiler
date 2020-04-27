@@ -1,0 +1,6 @@
+let
+	class A( ) { }
+
+	var clsA: A = new A( );
+
+in print( A == A );

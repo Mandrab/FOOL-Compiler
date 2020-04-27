@@ -1,0 +1,9 @@
+let
+	class A( x:int ) { 
+		fun method: int ( ) 0;
+	}
+
+	var clsA: A = new A( 0 );
+
+	var x: int = 0;
+in print( clsA.x( ) );

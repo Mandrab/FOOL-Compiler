@@ -561,17 +561,28 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		STEntry entry = null;
 		
 		for ( int nl = symTable.getLevel( ); nl >= 0 && entry == null; nl-- ) {
-			entry=( symTable.getTable( nl ) ).get( ctx.oID.getText( ) );
+			entry = ( symTable.getTable( nl ) ).get( ctx.oID.getText( ) );
 		}
 
        	if ( entry == null ) {
          	System.out.println( "ID '" + ctx.oID.getText( ) + "' at line " + ctx.oID.getLine( ) + " not declared" );
          	stErrors++; 
-        }
-       	
+        } else if ( ! ( entry.getRetType( ) instanceof RefTypeNode ) ) {
+       		System.out.println( "ID '" + ctx.oID.getText( ) + "' at line " + ctx.oID.getLine( ) + " is not an object" );
+       		stErrors++; 
+       	}
+
 		RefTypeNode reference = ( RefTypeNode ) entry.getRetType( );
 
 		STEntry methodEntry = classTable.getClassVT( reference.getID( ) ).get( ctx.mID.getText( ) );		// method entry
+
+		if ( methodEntry == null ) {
+       		System.out.println( "method ID '" + ctx.mID.getText( ) + "' at line " + ctx.mID.getLine( ) + " not declared" );
+       		stErrors++; 
+       	} else if ( ! methodEntry.isMethod( ) ) {
+       		System.out.println( "method ID '" + ctx.mID.getText( ) + "' at line " + ctx.mID.getLine( ) + " is not a method" );
+       		stErrors++; 
+       	}
 
 		ClassCallNode clsCallNode = new ClassCallNode( ctx.mID.getText( ), entry, methodEntry, symTable.getLevel( ) );
 

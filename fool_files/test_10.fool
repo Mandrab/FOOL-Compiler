@@ -1,0 +1,14 @@
+let
+	class A( ) {
+		
+	}
+	
+	class B extends A( ) {
+		
+	}
+
+	var clsA: A = new A( );
+	var clsB: B = new B( );
+	var variable: bool = clsA == clsB;
+
+in print( variable );

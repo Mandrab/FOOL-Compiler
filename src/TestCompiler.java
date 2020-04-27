@@ -48,6 +48,8 @@ class TestCompiler {
 		testFool( "test_07", s -> s, RUNNER_LOGS + "5\n" );
 		testFool( "test_08", s -> s, RUNNER_LOGS + "2\n" );
 		testFool( "test_09", s -> s, RUNNER_LOGS + "11\n" );
+		testFool( "test_10", s -> s, RUNNER_LOGS + "0\n" );
+		testFool( "test_11", s -> s, RUNNER_LOGS + "0\n" );
 	}
 
 	@Test
@@ -74,6 +76,13 @@ class TestCompiler {
 	public void testExceptions( ) {
 		testException( "test_type_exception_00", true );
 		testException( "test_type_exception_01", true );
+		testException( "test_type_exception_02", true );
+		testException( "test_type_exception_03", true );
+		testException( "test_type_exception_04", true );
+		testException( "test_type_exception_05", true );
+		testException( "test_type_exception_06", false );	// symbol table exception
+		testException( "test_type_exception_07", false );	// symbol table exception
+		testException( "test_type_exception_08", false );	// symbol table exception
 	}
 
 	/**

@@ -45,21 +45,21 @@ var :
 
 exp	:
 		term
-	|	l = exp PLUS r = exp
-	|	l = exp MINUS r = exp
-	|	l = exp OR r = exp ;
+	|	l = exp PLUS r = term
+	|	l = exp MINUS r = term
+	|	l = exp OR r = term ;
 
 term :
 		factor
-	|	l = term TIMES r = term
-	|	l = term DIV r = term
-	|	l = term AND r = term ;
+	|	l = term TIMES r = factor
+	|	l = term DIV r = factor
+	|	l = term AND r = factor ;
 
 factor :
 		value
-	|	l = factor EQ r = factor 
-   	| 	l = factor GE r = factor 
-   	| 	l = factor LE r = factor ;
+	|	l = factor EQ r = value 
+   	| 	l = factor GE r = value 
+   	| 	l = factor LE r = value ;
 
 value :
 		

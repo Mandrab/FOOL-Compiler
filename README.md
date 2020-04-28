@@ -1,10 +1,10 @@
 # FOOL Project
 
-This project started with the aim of better understand how programming languages and compilers work. It has been made after following the *Languages, Compilers and Computational Models* course at UniBo.
+This project started with the aim of better understand how programming languages and compilers work. It has been made after following the *Languages, Compilers and Computational Models* course at University of Bologna.
 
 ## A Functional and Object Oriented Language
 
-The project started with the design of a simple language that mixes Functional and Object Oriented paradigms (a.k.a. FOOL, with L standing for Language). Two short codes example are available below. The first one shows an higher-order use, the second one shows use of objects.
+The project started with the design of a simple language that mixes Functional and Object Oriented paradigms (a.k.a. FOOL, with L standing for Language). Two short codes example are available below. The first one shows an higher-order use, the second one shows use of objects. Obviously, the two paradigms can also be used together.
 
 Higher-order code:
 
@@ -65,30 +65,27 @@ However, being that a learning project, FOOL is not intended to be used as a rea
 * no imports (only a code file available)
 * class declarations as first elements of the file
 * no *class* variables (variables exist outside the class or in methods/functions!)
-* immutable *class'* fields
-* *class* fields can't be lambdas (but methods/functions' parameters can!)
+* class' fields are immutable (values passed in constructor)
+* class' fields can't be lambdas (but methods/functions' parameters can!)
 * no deallocation of objects
 * only *stdout* file descriptor available
 
 ## The Compiler
 
 It has been built in Java through the use of **ANTLR** tool. It's composed by *Lexer*, *Parser*, *Type-Checker* and *Code-Generator*. No optimization is made on the code.</br>
-All these components are implemented using the *Visitor pattern* to divide the tasks in the best possible way.
+All these components are implemented using the *Visitor Pattern* to divide the tasks in the best possible way.
 
 ### Lexer
 This component is automatically builded by the ANTLR tool based on the .g4 file. In this one, the keywords of all the tokens are described.
 
 ### Parser
-ANTLR auto-build a class that allow to parse the code *top-down*. This one is constructed through the grammar rules defined in the .g4 file. The rules to create the *Abstract Syntax Tree* (a "condensed" version of the *Parse Tree*) are instead defined in the *ParserVisitor* file.
+ANTLR auto-build a class that allow to parse the code *top-down*. This one is constructed through the grammar rules defined in the .g4 file. The rules to create the *Abstract Syntax Tree* (a "condensed" version of the *Parse Tree*) are instead defined in the *ParserVisitor* file. This last component also performs a *semantic analysis*.
 
 ### Type-Checker
-This is the component that checks that the code is correctly typed (some check are indeed also done by the parser component). 
-
-    This section has to be expanded
+This is the component that checks that the code is correctly typed. Despite some basic checks are also done by the parser component during the semantic analysis, the type-checker performs most accurate ones. Some examples are expressions' types, *lowest-common-ancestor* for if-then-else node, etc.
     
 ### Code-Generator
-
-    This section has to be expanded
+That's the component that generates the assembly code for the stack virtual machine. The implementation of this component was developed side-by-side with the design of the Activation Record.
 
 ### Compiler API
 The final version of the compiler contains a CLI interface for build a FOOL file and run his generated code on the virtual machine. The available commands, to pass as arguments at the main file, are listed below:</br>

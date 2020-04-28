@@ -44,20 +44,20 @@ import ast.VarNode;
  * @author Paolo Baldini
  */
 public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVisitor<String> {
-	
+
 	private String baseIndent;
 	private int indentCount;
-	
+
 	public PrinterVisitor( ) {
 		baseIndent = "\t";
 		indentCount = 0;
 	}
-	
+
 	public PrinterVisitor( String indent ) {
 		baseIndent = indent;
 		indentCount = 0;
 	}
-	
+
 	@Override
 	public String visit( Node element ) {
 		try {
@@ -145,7 +145,7 @@ public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVis
 
 	@Override
 	public String visit( EmptyNode element ) {
-		return indent( ) + "Null\n"; 
+		return indent( ) + "Null\n";
 	}
 
 	@Override
@@ -375,7 +375,7 @@ public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVis
 		decIndent( );
 		return result;
 	}
-	
+
 	private String incIndent( ) {
 		indentCount++;
 		StringBuilder builder = new StringBuilder( );
@@ -383,14 +383,14 @@ public class PrinterVisitor extends ReflectionVisitor<String> implements NodeVis
 			builder.append( baseIndent );
 		return builder.toString( );
 	}
-	
+
 	private String indent( ) {
 		StringBuilder builder = new StringBuilder( );
 		for ( int i = 0; i < indentCount; i++ )
 			builder.append( baseIndent );
 		return builder.toString( );
 	}
-	
+
 	private String decIndent( ) {
 		indentCount--;
 		StringBuilder builder = new StringBuilder( );

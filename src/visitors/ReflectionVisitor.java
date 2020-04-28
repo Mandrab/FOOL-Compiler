@@ -9,7 +9,7 @@ import ast.Node;
  * Class that uses reflection to call the correct 'visit' method
  * 
  * @author Paolo Baldini
- *
+ * 
  * @param <T>
  * 		expected return type of 'visit' method
  */

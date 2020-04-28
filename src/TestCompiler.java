@@ -15,7 +15,7 @@ import lib.TypeException;
  * @author Paolo Baldini
  */
 class TestCompiler {
-	
+
 	private static final String RUNNER_LOGS = "Starting Virtual Machine...\n";
 	private static final String FOOL_FILES_PATH = "fool_files" + File.separator;
 
@@ -72,7 +72,7 @@ class TestCompiler {
 		testFool( "test_math_04", s -> s, RUNNER_LOGS + "40\n" );
 		testFool( "test_math_05", s -> s, RUNNER_LOGS + "4\n" );
 	}
-	
+
 	@Test
 	public void testExceptions( ) {
 		testException( "test_type_exception_00", true );
@@ -93,31 +93,31 @@ class TestCompiler {
 	 * Test program comparing provided result with expected one
 	 * 
 	 * @param <T>
-	 * 		type of result (converted from string): I might want an obj
+	 *		type of result (converted from string): I might want an obj
 	 * @param foolFile
-	 * 		file to compile, run and test
+	 *		file to compile, run and test
 	 * @param resultMapper
-	 * 		map string result to required type
+	 *		map string result to required type
 	 * @param expectedResult
-	 * 		the expected result
+	 *		the expected result
 	 * @throws Exception
-	 * 		classical compile or run exception
+	 *		classical compile or run exception
 	 */
 	private <T> void testFool( String foolFile, Function<String,T> resultMapper, T expectedResult ) throws Exception {
-		
+
 		String fileName = FOOL_FILES_PATH + foolFile;
 
-        Compiler.compile( fileName + ".fool" );
+		Compiler.compile( fileName + ".fool" );
 
-        // set to catch result
-        redirectIO( );
+		// set to catch result
+		redirectIO( );
 
-        Runner.runCode( fileName + ".asm", false );
+		Runner.runCode( fileName + ".asm", false );
 
-        // reset System.out
-        restoreIO( );
+		// reset System.out
+		restoreIO( );
 
-        assertEquals( expectedResult, resultMapper.apply( testStream.toString( ) ) );
+		assertEquals( expectedResult, resultMapper.apply( testStream.toString( ) ) );
 	}
 
 	/**
@@ -137,10 +137,10 @@ class TestCompiler {
 	 * Test compiler/program to check if it launches expected exceptions
 	 * 
 	 * @param file
-	 * 		file to test (build/run)
+	 *		file to test (build/run)
 	 * @param expectedTypeException
-	 * 		true if i expect a type-exception,
-	 * 		false otherwise (i expect a different type of exception)
+	 *		true if i expect a type-exception,
+	 *		false otherwise (i expect a different type of exception)
 	 */
 	public void testException( String file, boolean expectedTypeException ) {
 		try {

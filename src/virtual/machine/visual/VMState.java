@@ -12,7 +12,7 @@ import java.util.Optional;
 public class VMState {
 
 	private int[] memory;
-	
+
 	private int ip = 0;
 	private int sp = MEMSIZE;
 
@@ -20,9 +20,9 @@ public class VMState {
 	private int hp = 0;
 	private int ra;
 	private int fp = MEMSIZE;
-	
+
 	private Optional<String> result;
-	
+
 	public VMState( VMState oldState ) {
 		memory = new int[ MEMSIZE ];
 		System.arraycopy( oldState.getMemory( ), 0, memory, 0, MEMSIZE );
@@ -34,7 +34,7 @@ public class VMState {
 		this.fp = oldState.getFp( );
 		this.result = oldState.getResult( );
 	}
-	
+
 	public VMState( int[] mem, int ip, int sp, int tm, int hp, int ra, int fp, Optional<String> result ) {
 		memory = new int[ MEMSIZE ];
 		System.arraycopy( mem, 0, memory, 0, MEMSIZE );
@@ -62,11 +62,11 @@ public class VMState {
 	public int setIp( int ip ) {
 		return this.ip = ip;
 	}
-	
+
 	public int incIp( ) {
 		return ++ip;
 	}
-	
+
 	public int decIp( ) {
 		return --ip;
 	}
@@ -78,11 +78,11 @@ public class VMState {
 	public int setSp( int sp ) {
 		return this.sp = sp;
 	}
-	
+
 	public int incSp( ) {
 		return ++sp;
 	}
-	
+
 	public int decSp( ) {
 		return --sp;
 	}
@@ -102,11 +102,11 @@ public class VMState {
 	public int setHp( int hp ) {
 		return this.hp = hp;
 	}
-	
+
 	public int incHp( ) {
 		return ++hp;
 	}
-	
+
 	public int decHp( ) {
 		return --hp;
 	}
@@ -126,9 +126,9 @@ public class VMState {
 	public int setFp( int fp ) {
 		return this.fp = fp;
 	}
-	
+
 	public void setResult( String value ) {
-		result = value == null 
+		result = value == null
 				? Optional.empty( )
 				: Optional.of( new String( value ) );
 	}
@@ -139,11 +139,11 @@ public class VMState {
 					? result.get( ) + "\n" + value
 					: value );
 	}
-	
+
 	public Optional<String> getResult( ) {
 		return result;
 	}
-	
+
 	@Override
 	public String toString( ) {
 		return "State: \n" +

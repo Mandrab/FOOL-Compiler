@@ -16,10 +16,10 @@ public class FOOLExecutor {
 	 * The '-gui' flag allow to run the GUI version of the Stack Virtual Machine.
 	 * 
 	 * @param args
-	 * 		may contains the path to the file (without .fool extension) and/or the
-	 * 		'-gui' flag to run the GUI
+	 *		may contains the path to the file (without .fool extension) and/or the
+	 *		'-gui' flag to run the GUI
 	 * @throws Exception
-	 * 		generic exception thrown if compiler (or runner) fails
+	 *		generic exception thrown if compiler (or runner) fails
 	 */
 	public static void main( String[] args ) throws Exception {
 
@@ -37,6 +37,6 @@ public class FOOLExecutor {
 		Compiler.compile( filePath.get( ) + ".fool" );
 
 		// run compiled program
-        Runner.runCode( filePath.get( ) + ".asm", runGui );
+		Runner.runCode( filePath.get( ) + ".asm", runGui );
 	}
 }

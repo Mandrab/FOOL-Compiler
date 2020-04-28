@@ -16,7 +16,7 @@ public class MethodNode implements DecNode, Node {
 	private Node returnType;			// method's return type
 	private List<Node> parameters;		// method's required parameters' types
 	private List<Node> declarations;	// variables declarations in method's body (let-in block)
-	private Node exp;					// mathod's main expression
+	private Node exp;					// method's main expression
 	private int offset;					// method's offset in class definition
 	private String generatedLabel;		// assembly sub-routine's label
 

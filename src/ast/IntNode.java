@@ -14,11 +14,11 @@ public class IntNode implements Node {
 	public IntNode( Integer value ) {
 		this.value = value;
 	}
-	
+
 	public int getValue( ) {
 		return value;
 	}
-	
+
 	@Override
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );

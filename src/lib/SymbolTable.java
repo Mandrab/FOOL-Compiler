@@ -32,7 +32,7 @@ public class SymbolTable {
 		Map<String, STEntry> level = new HashMap<String, STEntry>( );
 		symTable.add( level );
 		nestingLevel++;
-		
+
 		return level;
 	}
 
@@ -58,7 +58,7 @@ public class SymbolTable {
 	 */
 	public Map<String, STEntry> getTable( int nestingLevel ) {
 		if ( nestingLevel >= symTable.size( ) ) throw new IllegalStateException( );
-		
+
 		return symTable.get( nestingLevel );
 	}
 
@@ -72,7 +72,7 @@ public class SymbolTable {
 	 */
 	public Map<String, STEntry> popTable( ) {
 		if ( nestingLevel >= symTable.size( ) ) throw new IllegalStateException( );
-		
+
 		return symTable.remove( nestingLevel-- );
 	}
 

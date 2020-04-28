@@ -18,19 +18,19 @@ public class FieldNode implements DecNode, Node {
 		this.type = type;
 		this.offset = offset;
 	}
-	
+
 	public String getID( ) {
 		return ID;
 	}
-	
+
 	public Node getSymType( ) {
 		return type;
 	}
-	
+
 	public void setOffset( int offset ) {
 		this.offset = offset;
 	}
-	
+
 	public int getOffset( ) {
 		return this.offset;
 	}

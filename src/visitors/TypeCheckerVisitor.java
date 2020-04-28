@@ -188,7 +188,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 					FieldNode myField = ( FieldNode ) thisCTN.getFields( ).get( fieldOffset );
 
 					if ( ! lib.isSubtype( myField.getSymType( ), superField.getSymType( ) ) )
-						throw TypeException.buildAndMark( "Overriding of field '" + superField.getID( ) + 
+						throw TypeException.buildAndMark( "Overriding of field '" + superField.getID( ) +
 								"' has wrong type. Expected: " + superField.getSymType( ) + " (or super). Given: " + myField.getSymType( ), lib );
 				}
 			}
@@ -216,16 +216,16 @@ public class TypeCheckerVisitor extends ReflectionVisitor<Node> implements NodeV
 	@Override
 	public Node visit( DivNode element ) {
 		// check that operands are integers
-		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) ) 
+		if ( ! lib.isSubtype( visit( element.getLeft( ) ), new IntTypeNode( ) ) )
 			throw TypeException.buildAndMark( "First element in division is not an integer", lib );
-		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) ) 
+		if ( ! lib.isSubtype( visit( element.getRight( ) ), new IntTypeNode( ) ) )
 			throw TypeException.buildAndMark( "Second element in division is not an integer", lib );
 		return new IntTypeNode( );
 	}
 
 	@Override
 	public Node visit( EmptyNode element ) {
-		return new EmptyTypeNode( ); 
+		return new EmptyTypeNode( );
 	}
 
 	@Override

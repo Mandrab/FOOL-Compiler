@@ -22,10 +22,10 @@ public class Runner {
 	 * The '-gui' flag allow to run the GUI version of the Stack Virtual Machine.
 	 * 
 	 * @param args
-	 * 		must contains file's path and eventually
-	 * 		the '-gui' flag to run the GUI
+	 *		must contains file's path and eventually
+	 *		the '-gui' flag to run the GUI
 	 * @throws Exception
-	 * 		if no .asm file is specified or a runtime error occurs
+	 *		if no .asm file is specified or a runtime error occurs
 	 */
 	public static void main( String[] args ) throws Exception {
 
@@ -45,11 +45,11 @@ public class Runner {
 	 * The visual parameter allow to run the GUI version of the Stack Virtual Machine.
 	 * 
 	 * @param filePath
-	 * 		the path to the .asm file
+	 *		the path to the .asm file
 	 * @param visual
-	 * 		if true, run the GUI. Otherwise, run in CLI
+	 *		if true, run the GUI. Otherwise, run in CLI
 	 * @throws Exception
-	 * 		if no .asm file is specified or a runtime error occurs
+	 *		if no .asm file is specified or a runtime error occurs
 	 */
 	public static void runCode( String filePath, boolean visual ) throws Exception {
 
@@ -63,7 +63,7 @@ public class Runner {
 		// validate code through SVM (Stack Virtual Machine)
 		SVMVISLexer lexerASM = new SVMVISLexer( charsASM );
 		CommonTokenStream tokensASM = new CommonTokenStream( lexerASM );
-		SVMVISParser parserASM = new SVMVISParser( tokensASM ); 
+		SVMVISParser parserASM = new SVMVISParser( tokensASM );
 		parserASM.assembly( );
 
 		// check error in assembly code

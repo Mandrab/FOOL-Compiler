@@ -14,12 +14,12 @@ import ast.*;
  */
 public class FOOLLib {
 
-    public static final int MEMSIZE = 10000;		// memory size of the virtual machine
+	public static final int MEMSIZE = 10000;		// memory size of the virtual machine
 
-    private int typeErrors;							// type errors in the code
+	private int typeErrors;							// type errors in the code
 
-    private Map<String, String> superType;			// map a class to its super-class
-    private List<List<String>> dispatchTables;		// list dispatch tables
+	private Map<String, String> superType;			// map a class to its super-class
+	private List<List<String>> dispatchTables;		// list dispatch tables
 
 	private int labelCount;
 	private int funLabelCount;
@@ -106,11 +106,11 @@ public class FOOLLib {
 	/**
 	 * Allow to use, in the if-then-else node, two expressions also when their return types have a common ancestor
 	 * e.g., the expression 'if ( CONDITION ) then { B } else { C }' where:
-     *          A
-     *        /   \
-     *       B     C
-     * is allowed
-     *
+	 *          A
+	 *        /   \
+	 *       B     C
+	 * is allowed
+	 *
 	 * @param 'a' a node of the ast 
 	 * @param 'b' a node of the ast 
 	 * @return if a 'lowest common ancestor' (between 'a' and 'b') exist,
@@ -121,7 +121,7 @@ public class FOOLLib {
 
 		// if 'a' is 'null', then return 'b'
 		if ( ( a instanceof EmptyTypeNode ) )
-			return  b; 
+			return b; 
 
 		// if 'b' is 'null', then return 'a'
 		if ( ( b instanceof EmptyTypeNode ) )

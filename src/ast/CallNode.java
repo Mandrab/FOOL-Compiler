@@ -22,27 +22,27 @@ public class CallNode implements Node {
 		parameters = pars;
 		nestingLevel = nl;
 	}
-	
+
 	public String getID( ) {
 		return ID;
 	}
-	
+
 	public int getNestingLevel( ) {
 		return nestingLevel;
 	}
-	
+
 	public STEntry getEntry( ) {
 		return definition;
 	}
-	
+
 	public List<Node> getParameters( ) {
 		return parameters;
 	}
-	
+
 	public Node getType( ) {
 		return definition.getRetType( );
 	}
-	
+
 	@Override
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );

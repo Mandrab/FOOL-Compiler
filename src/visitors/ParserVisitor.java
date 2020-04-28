@@ -48,7 +48,7 @@ import lib.SymbolTable;
 
 /**
  * Parse tree visitor to generate AST ('decorated' with symbol table informations)
- *
+ * 
  * @author Paolo Baldini
  */
 public class ParserVisitor extends FOOLBaseVisitor<Node> {
@@ -96,7 +96,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 		// if the program has only an expression (without declarations) -> return a ProgNode;
 		// otherwise -> return a ProgLetInNode
-		return ctx.LET( ) != null ? new ProgLetInNode( declarations,  exp ) : new ProgNode( exp );
+		return ctx.LET( ) != null ? new ProgLetInNode( declarations, exp ) : new ProgNode( exp );
 	}
 
 	@Override
@@ -121,24 +121,24 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 		}
 
 		// create a nested table for class' declarations
-	  	Map<String,STEntry> virtualTable = symTable.nestTable( );
+		Map<String,STEntry> virtualTable = symTable.nestTable( );
 
-	  	// set fields and methods starting offsets
-	  	int fieldOffset = -1;
-	  	int methodOffset = 0;
+		// set fields and methods starting offsets
+		int fieldOffset = -1;
+		int methodOffset = 0;
 
 		// EXTENDS
-	  	if ( ctx.EXTENDS( ) != null ) {
-	  		// superclass name
-	  		String suID = ctx.suID.getText( );
+		if ( ctx.EXTENDS( ) != null ) {
+			// superclass name
+			String suID = ctx.suID.getText( );
 
-	  		// superclass not defined
-	  		if ( classTable.getClassVT( suID ) == null ) {
+			// superclass not defined
+			if ( classTable.getClassVT( suID ) == null ) {
 				System.out.println( "Class ID '" + suID + "' not found at line " + ctx.suID.getLine( ) );
 				stErrors++;
 			}
 
-	  		// set class' parent as the superclass' STentry (from symbol table)
+			// set class' parent as the superclass' STentry (from symbol table)
 			clsNode.setSuper( stFront.get( suID ) );
 			// get superclass' type
 			superClassType = ( ClassTypeNode ) stFront.get( suID ).getRetType( );
@@ -151,26 +151,26 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			classTable.getClassVT( suID ).forEach( (k, v) -> virtualTable.put( k, v ) );
 			// declare supertyping
 			lib.setSuperType( clsID, suID );
-	  	}
+		}
 
 		// data structure for redefinition-check optimization
 		Set<String> definedElements = new HashSet<>( );
 
-	  	// FIELDS
-	  	for ( int i = 0; ctx.field( ) != null && i < ctx.field( ).size( ); i++ ) {
-	  		// get FieldNode visiting his declaration
-	  		FieldNode fieldNode = ( FieldNode ) visit( ctx.field( i ) );
+		// FIELDS
+		for ( int i = 0; ctx.field( ) != null && i < ctx.field( ).size( ); i++ ) {
+			// get FieldNode visiting his declaration
+			FieldNode fieldNode = ( FieldNode ) visit( ctx.field( i ) );
 
-	  		// add field to class
-	  		clsNode.addField( fieldNode );
+			// add field to class
+			clsNode.addField( fieldNode );
 
-	  		// check for field redefinition (in this class)
-	  		if( definedElements.stream( ).anyMatch( e -> e.equals( fieldNode.getID( ) ) ) ) {
-	  			System.out.println( "Redefinition of field " + fieldNode.getID( ) + " at line " + ctx.field( i ).ID( ).getSymbol( ).getLine( ) );
-	  			stErrors++;
-	  		} else definedElements.add( fieldNode.getID( ) );
+			// check for field redefinition (in this class)
+			if( definedElements.stream( ).anyMatch( e -> e.equals( fieldNode.getID( ) ) ) ) {
+				System.out.println( "Redefinition of field " + fieldNode.getID( ) + " at line " + ctx.field( i ).ID( ).getSymbol( ).getLine( ) );
+				stErrors++;
+			} else definedElements.add( fieldNode.getID( ) );
 
-	  		// try to get previous field declaration
+			// try to get previous field declaration
 			STEntry val = virtualTable.get( fieldNode.getID( ) );
 
 			// a previous declared field exist
@@ -196,26 +196,26 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 				virtualTable.put( fieldNode.getID( ), new STEntry( symTable.getLevel( ), fieldNode.getSymType( ), fieldOffset, false ) );
 				fieldNode.setOffset( fieldOffset-- );
 			}
-	  	}
+		}
 
-	  	// METHODS
-	  	for ( int i = 0; ctx.method( ) != null && i < ctx.method( ).size( ); i++ ) {
-	  		// get MethodNode visiting his declaration
-	  		MethodNode methodNode = ( MethodNode ) visit( ctx.method( i ) );
+		// METHODS
+		for ( int i = 0; ctx.method( ) != null && i < ctx.method( ).size( ); i++ ) {
+			// get MethodNode visiting his declaration
+			MethodNode methodNode = ( MethodNode ) visit( ctx.method( i ) );
 
-	  		// add method to class
-	  		clsNode.addMethod( methodNode );
+			// add method to class
+			clsNode.addMethod( methodNode );
 
-	  		// check for method redefinition (in this class)
-	  		if( definedElements.stream( ).anyMatch( e -> e.equals( methodNode.getID( ) ) ) ) {
-	  			System.out.println( "Redefinition of field " + methodNode.getID( ) + " at line " + ctx.method( i ).ID( ).getSymbol( ).getLine( ) );
-	  			stErrors++;
-	  		} else definedElements.add( methodNode.getID( ) );
+			// check for method redefinition (in this class)
+			if( definedElements.stream( ).anyMatch( e -> e.equals( methodNode.getID( ) ) ) ) {
+				System.out.println( "Redefinition of field " + methodNode.getID( ) + " at line " + ctx.method( i ).ID( ).getSymbol( ).getLine( ) );
+				stErrors++;
+			} else definedElements.add( methodNode.getID( ) );
 
-	  		// try to get previous method declaration
-	  		STEntry val = virtualTable.get( methodNode.getID( ) );
+			// try to get previous method declaration
+			STEntry val = virtualTable.get( methodNode.getID( ) );
 
-	  		// a previous declared method exist
+			// a previous declared method exist
 			if( val != null ){
 
 				// superclass exist and has this method -> ok, override
@@ -238,17 +238,17 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 				virtualTable.put( methodNode.getID( ), new STEntry( symTable.getLevel( ), new ArrowTypeNode( methodNode.getParameters( ), methodNode.getSymType( ) ), methodOffset, true ) );
 				methodNode.setOffset( methodOffset++ );
 			}
-	  	}
+		}
 
-	  	// add virtual table of this class to class-table and remove it from symbol table
-	  	classTable.addClassVT( clsID, virtualTable );
-	  	symTable.popTable( );
+		// add virtual table of this class to class-table and remove it from symbol table
+		classTable.addClassVT( clsID, virtualTable );
+		symTable.popTable( );
 
-	  	// get (offset-sorted) methods and add them to ClassTypeNode
-	  	virtualTable.values( ).stream( ).filter( STEntry::isMethod )
-	  			.sorted( ( e1, e2 ) -> e1.getOffset( ) - e2.getOffset( ) ).forEach( e -> clsTypeNode.addMethod( e.getRetType( ) ) );
+		// get (offset-sorted) methods and add them to ClassTypeNode
+		virtualTable.values( ).stream( ).filter( STEntry::isMethod )
+				.sorted( ( e1, e2 ) -> e1.getOffset( ) - e2.getOffset( ) ).forEach( e -> clsTypeNode.addMethod( e.getRetType( ) ) );
 
-	  	// get (offset-sorted) fields and add them to ClassTypeNode
+		// get (offset-sorted) fields and add them to ClassTypeNode
 		virtualTable.entrySet( ).stream( ).filter( e -> ! e.getValue( ).isMethod( ) )
 				.sorted( ( e1, e2 ) -> e2.getValue( ).getOffset( ) - e1.getValue( ).getOffset( ) )
 				.forEach( e -> clsTypeNode.addField( new FieldNode( e.getKey( ), e.getValue( ).getRetType( ), e.getValue( ).getOffset( ) ) ) );
@@ -327,7 +327,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			// add function expression
 			funNode.setExpession( visit( ctx.fE ) );
 
-		  	// remove function's symbol table (exiting the method scope) and restore old offset
+			// remove function's symbol table (exiting the method scope) and restore old offset
 			symTable.popTable( );
 			offset = oldOffset;
 
@@ -359,17 +359,17 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 			ParNode par = ( ParNode ) visit( ctx.parameter( i ) );
 
 			// add parameter to method
-		  	methodNode.addParameter( par );
+			methodNode.addParameter( par );
 
-		  	if ( par.getSymType( ) instanceof ArrowTypeNode )
+			if ( par.getSymType( ) instanceof ArrowTypeNode )
 				parOffset++;
 
-		  	// check parameter existence in method's symbol table
-		  	if ( mthdNestingLevel.put( par.getID( ), new STEntry( symTable.getLevel( ), par.getSymType( ), parOffset++, false ) ) != null  ) {
-		  		System.out.println( "Parameter ID '" + par.getID( ) + "' at line " + ctx.parameter( i ).ID( ).getSymbol( ).getLine( ) + " already declared" );
+			// check parameter existence in method's symbol table
+			if ( mthdNestingLevel.put( par.getID( ), new STEntry( symTable.getLevel( ), par.getSymType( ), parOffset++, false ) ) != null ) {
+				System.out.println( "Parameter ID '" + par.getID( ) + "' at line " + ctx.parameter( i ).ID( ).getSymbol( ).getLine( ) + " already declared" );
 				stErrors++;
 			}
-	  	}
+		}
 
 		// parse every declaration
 		for ( int i = 0; ctx.var( ) != null && i < ctx.var( ).size( ); i++ ) {
@@ -388,7 +388,7 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 	@Override
 	public Node visitParameter(FOOLParser.ParameterContext ctx) {
-	 	return new ParNode( ctx.ID( ).getText( ), visit( ctx.hotype( ) ) );
+		return new ParNode( ctx.ID( ).getText( ), visit( ctx.hotype( ) ) );
 	}
 
 	@Override
@@ -544,8 +544,8 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 		// check if declaration exists
 		if ( entry == null ) {
-		 	System.out.println( "ID '" + ctx.ID( ).getText( ) + "' at line " + ctx.ID( ).getSymbol( ).getLine( ) + " not declared" );
-		 	stErrors++;
+			System.out.println( "ID '" + ctx.ID( ).getText( ) + "' at line " + ctx.ID( ).getSymbol( ).getLine( ) + " not declared" );
+			stErrors++;
 		}
 
 		return new IdNode( ctx.ID( ).getText( ), entry, symTable.getLevel( ) );
@@ -562,8 +562,8 @@ public class ParserVisitor extends FOOLBaseVisitor<Node> {
 
 		// check if declaration exists
 		if ( entry == null ) {
-		 	System.out.println( "ID '" + ctx.ID( ).getText( ) + "' at line " + ctx.ID( ).getSymbol( ).getLine( ) + " not declared" );
-		 	stErrors++;
+			System.out.println( "ID '" + ctx.ID( ).getText( ) + "' at line " + ctx.ID( ).getSymbol( ).getLine( ) + " not declared" );
+			stErrors++;
 		}
 
 		List<Node> arglist = new ArrayList<Node>( );

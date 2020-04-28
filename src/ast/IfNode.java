@@ -18,7 +18,7 @@ public class IfNode implements Node {
 		this.thenBranch = thenBranch;
 		this.elseBranch = elseBranch;
 	}
-	
+
 	public Node getCondition( ) {
 		return condition;
 	}

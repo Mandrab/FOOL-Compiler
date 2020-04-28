@@ -40,7 +40,7 @@ import ast.VarNode;
  * Interface for an AST visitor
  * 
  * @author Paolo Baldini
- *
+ * 
  * @param <R>
  * 		expected return type of 'visit' method
  */

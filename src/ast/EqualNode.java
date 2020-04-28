@@ -16,7 +16,7 @@ public class EqualNode implements Node {
 		this.left = left;
 		this.right = right;
 	}
-	
+
 	public Node getLeft( ) {
 		return left;
 	}

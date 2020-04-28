@@ -40,7 +40,7 @@ public class STEntry implements Visitable {
 		return type;
 	}
 
-	public boolean isMethod( )  {
+	public boolean isMethod( ) {
 		return isMethod;
 	}
 

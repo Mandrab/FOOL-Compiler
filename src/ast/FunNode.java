@@ -24,20 +24,20 @@ public class FunNode implements Node, DecNode {
 		this.parameters = new ArrayList<Node>( );
 		this.declarations = new ArrayList<Node>( );
 	}
-	
+
 	public String getID( ) {
 		return ID;
 	}
-	
+
 	@Override
 	public Node getSymType( ) {
 		return returnType;
 	}
-	
+
 	public void addParameter( Node parameter ) {
 		parameters.add( parameter );
 	}
-	
+
 	public List<Node> getParameters( ) {
 		return parameters;
 	}
@@ -45,7 +45,7 @@ public class FunNode implements Node, DecNode {
 	public void addDeclaration( Node declaration ) {
 		declarations.add( declaration );
 	}
-	
+
 	public List<Node> getDeclarations( ) {
 		return declarations;
 	}
@@ -53,11 +53,11 @@ public class FunNode implements Node, DecNode {
 	public void setExpession( Node expression ) {
 		exp = expression;
 	}
-	
+
 	public Node getExpession( ) {
 		return exp;
 	}
-	
+
 	@Override
 	public <T> T accept( NodeVisitor<T> visitor ) {
 		return visitor.visit( this );

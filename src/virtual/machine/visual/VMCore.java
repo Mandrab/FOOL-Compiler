@@ -15,9 +15,9 @@ import static lib.FOOLLib.MEMSIZE;
  */
 public class VMCore {
 
-    private static final int CODESIZE = 10000;
+	private static final int CODESIZE = 10000;
 
-    private List<VMState> oldStates;
+	private List<VMState> oldStates;
 	private VMState state;
 
 	private int[] code;
@@ -37,10 +37,10 @@ public class VMCore {
 	public void nextStep( ) {
 		try {
 			if ( ! ended ) {
-	
+
 				oldStates.add( 0, state );
 				state = new VMState( state );
-				
+
 				int bytecode = fetch( );	// fetch instruction
 				int v1, v2;
 				int address;

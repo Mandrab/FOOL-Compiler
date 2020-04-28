@@ -16,7 +16,7 @@ public class DivNode implements Node {
 		this.left = left;
 		this.right = right;
 	}
-	
+
 	public Node getLeft( ) {
 		return left;
 	}

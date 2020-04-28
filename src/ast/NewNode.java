@@ -21,7 +21,7 @@ public class NewNode implements Node {
 		this.entry = entry;
 		this.fields = new ArrayList<Node>( );
 	}
-	
+
 	public String getID( ) {
 		return ID;
 	}
@@ -29,11 +29,11 @@ public class NewNode implements Node {
 	public STEntry getEntry( ) {
 		return entry;
 	}
-	
+
 	public void addField( Node field ) {
 		fields.add( field );
 	}
-	
+
 	public List<Node> getFields( ) {
 		return fields;
 	}

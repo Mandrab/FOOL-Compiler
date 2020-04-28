@@ -114,18 +114,18 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 
 		// for a method, the label is found in dispatch table
 		if ( element.getEntry( ).isMethod( ) )
-			return result + 
+			return result +
 					"stm\n" + "ltm\n" + "ltm\n" +	// duplicate top of the stack (contains AR of declaration)
 					"lw\n" +						// get value (dispatch pointer)
-			        "push " + element.getEntry( ).getOffset( ) + "\n"+ // push method offset
+					"push " + element.getEntry( ).getOffset( ) + "\n"+ // push method offset
 					"add\n" +						// get method's label address
-		            "lw\n" + 						// get value (label of method's subroutine)
-			        "js\n";							// jump to subroutine (put address of next instruction in ra)
+					"lw\n" +						// get value (label of method's subroutine)
+					"js\n";							// jump to subroutine (put address of next instruction in ra)
 
 		// for a function, the label is found in AR of declaration
 		return result +
 				"push " + element.getEntry( ).getOffset( ) + "\n" +	// push function offset
-				"add\n" + 							// get function's declaration-AR's address
+				"add\n" +							// get function's declaration-AR's address
 				"stm\n" + "ltm\n" +					// save top of stack in tm register
 				"lw\n" +							// get value (AR address of function's declaration)
 				"ltm\n" +							// put AR address again on stack
@@ -194,7 +194,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 				myDispatchTable.remove( methodOffset );
 				myDispatchTable.add( methodOffset, methodLabel );
 			} else {
-				myDispatchTable.add( methodLabel );	
+				myDispatchTable.add( methodLabel );
 			}
 		}
 
@@ -237,13 +237,13 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 		String equal = lib.freshLabel( );
 		String end = lib.freshLabel( );
 
-		return visit( element.getLeft( ) ) +	// get left value
-				visit( element.getRight( ) ) +	// get right value
-				"beq " + equal + "\n" + 		// if equals, jump to equals label ...
-				"push 0\n" + 					// ... otherwise push 'false' ...
-				"b " + end + "\n" + 			// ... then jump to end
+		return visit( element.getLeft( ) ) +		// get left value
+				visit( element.getRight( ) ) +		// get right value
+				"beq " + equal + "\n" +				// if equals, jump to equals label ...
+				"push 0\n" +						// ... otherwise push 'false' ...
+				"b " + end + "\n" +					// ... then jump to end
 				equal + ": \n" +
-				"push 1\n" +					// push 'true'
+				"push 1\n" +						// push 'true'
 				end + ": \n";
 	}
 
@@ -301,7 +301,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	@Override public String visit( GreaterEqualNode element ) {
 		final String lesserEqual = lib.freshLabel( );
 		final String end = lib.freshLabel( );
-		
+
 		// NOTE that right and left code generation is swapped! A >= B --> B <= A
 		return visit( element.getRight( ) ) +
 				visit( element.getLeft( ) ) +
@@ -326,7 +326,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 		// if it's not a functional id ...
 		if ( ! ( element.getEntry( ).getRetType( ) instanceof ArrowTypeNode ) )
 			return findAR +							// find AR of declaration
-					"push " + element.getEntry( ).getOffset( ) + "\n" +	// push id offset 
+					"push " + element.getEntry( ).getOffset( ) + "\n" +	// push id offset
 					"add\n" +						// get address of value
 					"lw\n";							// put value on top of the stack
 
@@ -334,7 +334,7 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 		return findAR +								// find AR of declaration of id
 				"push " + element.getEntry( ).getOffset( ) + "\n" +	// push id offset
 				"add\n" +							// get address of function's AL
-				"stm\n" + "ltm\n" +               	// save top of stack in tm (contains address of id)
+				"stm\n" + "ltm\n" +					// save top of stack in tm (contains address of id)
 				"lw\n" +							// load AL on top of the stack
 				"ltm\n" +							// put address of id on stack
 				"push 1\n" +						// previous value on stack contains function's label
@@ -347,16 +347,16 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	 */
 	@Override public String visit( IfNode element ) {
 		String then = lib.freshLabel( );
-	    String end = lib.freshLabel( );
+		String end = lib.freshLabel( );
 
-	    return visit( element.getCondition( ) ) +	// get condition result (0 or 1)
-	    		"push 1\n" +						// push 'true' to compare
+		return visit( element.getCondition( ) ) +	// get condition result (0 or 1)
+				"push 1\n" +						// push 'true' to compare
 				"beq " + then + "\n" +				// if condition is 'true', then jump to 'then-branch' ...
 				visit( element.getElseBranch( ) ) +	// ... else execute code of 'else-branch' ...
 				"b " + end + "\n" +					// ... and jump to end
 				then + ": \n" +
 				visit( element.getThenBranch( ) ) +	// execute code of 'then-branch'
-				end + ": \n";	     
+				end + ": \n";
 	}
 
 	/**
@@ -376,15 +376,15 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	 */
 	@Override public String visit( LessEqualNode element ) {
 		String lesserEqual = lib.freshLabel( );
-	    String end = lib.freshLabel( );
+		String end = lib.freshLabel( );
 
-	    return visit( element.getLeft( ) ) +
-	    		visit( element.getRight( ) ) +
-				"bleq " + lesserEqual + "\n" +	// if less-equal, jump to less-equal label ...
-				"push 0\n" +					// ... otherwise push 'false' ...
-				"b " + end + "\n" +				// ... then jump to end
+		return visit( element.getLeft( ) ) +
+				visit( element.getRight( ) ) +
+				"bleq " + lesserEqual + "\n" +		// if less-equal, jump to less-equal label ...
+				"push 0\n" +						// ... otherwise push 'false' ...
+				"b " + end + "\n" +					// ... then jump to end
 				lesserEqual + ": \n" +
-				"push 1\n" +					// push 'true' (greater-equal)
+				"push 1\n" +						// push 'true' (greater-equal)
 				end + ": \n";
 	}
 
@@ -452,8 +452,8 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 				).collect( Collectors.joining( ) );
 
 		// get global AR (memsize) and add class offset
-		int dispatchTableStackOffset = element.getEntry( ).getOffset( ) + FOOLLib.MEMSIZE; 
-		fieldCode += "push " + dispatchTableStackOffset + "\n" + // push dispatch pointer's address 
+		int dispatchTableStackOffset = element.getEntry( ).getOffset( ) + FOOLLib.MEMSIZE;
+		fieldCode += "push " + dispatchTableStackOffset + "\n" + // push dispatch pointer's address
 				"lw\n" +							// put the dispatch pointer on top of the stack
 				"lhp\n" +							// push hp on stack
 				"sw\n" +							// store dispatch pointer on heap
@@ -480,18 +480,18 @@ public class CodeGeneratorVisitor extends ReflectionVisitor<String> implements N
 	 */
 	@Override public String visit( OrNode element ) {
 		String False = lib.freshLabel( );
-	    String end = lib.freshLabel( );
+		String end = lib.freshLabel( );
 
-	    return visit( element.getLeft( ) ) +
-	    		visit( element.getRight( ) ) +
-	    		"add\n" +							// sum the two boolean (false = 0, true = 1)
+		return visit( element.getLeft( ) ) +
+				visit( element.getRight( ) ) +
+				"add\n" +							// sum the two boolean (false = 0, true = 1)
 				"push 0\n" +						// push 0 to compare
 				"beq " + False + "\n" +				// if sum equals to 0, then jump to False ...
 				"push 1\n" +						// otherwise push 'true' ...
 				"b " + end + "\n" +					// ... and jump to end
 				False + ": \n" +
 				"push 0\n" +						// push 'false'
-				end + ": \n";	 
+				end + ": \n";
 	}
 
 	/**

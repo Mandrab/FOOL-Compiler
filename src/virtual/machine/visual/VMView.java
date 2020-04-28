@@ -39,11 +39,11 @@ import static lib.FOOLLib.MEMSIZE;
 public class VMView {
 
 	private static final Font FONT = new Font( Font.MONOSPACED, Font.PLAIN, 12 );
-	
+
 	private final VMCore vm;
-	
+
 	private int[] sourceMap;
-	
+
 	private final JFrame frame;
 	private final JPanel mainPanel;
 	private final JPanel eastPanel;
@@ -59,11 +59,11 @@ public class VMView {
 	private final JScrollPane asmScroll, stackScroll, heapScroll, outputScroll;
 	private final JTextArea outputText;
 	private final JTextArea infoBox;
-	
+
 	private final int codeLineCount;
 	private String keyboardCommand = "";
 	private int breakPointLine = -1;
-	
+
 	public VMView ( VMCore vm, int[] sourceMap, List<String> source ) {
 
 		this.vm = vm;
@@ -72,9 +72,9 @@ public class VMView {
 		frame = new JFrame( "FOOL Virtual Machine" );
 		mainPanel = new JPanel( );
 		eastPanel = new JPanel( );
-		
+
 		eastPanel.setLayout( new BorderLayout( ) );
-		
+
 		buttonPanel = new JPanel( );
 		buttonPanel.setLayout( new BorderLayout( ) );
 		play = new JButton( "PLAY" );
@@ -123,21 +123,21 @@ public class VMView {
 		asmList.setListData( new Vector<>( source ) );
 		codeLineCount = source.size( );
 
-		
+
 		asmList.setFont( FONT );
 		asmList.addMouseListener( new MouseAdapter( ) {
-		    public void mouseClicked( MouseEvent evt ) {
-		        JList<?> list = ( JList<?> ) evt.getSource( );
-		        if ( evt.getClickCount( ) == 2 ) { // Double-click detected
-		        	int index = list.locationToIndex( evt.getPoint( ) );
-		        	if ( breakPointLine == index ) breakPointLine = -1;
-		        	else breakPointLine = index;
-		    		SwingUtilities.updateComponentTreeUI( asmList );
-		        }
-		    }
-		    public void mouseReleased( MouseEvent e ) {
-		    	asmList.setSelectedIndex( sourceMap[vm.getState( ).getIp( )] );
-		    }
+			public void mouseClicked( MouseEvent evt ) {
+				JList<?> list = ( JList<?> ) evt.getSource( );
+				if ( evt.getClickCount( ) == 2 ) { // Double-click detected
+					int index = list.locationToIndex( evt.getPoint( ) );
+					if ( breakPointLine == index ) breakPointLine = -1;
+					else breakPointLine = index;
+					SwingUtilities.updateComponentTreeUI( asmList );
+				}
+			}
+			public void mouseReleased( MouseEvent e ) {
+				asmList.setSelectedIndex( sourceMap[vm.getState( ).getIp( )] );
+			}
 		});
 		for ( MouseMotionListener m : asmList.getMouseMotionListeners( ) ) {
 			asmList.removeMouseMotionListener( m );
@@ -146,15 +146,15 @@ public class VMView {
 			private static final long serialVersionUID = -4794316536883433342L;
 
 			@Override
-		    public Component getListCellRendererComponent( JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus ) {
-		        JLabel label = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+			public Component getListCellRendererComponent( JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus ) {
+				JLabel label = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
 
-		        if ( index == breakPointLine )
-		        	label.setBackground( Color.RED );
-		        return label;
-		    }
+				if ( index == breakPointLine )
+					label.setBackground( Color.RED );
+				return label;
+			}
 		});
-		
+
 		asmScroll = new JScrollPane( asmList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
 		mainPanel.add( asmScroll, BorderLayout.EAST );
@@ -169,15 +169,15 @@ public class VMView {
 		heapScroll = new JScrollPane( heapList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
 		memPanel = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
-                stackScroll, heapScroll );
+				stackScroll, heapScroll );
 		mainPanel.add( memPanel, BorderLayout.CENTER );
-		
+
 		outputText = new JTextArea( );
 		outputText.setRows( 7 );
 		outputText.setEditable( false );
 		outputScroll = new JScrollPane( outputText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
-		
+
 
 		frame.getContentPane( ).setLayout( new BorderLayout( ) );
 		frame.add( mainPanel, BorderLayout.CENTER );
@@ -200,22 +200,22 @@ public class VMView {
 
 		update( );
 		frame.setMinimumSize( new Dimension( 800, 500 ) );
-		frame.pack( );		
+		frame.pack( );
 
 		stackScroll.getVerticalScrollBar( ).setValue( stackScroll.getVerticalScrollBar( ).getMaximum( ) );
 		memPanel.setDividerLocation( 0.5 );
-		
+
 		Thread.setDefaultUncaughtExceptionHandler( new Thread.UncaughtExceptionHandler( ) {
-	        @Override
-	        public void uncaughtException( Thread t, Throwable e ) {
-	            e.printStackTrace( );
-	            System.exit( 1 );
-	        }
-	    } );
-		
+			@Override
+			public void uncaughtException( Thread t, Throwable e ) {
+				e.printStackTrace( );
+				System.exit( 1 );
+			}
+		} );
+
 		frame.setVisible( true );
 	}
-	
+
 	private void checkKeyboardCommand( ) {
 		if ( keyboardCommand.endsWith( " " ) )
 			nextStepButtonHandler( );
@@ -243,7 +243,7 @@ public class VMView {
 		ipLabel.setText( "IP: " + vm.getState( ).getIp( ) );
 		hpLabel.setText( "HP: " + vm.getState( ).getHp( ) );
 		spLabel.setText( "SP: " + vm.getState( ).getSp( ) );
-		
+
 		asmList.clearSelection( );
 		asmList.setSelectedIndex( sourceMap[vm.getState( ).getIp( )] );
 		SwingUtilities.updateComponentTreeUI( asmList );
@@ -257,7 +257,7 @@ public class VMView {
 			outputText.setText( vm.getState( ).getResult( ).get( ) + "\n" );
 		else outputText.setText( "" );
 	}
-	
+
 	private void playButtonHandler( ) {
 		while ( ! vm.hasEnded( ) && sourceMap[vm.getState( ).getIp( )] != breakPointLine )
 			vm.nextStep( );
@@ -268,7 +268,7 @@ public class VMView {
 		vm.nextStep( );
 		update( );
 	}
-	
+
 	private void backStepButtonHandler( ) {
 		vm.backStep( );
 		update( );

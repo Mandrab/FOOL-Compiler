@@ -14,7 +14,7 @@ public class BoolNode implements Node {
 	public BoolNode( boolean value ) {
 		this.value = value;
 	}
-	
+
 	public boolean getValue( ) {
 		return value;
 	}

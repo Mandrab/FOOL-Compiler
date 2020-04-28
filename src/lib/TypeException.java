@@ -13,7 +13,7 @@ public class TypeException extends RuntimeException {
 
 	private TypeException( String msg ) {
 		 text = msg;
-    }
+	}
 
 	@Override
 	public String getMessage( ) {

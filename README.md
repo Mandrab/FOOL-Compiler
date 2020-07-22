@@ -106,5 +106,5 @@ Generated assembly can be runned over a provided virtual machine. This one is, m
 
 ## Credits
 **Mario Bravetti**, teacher of the course. He established the working path.</br>
-**Marco Meluzzi**, **Matteo Scucchia** and **Francesca Tonetti** with whom I have implemented a different version of the compiler that does *not* use the visitor pattern.</br>
-**Ylenia Battistini**, **Sophia Fantoni** and **Enrico Gnagnarella** with which various issues were discussed.
+**[Marco Meluzzi](https://github.com/marcomeluzzi)**, **Matteo Scucchia** and **Francesca Tonetti** with whom I have implemented a different version of the compiler that does *not* use the visitor pattern.</br>
+**[Ylenia Battistini](https://github.com/yleniaBattistini)**, **Sophia Fantoni** and **Enrico Gnagnarella** with which various issues were discussed.
